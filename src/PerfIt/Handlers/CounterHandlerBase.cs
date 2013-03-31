@@ -9,11 +9,13 @@ namespace PerfIt.Handlers
 {
     public abstract class CounterHandlerBase : ICounterHandler
     {
-        private string _applicationName;
+        protected string _applicationName;
+        protected PerfItFilterAttribute _filter;
 
-        public CounterHandlerBase(string applicationName, string counterName)
+        public CounterHandlerBase(string applicationName, PerfItFilterAttribute filter)
         {
-            CounterName = counterName;
+            _filter = filter;
+            CounterName = filter.CategoryName;
             _applicationName = applicationName;
         }
 

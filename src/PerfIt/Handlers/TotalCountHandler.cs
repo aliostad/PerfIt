@@ -12,12 +12,12 @@ namespace PerfIt.Handlers
 
         private readonly PerformanceCounter _counter;
 
-        public TotalCountHandler(string applicationName, string counterName) : base(applicationName, counterName)
+        public TotalCountHandler(string applicationName, PerfItFilterAttribute filter) : base(applicationName, filter)
         {
             _counter = new PerformanceCounter()
             {
-                CategoryName = applicationName,
-                CounterName = counterName,
+                CategoryName = filter.CategoryName,
+                CounterName = filter.Name,
                 InstanceName = applicationName,
                 ReadOnly = false,
                 InstanceLifetime = PerformanceCounterInstanceLifetime.Process
@@ -31,17 +31,32 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
         {
-            throw new NotImplementedException();
+            // nothing 
         }
 
         protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
         {
-            throw new NotImplementedException();
+            _counter.Increment();
         }
 
         protected override CounterCreationData[] DoGetCreationData(PerfItFilterAttribute filter)
         {
-            throw new NotImplementedException();
+            return new []
+                       {
+                           new CounterCreationData()
+                               {
+                                   CounterName = _filter.Name,
+                                   CounterType = PerformanceCounterType.NumberOfItems32,
+                                   CounterHelp = _filter.Description
+                               }
+                       };
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            if(_counter!=null)
+                _counter.Dispose();
         }
     }
 }
