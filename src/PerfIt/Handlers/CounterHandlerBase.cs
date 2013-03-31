@@ -15,7 +15,7 @@ namespace PerfIt.Handlers
         public CounterHandlerBase(string applicationName, PerfItFilterAttribute filter)
         {
             _filter = filter;
-            CounterName = filter.CategoryName;
+            Name = filter.Name + "." + CounterType;
             _applicationName = applicationName;
         }
 
@@ -24,11 +24,31 @@ namespace PerfIt.Handlers
             
         }
 
-
+        /// <summary>
+        /// type of counter. just a string identifier
+        /// </summary>
         public abstract string CounterType { get; }
+
+        /// <summary>
+        /// called when request arrives in delegating handler
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="context"></param> 
         protected abstract void OnRequestStarting(HttpRequestMessage request, PerfItContext context);
+        
+        /// <summary>
+        /// called as the async continuation on the delegating handler (when response is sent back)
+        /// </summary>
+        /// <param name="response"></param>
+        /// <param name="context"></param>
         protected abstract void OnRequestEnding(HttpResponseMessage response, PerfItContext context);
-        protected abstract CounterCreationData[] DoGetCreationData(PerfItFilterAttribute filter);
+        
+        /// <summary>
+        /// Handler to return data for creating counters
+        /// </summary>
+        /// <param name="filter">Filter attribute defined</param>
+        /// <returns></returns>
+        protected abstract CounterCreationData[] DoGetCreationData();
 
         public void OnRequestStarting(HttpRequestMessage request)
         {
@@ -46,11 +66,12 @@ namespace PerfIt.Handlers
             }
         }
 
-        public string CounterName { get; private set; }
+        public string Name { get; private set; }
 
-        public CounterCreationData[] BuildCreationData(PerfItFilterAttribute filter)
+        public CounterCreationData[] BuildCreationData()
         {
-            return DoGetCreationData(filter);
+            return DoGetCreationData();
         }
+
     }
 }

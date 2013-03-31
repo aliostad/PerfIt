@@ -1,27 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 
 namespace PerfIt.Handlers
 {
     public class TotalCountHandler : CounterHandlerBase
     {
 
-        private readonly PerformanceCounter _counter;
+        private readonly Lazy<PerformanceCounter> _counter;
 
         public TotalCountHandler(string applicationName, PerfItFilterAttribute filter) : base(applicationName, filter)
         {
-            _counter = new PerformanceCounter()
+            
+            _counter = new Lazy<PerformanceCounter>(() =>
             {
-                CategoryName = filter.CategoryName,
-                CounterName = filter.Name,
-                InstanceName = applicationName,
-                ReadOnly = false,
-                InstanceLifetime = PerformanceCounterInstanceLifetime.Process
-            };
+                var counter = new PerformanceCounter()
+                {
+                    CategoryName = filter.CategoryName,
+                    CounterName = Name,
+                    InstanceName = applicationName,
+                    ReadOnly = false,
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                };
+                counter.RawValue = 0;
+                return counter;
+            }
+              );
+             
         }
 
         public override string CounterType
@@ -36,16 +41,16 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
         {
-            _counter.Increment();
+            _counter.Value.Increment();
         }
 
-        protected override CounterCreationData[] DoGetCreationData(PerfItFilterAttribute filter)
+        protected override CounterCreationData[] DoGetCreationData()
         {
             return new []
                        {
                            new CounterCreationData()
                                {
-                                   CounterName = _filter.Name,
+                                   CounterName = Name,
                                    CounterType = PerformanceCounterType.NumberOfItems32,
                                    CounterHelp = _filter.Description
                                }
@@ -55,8 +60,13 @@ namespace PerfIt.Handlers
         public override void Dispose()
         {
             base.Dispose();
-            if(_counter!=null)
-                _counter.Dispose();
+            if (_counter != null && _counter.IsValueCreated)
+            {
+                _counter.Value.RemoveInstance();
+                _counter.Value.Dispose(); 
+            }
         }
+
+        
     }
 }

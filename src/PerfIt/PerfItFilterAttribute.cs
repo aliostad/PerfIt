@@ -9,12 +9,13 @@ using System.Web.Http.Filters;
 
 namespace PerfIt
 {
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class PerfItFilterAttribute : ActionFilterAttribute
     {
 
-
         /// <summary>
-        /// Optional name of the counter. If not specified it will be [controller].[action]
+        /// Optional name of the counter. 
+        /// If not specified it will be [controller].[action].[counterType] for each counter.
         /// </summary>
         public string Name { get; set; }
 
@@ -44,8 +45,12 @@ namespace PerfIt
                 {
                     Name = string.Format("{0}.{1}",
                                          actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor
-                                                              .ControllerName,
+                                                              .ControllerType.Name,
                                          actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                }
+                foreach (var counter in Counters)
+                {
+                    context.CountersToRun.Add(Name + "." + counter);    
                 }
 
                 context.Filter = this;

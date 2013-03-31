@@ -12,7 +12,7 @@ namespace PerfIt
         string CounterType { get; }
         void OnRequestStarting(HttpRequestMessage request);
         void OnRequestEnding(HttpResponseMessage response);
-        string CounterName { get; }
-        CounterCreationData[] BuildCreationData(PerfItFilterAttribute filter);
+        string Name { get; }
+        CounterCreationData[] BuildCreationData();
     }
 }

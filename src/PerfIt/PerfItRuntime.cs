@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Web.Http;
+using PerfIt.Handlers;
 
 namespace PerfIt
 {
@@ -13,6 +15,11 @@ namespace PerfIt
         static PerfItRuntime()
         {
             HandlerFactories = new Dictionary<string, Func<string, PerfItFilterAttribute, ICounterHandler>>();
+            HandlerFactories.Add(CounterTypes.TotalNoOfOperations, 
+                (appName, filter) => new TotalCountHandler(appName, filter));
+            HandlerFactories.Add(CounterTypes.AverageTimeTaken,
+                (appName, filter) => new AverageTimeHandler(appName, filter));
+
         }
 
         /// <summary>
@@ -30,7 +37,20 @@ namespace PerfIt
             var perfItFilterAttributes = FindAllFilters();
 
             var cayegories = perfItFilterAttributes.ToList().Select(x => x.CategoryName).Distinct();
-            cayegories.ToList().ForEach(PerformanceCounterCategory.Delete);
+            cayegories.ToList().ForEach(
+                (x) =>
+                    {
+                        try
+                        {
+                            if(PerformanceCounterCategory.Exists(x))
+                                PerformanceCounterCategory.Delete(x);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex);
+                        }       
+                    }
+                );
             
         }
 
@@ -39,12 +59,12 @@ namespace PerfIt
         /// </summary>
         public static void Install()
         {
+            Uninstall();
+
             var perfItFilterAttributes = FindAllFilters();
-            var creationDataCollections = new Dictionary<string, CounterCreationDataCollection>();
+            var creationDataCollections = new List<Tuple< string, CounterCreationDataCollection>>();
             foreach (var filter in perfItFilterAttributes)
             {
-                if (!creationDataCollections.ContainsKey(filter.CategoryName))
-                    creationDataCollections.Add(filter.CategoryName, new CounterCreationDataCollection());
 
                 foreach (var counterType in filter.Counters)
                 {
@@ -52,16 +72,18 @@ namespace PerfIt
                         throw new ArgumentException("Counter type not defined: " + counterType);
                     using (var counterHandler = HandlerFactories[counterType]("Dummy, Not needed!", filter))
                     {
-                        creationDataCollections[filter.CategoryName].AddRange(counterHandler.BuildCreationData(filter));
+                        creationDataCollections.Add(new Tuple<string, CounterCreationDataCollection>(
+                            filter.CategoryName, new CounterCreationDataCollection(counterHandler.BuildCreationData()))); 
+
                     }
                 }   
             }
 
             // now create them
-            foreach (var categoryName in creationDataCollections.Keys)
+            foreach (var creationData in creationDataCollections)
             {
-                PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
-                    PerformanceCounterCategoryType.MultiInstance, creationDataCollections[categoryName]);
+                PerformanceCounterCategory.Create(creationData.Item1, "PerfIt category for " + creationData.Item1,
+                    PerformanceCounterCategoryType.MultiInstance, creationData.Item2);
             }
            
         }
