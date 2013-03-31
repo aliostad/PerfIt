@@ -23,7 +23,7 @@ namespace PerfIt
         /// 
         /// </summary>
         /// <param name="configuration">Hosting configuration</param>
-        /// <param name="applicationName">Name of the application. It will be used as counetrs category</param>
+        /// <param name="applicationName">Name of the web application. It will be used as counetrs instance name</param>
         public PerfItDelegatingHandler(HttpConfiguration configuration, string applicationName)
         {
             _applicationName = applicationName;
@@ -36,7 +36,7 @@ namespace PerfIt
                     if(!PerfItRuntime.HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not registered: " + counterType);
 
-                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](applicationName, filter.Name);
+                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](applicationName, filter);
                     _counterContexts.Add(counterHandler.CounterName, new PerfItCounterContext()
                                                                          {
                                                                              Handler = counterHandler,
@@ -45,16 +45,6 @@ namespace PerfIt
                 }
                     
             }
-
-        }
-
-        /// <summary>
-        /// Uses current assemnly name as the name of the application
-        /// </summary>
-        /// <param name="configuration">Hosting configuration</param>
-        public PerfItDelegatingHandler(HttpConfiguration configuration):
-            this(configuration, PerfItRuntime.GetDefaultApplicationName())
-        {
 
         }
 

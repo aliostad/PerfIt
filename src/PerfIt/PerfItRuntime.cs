@@ -12,74 +12,58 @@ namespace PerfIt
     {
         static PerfItRuntime()
         {
-            HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
+            HandlerFactories = new Dictionary<string, Func<string, PerfItFilterAttribute, ICounterHandler>>();
         }
 
         /// <summary>
         /// Counter handler factories with counter type as the key.
-        /// Factory's first param is applicationName and second is counterName
+        /// Factory's first param is applicationName and second is the filter
         /// Use it to register your own counters or replace built-in implementations
         /// </summary>
-        public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }  
-
-
-        /// <summary>
-        /// Installs performance counters in the current assembly using PerfItFilterAttribute.
-        /// Uses assembly name as the application name which becomes counters category.
-        /// </summary>
-        public static void Install()
-        {
-            Install(GetDefaultApplicationName());
-        }
-
-        internal static string GetDefaultApplicationName()
-        {
-            return Assembly.GetExecutingAssembly().GetName().Name;
-        }
-
+        public static Dictionary<string, Func<string, PerfItFilterAttribute, ICounterHandler>> HandlerFactories { get; private set; }
+    
         /// <summary>
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
-        /// Uses assembly name as the application name which becomes counters category.
         /// </summary>
         public static void Uninstall()
         {
-            Uninstall(GetDefaultApplicationName());
-        }
+            var perfItFilterAttributes = FindAllFilters();
 
-        /// <summary>
-        /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
-        /// Uses name provided as the application name which becomes counters category.
-        /// </summary>
-        public static void Uninstall(string applicationName)
-        {
-            PerformanceCounterCategory.Delete(applicationName);
+            var cayegories = perfItFilterAttributes.ToList().Select(x => x.CategoryName).Distinct();
+            cayegories.ToList().ForEach(PerformanceCounterCategory.Delete);
+            
         }
 
         /// <summary>
         /// Installs performance counters in the current assembly using PerfItFilterAttribute.
-        /// Uses name provided as the application name which becomes counters category.
         /// </summary>
-        public static void Install(string applicationName)
+        public static void Install()
         {
             var perfItFilterAttributes = FindAllFilters();
-            var creationDataCollection = new CounterCreationDataCollection();
+            var creationDataCollections = new Dictionary<string, CounterCreationDataCollection>();
             foreach (var filter in perfItFilterAttributes)
             {
+                if (!creationDataCollections.ContainsKey(filter.CategoryName))
+                    creationDataCollections.Add(filter.CategoryName, new CounterCreationDataCollection());
+
                 foreach (var counterType in filter.Counters)
                 {
                     if (!HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not defined: " + counterType);
-                    using (var counterHandler = HandlerFactories[counterType](applicationName, filter.Name))
+                    using (var counterHandler = HandlerFactories[counterType]("Dummy, Not needed!", filter))
                     {
-                        creationDataCollection.AddRange(counterHandler.BuildCreationData(filter));
+                        creationDataCollections[filter.CategoryName].AddRange(counterHandler.BuildCreationData(filter));
                     }
-                }
-                
+                }   
             }
 
-            PerformanceCounterCategory.Create(applicationName, "PerfIt category for " + applicationName, 
-                PerformanceCounterCategoryType.MultiInstance,
-                                                 creationDataCollection);
+            // now create them
+            foreach (var categoryName in creationDataCollections.Keys)
+            {
+                PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
+                    PerformanceCounterCategoryType.MultiInstance, creationDataCollections[categoryName]);
+            }
+           
         }
 
         /// <summary>
@@ -115,9 +99,13 @@ namespace PerfIt
                             {
                                 attr.Name = controllerName + "." + actionName.Name;
                             }
+                            if (string.IsNullOrEmpty(attr.CategoryName))
+                            {
+                                attr.CategoryName = apiController.Assembly.GetName().Name;
+                            }
+                            attributes.Add(attr);
                         }
                         
-                        attributes.Add(attr);
                     }
                 }
             }

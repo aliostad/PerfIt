@@ -11,6 +11,8 @@ namespace PerfIt
 {
     public class PerfItFilterAttribute : ActionFilterAttribute
     {
+
+
         /// <summary>
         /// Optional name of the counter. If not specified it will be [controller].[action]
         /// </summary>
@@ -20,6 +22,11 @@ namespace PerfIt
         /// Description of the counter. Will be published to counter metadata visible in Perfmon.
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// Optional category name. If left blank, name of the assembly containing controllers is used.
+        /// </summary>
+        public string CategoryName { get; set; }
 
         /// <summary>
         /// Counter types. Each value as a string.
