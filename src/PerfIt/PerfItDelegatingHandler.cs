@@ -14,8 +14,8 @@ namespace PerfIt
     public class PerfItDelegatingHandler : DelegatingHandler
     {
         private HttpConfiguration _configuration;
-        private ConcurrentDictionary<string, PerfItCounterContext> _counterContexts = 
-            new ConcurrentDictionary<string, PerfItCounterContext>();
+        private Dictionary<string, PerfItCounterContext> _counterContexts = 
+            new Dictionary<string, PerfItCounterContext>();
 
         private readonly string _applicationName;
 
@@ -31,7 +31,18 @@ namespace PerfIt
             var filters = PerfItRuntime.FindAllFilters();
             foreach (var filter in filters)
             {
+                foreach (var counterType in filter.Counters)
+                {
+                    if(!PerfItRuntime.HandlerFactories.ContainsKey(counterType))
+                        throw new ArgumentException("Counter type not registered: " + counterType);
 
+                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](applicationName, filter.Name);
+                    _counterContexts.Add(counterHandler.CounterName, new PerfItCounterContext()
+                                                                         {
+                                                                             Handler = counterHandler,
+                                                                             Name = filter.Name
+                                                                         });
+                }
                     
             }
 
@@ -63,8 +74,21 @@ namespace PerfIt
                     return base.SendAsync(request, cancellationToken);
             }
 
+            request.Properties.Add(Constants.PerfItKey, new PerfItContext());
+            foreach (var context in _counterContexts.Values)
+            {
+                context.Handler.OnRequestStarting(request);
+            }
 
-            return null;
+            return base.SendAsync(request, cancellationToken)
+                .Then((response) =>
+                                  {
+                                      foreach (var context in _counterContexts.Values)
+                                      {
+                                          context.Handler.OnRequestEnding(response);
+                                      }
+                                      return response;
+                                  });
 
         }
 
@@ -75,5 +99,16 @@ namespace PerfIt
 
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                foreach (var context in _counterContexts.Values)
+                {
+                    context.Handler.Dispose();
+                }
+                _counterContexts.Clear();
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@ namespace PerfIt
         /// <summary>
         /// Counter handler factories with counter type as the key.
         /// Factory's first param is applicationName and second is counterName
+        /// Use it to register your own counters or replace built-in implementations
         /// </summary>
         public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }  
 
