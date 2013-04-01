@@ -66,7 +66,6 @@ namespace PerfIt.Handlers
             var sw = (Stopwatch) context.Data[AverageTimeTakenTicksKey + Name];
             sw.Stop();
             _counter.Value.IncrementBy(sw.ElapsedTicks);
-            _counter.Value.NextValue();
             _baseCounter.Value.Increment();
         }
 
