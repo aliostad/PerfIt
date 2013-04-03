@@ -97,7 +97,10 @@ namespace PerfIt
         internal static IEnumerable<PerfItFilterAttribute> FindAllFilters()
         {
             var attributes = new List<PerfItFilterAttribute>();
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a => !(a is System.Reflection.Emit.AssemblyBuilder)
+                    && a.GetType().FullName != "System.Reflection.Emit.InternalAssemblyBuilder"
+                    && !a.GlobalAssemblyCache);
             var apiControllers = assemblies.SelectMany(x => x.GetExportedTypes())
                                            .Where(t => typeof(ApiController).IsAssignableFrom(t));
 
