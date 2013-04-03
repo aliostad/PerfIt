@@ -62,28 +62,30 @@ namespace PerfIt
             Uninstall();
 
             var perfItFilterAttributes = FindAllFilters();
-            var creationDataCollections = new List<Tuple< string, CounterCreationDataCollection>>();
+            var dictionary = new Dictionary<string, CounterCreationDataCollection>();
+
             foreach (var filter in perfItFilterAttributes)
             {
-
+                if (!dictionary.ContainsKey(filter.CategoryName))
+                {
+                    dictionary.Add(filter.CategoryName, new CounterCreationDataCollection());
+                }
                 foreach (var counterType in filter.Counters)
                 {
                     if (!HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not defined: " + counterType);
                     using (var counterHandler = HandlerFactories[counterType]("Dummy, Not needed!", filter))
                     {
-                        creationDataCollections.Add(new Tuple<string, CounterCreationDataCollection>(
-                            filter.CategoryName, new CounterCreationDataCollection(counterHandler.BuildCreationData()))); 
-
+                        dictionary[filter.CategoryName].AddRange(counterHandler.BuildCreationData());
                     }
                 }   
             }
 
             // now create them
-            foreach (var creationData in creationDataCollections)
+            foreach (var categoryName in dictionary.Keys)
             {
-                PerformanceCounterCategory.Create(creationData.Item1, "PerfIt category for " + creationData.Item1,
-                    PerformanceCounterCategoryType.MultiInstance, creationData.Item2);
+                PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
+                    PerformanceCounterCategoryType.MultiInstance, dictionary[categoryName]);
             }
            
         }
