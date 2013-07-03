@@ -37,11 +37,14 @@ namespace PerfIt
                         throw new ArgumentException("Counter type not registered: " + counterType);
 
                     var counterHandler = PerfItRuntime.HandlerFactories[counterType](applicationName, filter);
-                    _counterContexts.Add(counterHandler.Name, new PerfItCounterContext()
-                                                                         {
-                                                                             Handler = counterHandler,
-                                                                             Name = counterHandler.Name
-                                                                         });
+                    if (!_counterContexts.Keys.Contains(counterHandler.Name))
+                    {
+                        _counterContexts.Add(counterHandler.Name, new PerfItCounterContext()
+                                                                             {
+                                                                                 Handler = counterHandler,
+                                                                                 Name = counterHandler.Name
+                                                                             });
+                    }
                 }
                     
             }
