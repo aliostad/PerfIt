@@ -14,12 +14,17 @@ namespace PerfIt
     {
         static PerfItRuntime()
         {
+
             HandlerFactories = new Dictionary<string, Func<string, PerfItFilterAttribute, ICounterHandler>>();
+
             HandlerFactories.Add(CounterTypes.TotalNoOfOperations, 
                 (appName, filter) => new TotalCountHandler(appName, filter));
+
             HandlerFactories.Add(CounterTypes.AverageTimeTaken,
                 (appName, filter) => new AverageTimeHandler(appName, filter));
 
+            HandlerFactories.Add(CounterTypes.LastOperationExecutionTime,
+                (appName, filter) => new LastOperationExecutionTimeHandler(appName, filter));
         }
 
         /// <summary>

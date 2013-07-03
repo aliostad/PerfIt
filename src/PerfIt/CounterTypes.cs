@@ -9,5 +9,7 @@ namespace PerfIt
     {
         public const string AverageTimeTaken = "AverageTimeTaken";
         public const string TotalNoOfOperations = "TotalNoOfOperations";
+        public const string LastOperationExecutionTime = "LastOperationExecutionTime";
+
     }
 }
