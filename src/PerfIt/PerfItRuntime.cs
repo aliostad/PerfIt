@@ -102,7 +102,8 @@ namespace PerfIt
                     && a.GetType().FullName != "System.Reflection.Emit.InternalAssemblyBuilder"
                     && !a.GlobalAssemblyCache);
             var apiControllers = assemblies.SelectMany(x => x.GetExportedTypes())
-                                           .Where(t => typeof(ApiController).IsAssignableFrom(t));
+                                           .Where(t => typeof(ApiController).IsAssignableFrom(t) &&
+                                                        !t.IsAbstract);
 
             foreach (var apiController in apiControllers)
             {
@@ -126,6 +127,7 @@ namespace PerfIt
                             {
                                 attr.Name = controllerName + "." + actionName.Name;
                             }
+
                             if (string.IsNullOrEmpty(attr.CategoryName))
                             {
                                 attr.CategoryName = apiController.Assembly.GetName().Name;
