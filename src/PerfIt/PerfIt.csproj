@@ -66,6 +66,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\NumberOfOperationsPerSecondHandler.cs" />
     <Compile Include="Internal\Constants.cs" />
     <Compile Include="CounterTypes.cs" />
     <Compile Include="Handlers\AverageTimeHandler.cs" />

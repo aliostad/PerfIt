@@ -25,6 +25,10 @@ namespace PerfIt
 
             HandlerFactories.Add(CounterTypes.LastOperationExecutionTime,
                 (appName, filter) => new LastOperationExecutionTimeHandler(appName, filter));
+
+            HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
+                (appName, filter) => new NumberOfOperationsPerSecondHandler(appName, filter));
+
         }
 
         /// <summary>
