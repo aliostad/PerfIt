@@ -136,13 +136,13 @@ namespace PerfIt
                             {
                                 attr.Name = controllerName + "." + actionName.Name;
                             }
-
-                            if (string.IsNullOrEmpty(attr.CategoryName))
-                            {
-                                attr.CategoryName = apiController.Assembly.GetName().Name;
-                            }
-                            attributes.Add(attr);
                         }
+
+						if (string.IsNullOrEmpty(attr.CategoryName))
+						{
+							attr.CategoryName = apiController.Assembly.GetName().Name;
+						}
+						attributes.Add(attr);
                         
                     }
                 }
