@@ -1,7 +1,7 @@
 PerfIt!
 ======
 
-Windows performance monitoring for ASP.NET MVC and Web API actions
+Windows performance monitoring for ASP.NET Web API actions
 
 Blog posts
 ======
