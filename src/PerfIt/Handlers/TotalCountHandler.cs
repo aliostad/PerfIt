@@ -9,16 +9,21 @@ namespace PerfIt.Handlers
 
         private readonly Lazy<PerformanceCounter> _counter;
 
-        public TotalCountHandler(string applicationName, PerfItFilterAttribute filter) : base(applicationName, filter)
+        public TotalCountHandler
+            (
+            string categoryName,
+            string instanceName,
+            PerfItFilterAttribute filter)
+            : base(categoryName, instanceName, filter)
         {
             
             _counter = new Lazy<PerformanceCounter>(() =>
             {
                 var counter = new PerformanceCounter()
                 {
-                    CategoryName = filter.CategoryName,
+                    CategoryName = categoryName,
                     CounterName = Name,
-                    InstanceName = applicationName,
+                    InstanceName = instanceName,
                     ReadOnly = false,
                     InstanceLifetime = PerformanceCounterInstanceLifetime.Process
                 };

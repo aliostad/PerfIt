@@ -15,16 +15,20 @@ namespace PerfIt.Handlers
         private readonly Lazy<PerformanceCounter> _baseCounter;
 
 
-        public AverageTimeHandler(string applicationName, PerfItFilterAttribute filter) : base(applicationName, filter)
+        public AverageTimeHandler(
+            string categoryName,
+            string instanceName,
+            PerfItFilterAttribute filter)
+            : base(categoryName,instanceName, filter)
         {
 
             _counter = new Lazy<PerformanceCounter>( () =>
                                                          {
                                                              var counter = new PerformanceCounter()
                                                                                           {
-                                                                                              CategoryName = filter.CategoryName, 
+                                                                                              CategoryName = categoryName,
                                                                                               CounterName = Name, 
-                                                                                              InstanceName = applicationName, 
+                                                                                              InstanceName = instanceName, 
                                                                                               ReadOnly = false, 
                                                                                               InstanceLifetime = PerformanceCounterInstanceLifetime.Process
                                                                                           };
@@ -38,9 +42,9 @@ namespace PerfIt.Handlers
             {
                 var counter = new PerformanceCounter()
                         {
-                            CategoryName = filter.CategoryName,
+                            CategoryName = categoryName,
                             CounterName = GetBaseCounterName(),
-                            InstanceName = applicationName,
+                            InstanceName = instanceName,
                             ReadOnly = false,
                             InstanceLifetime = PerformanceCounterInstanceLifetime.Process
                         };

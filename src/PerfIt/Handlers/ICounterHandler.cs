@@ -12,7 +12,10 @@ namespace PerfIt
         string CounterType { get; }
         void OnRequestStarting(HttpRequestMessage request);
         void OnRequestEnding(HttpResponseMessage response);
+
         string Name { get; }
+
+        string UniqueName { get; }
         CounterCreationData[] BuildCreationData();
     }
 }

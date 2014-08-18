@@ -12,15 +12,19 @@ namespace PerfIt.Handlers
         private const string TimeTakenTicksKey = "LastOperationExecutionTimeHandler_#_StopWatch_#_";
         private readonly Lazy<PerformanceCounter> _counter;
 
-        public LastOperationExecutionTimeHandler(string applicationName, PerfItFilterAttribute filter) : base(applicationName, filter)
+        public LastOperationExecutionTimeHandler(
+            string categoryName,
+            string instanceName,
+            PerfItFilterAttribute filter)
+            : base(categoryName, instanceName, filter)
         {
             _counter = new Lazy<PerformanceCounter>(() =>
                 {
                     var counter = new PerformanceCounter()
                     {
-                        CategoryName = filter.CategoryName,
+                        CategoryName = categoryName,
                         CounterName = Name,
-                        InstanceName = applicationName,
+                        InstanceName = instanceName,
                         ReadOnly = false,
                         InstanceLifetime = PerformanceCounterInstanceLifetime.Process
                     };

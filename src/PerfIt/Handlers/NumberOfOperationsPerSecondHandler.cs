@@ -12,16 +12,20 @@ namespace PerfIt.Handlers
         private readonly Lazy<PerformanceCounter> _counter;
         private const string TimeTakenTicksKey = "NumberOfOperationsPerSecondHandler_#_StopWatch_#_";
 
-        public NumberOfOperationsPerSecondHandler(string applicationName, PerfItFilterAttribute filter) 
-            : base(applicationName, filter)
+        public NumberOfOperationsPerSecondHandler
+            (
+            string categoryName,
+            string instanceName,
+            PerfItFilterAttribute filter)
+            : base(categoryName, instanceName, filter)
         {
             _counter = new Lazy<PerformanceCounter>(() =>
             {
                 var counter = new PerformanceCounter()
                 {
-                    CategoryName = filter.CategoryName,
+                    CategoryName = categoryName,
                     CounterName = Name,
-                    InstanceName = applicationName,
+                    InstanceName = instanceName,
                     ReadOnly = false,
                     InstanceLifetime = PerformanceCounterInstanceLifetime.Process
                 };

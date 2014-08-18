@@ -9,14 +9,23 @@ namespace PerfIt.Handlers
 {
     public abstract class CounterHandlerBase : ICounterHandler
     {
-        protected string _applicationName;
-        protected PerfItFilterAttribute _filter;
 
-        public CounterHandlerBase(string applicationName, PerfItFilterAttribute filter)
+        protected PerfItFilterAttribute _filter;
+        protected string _instanceName;
+        protected string _categoryName;
+        protected string _uniqueName;
+
+        public CounterHandlerBase( 
+            string categoryName,
+            string instanceName, 
+            PerfItFilterAttribute filter)
         {
+            _categoryName = categoryName;
+            _instanceName = instanceName;
             _filter = filter;
-            Name = filter.Name + "." + CounterType;
-            _applicationName = applicationName;
+            Name = CounterType;
+
+            _uniqueName = categoryName + instanceName + Name;
         }
 
         public virtual void Dispose()
@@ -67,6 +76,12 @@ namespace PerfIt.Handlers
         }
 
         public string Name { get; private set; }
+        public string UniqueName { get { return _uniqueName; } }
+
+        public string GetUniqueName()
+        {
+            return _categoryName + _instanceName + Name;
+        }
 
         public CounterCreationData[] BuildCreationData()
         {

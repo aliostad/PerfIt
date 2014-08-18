@@ -15,20 +15,21 @@ namespace PerfIt
         static PerfItRuntime()
         {
 
-            HandlerFactories = new Dictionary<string, Func<string, PerfItFilterAttribute, ICounterHandler>>();
+            HandlerFactories = new Dictionary<string, Func<string, string, PerfItFilterAttribute, ICounterHandler>>();
 
             HandlerFactories.Add(CounterTypes.TotalNoOfOperations, 
-                (appName, filter) => new TotalCountHandler(appName, filter));
+                (categoryName, instanceName, filter) => new TotalCountHandler(categoryName, instanceName, filter));
 
             HandlerFactories.Add(CounterTypes.AverageTimeTaken,
-                (appName, filter) => new AverageTimeHandler(appName, filter));
+                (categoryName, instanceName, filter) => new AverageTimeHandler(categoryName, instanceName, filter));
 
             HandlerFactories.Add(CounterTypes.LastOperationExecutionTime,
-                (appName, filter) => new LastOperationExecutionTimeHandler(appName, filter));
+                (categoryName, instanceName, filter) => new LastOperationExecutionTimeHandler(categoryName, instanceName, filter));
 
             HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
-                (appName, filter) => new NumberOfOperationsPerSecondHandler(appName, filter));
+                (categoryName, instanceName, filter) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName, filter));
 
+            ThrowPublishingErrors = true;
         }
 
         /// <summary>
@@ -36,66 +37,71 @@ namespace PerfIt
         /// Factory's first param is applicationName and second is the filter
         /// Use it to register your own counters or replace built-in implementations
         /// </summary>
-        public static Dictionary<string, Func<string, PerfItFilterAttribute, ICounterHandler>> HandlerFactories { get; private set; }
+        public static Dictionary<string, Func<string, string, PerfItFilterAttribute, ICounterHandler>> HandlerFactories { get; private set; }
     
         /// <summary>
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
-        public static void Uninstall()
+        /// <param name="categoryName">if you have provided a categoryName for the installation, you must supply the same here</param>
+        public static void Uninstall(string categoryName = null)
         {
-            var perfItFilterAttributes = FindAllFilters();
 
-            var cayegories = perfItFilterAttributes.ToList().Select(x => x.CategoryName).Distinct();
-            cayegories.ToList().ForEach(
-                (x) =>
-                    {
-                        try
-                        {
-                            if(PerformanceCounterCategory.Exists(x))
-                                PerformanceCounterCategory.Delete(x);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex);
-                        }       
-                    }
-                );
+            var frames = new StackTrace().GetFrames();
+            var assembly = frames[1].GetMethod().ReflectedType.Assembly;
+           
+            try
+            {
+                if(PerformanceCounterCategory.Exists(categoryName))
+                    PerformanceCounterCategory.Delete(categoryName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }       
+                   
             
         }
 
         /// <summary>
+        /// By default True. If false, errors encountered at publishing performance counters will be captured and 
+        /// not thrown. They will be logged on the Trace.
+        /// </summary>
+        public static bool ThrowPublishingErrors { get; set; }
+
+        /// <summary>
         /// Installs performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
-        public static void Install()
+        /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
+        public static void Install(string categoryName = null)
         {
             Uninstall();
 
-            var perfItFilterAttributes = FindAllFilters();
-            var dictionary = new Dictionary<string, CounterCreationDataCollection>();
+            var frames = new StackTrace().GetFrames();
+            var assembly = frames[1].GetMethod().ReflectedType.Assembly;
+            if (string.IsNullOrEmpty(categoryName))
+                categoryName = assembly.GetName().Name;
+
+            var perfItFilterAttributes = FindAllFilters(assembly);
+
+            var counterCreationDataCollection = new CounterCreationDataCollection();
 
             foreach (var filter in perfItFilterAttributes)
             {
-                if (!dictionary.ContainsKey(filter.CategoryName))
-                {
-                    dictionary.Add(filter.CategoryName, new CounterCreationDataCollection());
-                }
                 foreach (var counterType in filter.Counters)
                 {
                     if (!HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not defined: " + counterType);
-                    using (var counterHandler = HandlerFactories[counterType]("Dummy, Not needed!", filter))
+                    using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName, filter))
                     {
-                        dictionary[filter.CategoryName].AddRange(counterHandler.BuildCreationData());
+                        counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
                     }
                 }   
             }
 
-            // now create them
-            foreach (var categoryName in dictionary.Keys)
-            {
-                PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
-                    PerformanceCounterCategoryType.MultiInstance, dictionary[categoryName]);
-            }
+           
+            PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
+                PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
+            
            
         }
 
@@ -103,14 +109,13 @@ namespace PerfIt
         /// Extracts all filters in the current assembly defined on ApiControllers
         /// </summary>
         /// <returns></returns>
-        internal static IEnumerable<PerfItFilterAttribute> FindAllFilters()
+        internal static IEnumerable<PerfItFilterAttribute> FindAllFilters(
+            Assembly assembly)
         {
+            
+
             var attributes = new List<PerfItFilterAttribute>();
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => !(a is System.Reflection.Emit.AssemblyBuilder)
-                    && a.GetType().FullName != "System.Reflection.Emit.InternalAssemblyBuilder"
-                    && !a.GlobalAssemblyCache);
-            var apiControllers = assemblies.SelectMany(x => x.GetExportedTypes())
+               var apiControllers = assembly.GetExportedTypes()
                                            .Where(t => typeof(ApiController).IsAssignableFrom(t) &&
                                                         !t.IsAbstract);
 
@@ -123,25 +128,21 @@ namespace PerfIt
                     var attr = (PerfItFilterAttribute)methodInfo.GetCustomAttributes(typeof(PerfItFilterAttribute), true).FirstOrDefault();
                     if (attr != null)
                     {
-                        if (string.IsNullOrEmpty(attr.Name)) // default name
+                        if (string.IsNullOrEmpty(attr.InstanceName)) // default name
                         {
                             var actionName = (ActionNameAttribute)
                                              methodInfo.GetCustomAttributes(typeof (ActionNameAttribute), true)
                                                        .FirstOrDefault();
                             if (actionName == null)
                             {
-                                attr.Name = controllerName + "." + methodInfo.Name;
+                                attr.InstanceName = controllerName + "." + methodInfo.Name;
                             }
                             else
                             {
-                                attr.Name = controllerName + "." + actionName.Name;
+                                attr.InstanceName = controllerName + "." + actionName.Name;
                             }
                         }
 
-						if (string.IsNullOrEmpty(attr.CategoryName))
-						{
-							attr.CategoryName = apiController.Assembly.GetName().Name;
-						}
 						attributes.Add(attr);
                         
                     }

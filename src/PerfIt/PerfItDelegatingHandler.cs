@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -13,22 +14,28 @@ namespace PerfIt
 {
     public class PerfItDelegatingHandler : DelegatingHandler
     {
-        private HttpConfiguration _configuration;
         private Dictionary<string, PerfItCounterContext> _counterContexts = 
             new Dictionary<string, PerfItCounterContext>();
 
         private readonly string _applicationName;
+        private string _categoryName;
+    
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="configuration">Hosting configuration</param>
         /// <param name="applicationName">Name of the web application. It will be used as counetrs instance name</param>
-        public PerfItDelegatingHandler(HttpConfiguration configuration, string applicationName)
+        public PerfItDelegatingHandler(HttpConfiguration configuration, // not used at the mo
+            string categoryName)
         {
-            _applicationName = applicationName;
-            _configuration = configuration;
-            var filters = PerfItRuntime.FindAllFilters();
+            _categoryName = categoryName;
+
+
+            var frames = new StackTrace().GetFrames();
+            var assembly = frames[1].GetMethod().ReflectedType.Assembly;
+
+            var filters = PerfItRuntime.FindAllFilters(assembly);
             foreach (var filter in filters)
             {
                 foreach (var counterType in filter.Counters)
@@ -36,13 +43,13 @@ namespace PerfIt
                     if(!PerfItRuntime.HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not registered: " + counterType);
 
-                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](applicationName, filter);
-                    if (!_counterContexts.Keys.Contains(counterHandler.Name))
+                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](categoryName, filter.InstanceName, filter);
+                    if (!_counterContexts.Keys.Contains(counterHandler.UniqueName))
                     {
-                        _counterContexts.Add(counterHandler.Name, new PerfItCounterContext()
+                        _counterContexts.Add(counterHandler.UniqueName, new PerfItCounterContext()
                                                                              {
                                                                                  Handler = counterHandler,
-                                                                                 Name = counterHandler.Name
+                                                                                 Name = counterHandler.UniqueName
                                                                              });
                     }
                 }
