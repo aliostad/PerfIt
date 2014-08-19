@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>$version$-alpha2</version>
+    <version>$version$</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -12,7 +12,7 @@
     <copyright>Copyright 2013</copyright>
     <tags>aspnetwebapi performance monitor monitoring perfmon counter</tags>
 	<dependencies>
-      <dependency id="Microsoft.AspNet.WebApi.WebHost" version="4.0.20710" />	  
+      <dependency id="Microsoft.AspNet.WebApi.WebHost" version="4.0.30506" />	  
     </dependencies>
 	
   </metadata>

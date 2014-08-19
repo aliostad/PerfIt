@@ -25,7 +25,7 @@ namespace PerfIt.Handlers
             _filter = filter;
             Name = CounterType;
 
-            _uniqueName = categoryName + instanceName + Name;
+            _uniqueName = PerfItRuntime.GetUniqueName(instanceName, Name);
         }
 
         public virtual void Dispose()

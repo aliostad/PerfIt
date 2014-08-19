@@ -9,5 +9,6 @@ namespace PerfIt
     {
         public const string PerfItKey = "_#_PerfIt_#_";
         public const string PerfItPublishCounters = "perfit:publishCounters";
+        public const string PerfItPublishErrors = "perfit:publishErrors";
     }
 }

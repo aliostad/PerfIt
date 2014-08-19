@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -38,17 +39,36 @@ namespace PerfIt
         {
             base.OnActionExecuted(actionExecutedContext);
 
-            if (actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItKey))
+            try
             {
-                var context = (PerfItContext) actionExecutedContext.Request.Properties[Constants.PerfItKey];
-               
-                foreach (var counter in Counters)
+                var instanceName = InstanceName;
+                if (string.IsNullOrEmpty(instanceName))
                 {
-                    context.CountersToRun.Add(counter);    
+                    HttpActionContext actionContext = actionExecutedContext.ActionContext;
+                    HttpActionDescriptor actionDescriptor = actionContext.ActionDescriptor;
+                    instanceName = PerfItRuntime.GetCounterInstanceName(actionDescriptor.ControllerDescriptor.ControllerType,
+                        actionDescriptor.ActionName);
                 }
 
-                context.Filter = this;
+                if (actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItKey))
+                {
+                    var context = (PerfItContext)actionExecutedContext.Request.Properties[Constants.PerfItKey];
+
+                    foreach (var counter in Counters)
+                    {
+                        context.CountersToRun.Add(PerfItRuntime.GetUniqueName(instanceName, counter));
+                    }
+
+                    context.Filter = this;
+                }
             }
+            catch (Exception exception)
+            {
+                Trace.TraceError(exception.ToString());
+                if(PerfItRuntime.ThrowPublishingErrors)
+                    throw exception;
+            }
+            
         } 
     }
 }

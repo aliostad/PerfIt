@@ -18,19 +18,20 @@ namespace PerfIt
             new Dictionary<string, PerfItCounterContext>();
 
         private readonly string _applicationName;
-        private string _categoryName;
-    
+        private bool _publish = false;
+
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="configuration">Hosting configuration</param>
-        /// <param name="applicationName">Name of the web application. It will be used as counetrs instance name</param>
-        public PerfItDelegatingHandler(HttpConfiguration configuration, // not used at the mo
+        /// <param name="configuration"></param>
+        /// <param name="categoryName">Name of the grouping category of counters (e.g. Process, Processor, Network Interface are all categories)</param>
+        public PerfItDelegatingHandler(HttpConfiguration configuration, // not used at the mo. For future use
             string categoryName)
         {
-            _categoryName = categoryName;
 
+            SetPublish();
+            SetErrorPolicy();
 
             var frames = new StackTrace().GetFrames();
             var assembly = frames[1].GetMethod().ReflectedType.Assembly;
@@ -58,6 +59,18 @@ namespace PerfIt
 
         }
 
+        private void SetPublish()
+        {
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? "true";
+            _publish = Convert.ToBoolean(value);
+        }
+
+        protected void SetErrorPolicy()
+        {
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? "true";
+            PerfItRuntime.ThrowPublishingErrors = Convert.ToBoolean(value);
+        }
+
         public string ApplicationName
         {
             get { return _applicationName; }
@@ -66,32 +79,50 @@ namespace PerfIt
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, 
             CancellationToken cancellationToken)
         {
-            // check whether turned off in config
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters];
-            if (!string.IsNullOrEmpty(value))
+            try
             {
-                if(!Convert.ToBoolean(value))
-                    return base.SendAsync(request, cancellationToken);
-            }
+                // check whether turned off in config
 
-            request.Properties.Add(Constants.PerfItKey, new PerfItContext());
-            foreach (var context in _counterContexts.Values)
-            {
-                context.Handler.OnRequestStarting(request);
+                if (!_publish)
+                    return base.SendAsync(request, cancellationToken);
+                
+                request.Properties.Add(Constants.PerfItKey, new PerfItContext());
+                foreach (var context in _counterContexts.Values)
+                {
+                    context.Handler.OnRequestStarting(request);
+                }
             }
+            catch (Exception exception)
+            {
+                Trace.TraceError(exception.ToString());
+
+                if(PerfItRuntime.ThrowPublishingErrors)
+                    throw exception;
+            }
+            
 
             return base.SendAsync(request, cancellationToken)
                 .Then((response) => 
                         {
-                            var ctx = (PerfItContext) response.RequestMessage.Properties[Constants.PerfItKey];
-
-                            foreach (var counter in ctx.CountersToRun)
+                            try
                             {
-                                _counterContexts[counter].Handler.OnRequestEnding(response);
+                                var ctx = (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey];
+
+                                foreach (var counter in ctx.CountersToRun)
+                                {
+                                    _counterContexts[counter].Handler.OnRequestEnding(response);
+                                }
                             }
+                            catch (Exception e)
+                            {
+                                Trace.TraceError(e.ToString());
+                                if(PerfItRuntime.ThrowPublishingErrors)
+                                    throw e;
+                            }
+                            
                             return response;
-                   
-                        });
+
+                        }, cancellationToken);
 
         }
 

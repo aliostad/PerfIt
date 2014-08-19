@@ -105,6 +105,17 @@ namespace PerfIt
            
         }
 
+        internal static string GetUniqueName(string instanceName, string counterType)
+        {
+            return string.Format("{0}.{1}", instanceName, counterType);
+        }
+
+        internal static string GetCounterInstanceName(Type controllerType, string actionName)
+        {
+            return string.Format("{0}.{1}", controllerType.Name, actionName);
+        }
+
+
         /// <summary>
         /// Extracts all filters in the current assembly defined on ApiControllers
         /// </summary>
@@ -130,17 +141,12 @@ namespace PerfIt
                     {
                         if (string.IsNullOrEmpty(attr.InstanceName)) // default name
                         {
-                            var actionName = (ActionNameAttribute)
+                            var actionNameAttr = (ActionNameAttribute)
                                              methodInfo.GetCustomAttributes(typeof (ActionNameAttribute), true)
                                                        .FirstOrDefault();
-                            if (actionName == null)
-                            {
-                                attr.InstanceName = controllerName + "." + methodInfo.Name;
-                            }
-                            else
-                            {
-                                attr.InstanceName = controllerName + "." + actionName.Name;
-                            }
+
+                            string actionName = actionNameAttr == null ? methodInfo.Name : actionNameAttr.Name;
+                            attr.InstanceName = GetCounterInstanceName(apiController, actionName);
                         }
 
 						attributes.Add(attr);
