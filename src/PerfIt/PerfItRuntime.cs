@@ -48,7 +48,9 @@ namespace PerfIt
 
             var frames = new StackTrace().GetFrames();
             var assembly = frames[1].GetMethod().ReflectedType.Assembly;
-           
+            if (string.IsNullOrEmpty(categoryName))
+                categoryName = assembly.GetName().Name;
+
             try
             {
                 if(PerformanceCounterCategory.Exists(categoryName))
@@ -115,7 +117,7 @@ namespace PerfIt
             return string.Format("{0}.{1}", controllerType.Name, actionName);
         }
 
-
+       
         /// <summary>
         /// Extracts all filters in the current assembly defined on ApiControllers
         /// </summary>

@@ -62,12 +62,12 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
         {
-            context.Data.Add(AverageTimeTakenTicksKey + Name, Stopwatch.StartNew());
+            context.Data.Add(AverageTimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
         }
 
         protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
         {
-            var sw = (Stopwatch) context.Data[AverageTimeTakenTicksKey + Name];
+            var sw = (Stopwatch)context.Data[AverageTimeTakenTicksKey + _instanceName];
             sw.Stop();
             _counter.Value.IncrementBy(sw.ElapsedTicks);
             _baseCounter.Value.Increment();

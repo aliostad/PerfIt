@@ -40,12 +40,12 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
         {
-            context.Data.Add(TimeTakenTicksKey + Name, Stopwatch.StartNew());
+            context.Data.Add(TimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
         }
 
         protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
         {
-            var sw = (Stopwatch)context.Data[TimeTakenTicksKey + Name];
+            var sw = (Stopwatch)context.Data[TimeTakenTicksKey + _instanceName];
             sw.Stop();
             _counter.Value.RawValue = sw.ElapsedMilliseconds;
         }

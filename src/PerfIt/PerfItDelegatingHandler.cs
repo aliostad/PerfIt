@@ -24,17 +24,20 @@ namespace PerfIt
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="configuration"></param>
-        /// <param name="categoryName">Name of the grouping category of counters (e.g. Process, Processor, Network Interface are all categories)</param>
-        public PerfItDelegatingHandler(HttpConfiguration configuration, // not used at the mo. For future use
-            string categoryName)
+        /// <param name="categoryName">Name of the grouping category of counters (e.g. Process, Processor, Network Interface are all categories)
+        /// if not provided, it will use name of the assembly.
+        /// </param>
+        public PerfItDelegatingHandler(string categoryName = null)
         {
+   
 
             SetPublish();
             SetErrorPolicy();
 
             var frames = new StackTrace().GetFrames();
             var assembly = frames[1].GetMethod().ReflectedType.Assembly;
+            if (string.IsNullOrEmpty(categoryName))
+                categoryName = assembly.GetName().Name;
 
             var filters = PerfItRuntime.FindAllFilters(assembly);
             foreach (var filter in filters)
