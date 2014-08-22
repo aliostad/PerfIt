@@ -56,7 +56,11 @@ In the actions you would want to monitor, add this attribute:
 
 ``` C#
 [PerfItFilter(Description = "Gets all items",
-    Counters = CounterTypes.StandardCounters)]
+            Counters = new[]{
+            CounterTypes.TotalNoOfOperations,
+            CounterTypes.AverageTimeTaken, 
+            CounterTypes.NumberOfOperationsPerSecond,
+            CounterTypes.LastOperationExecutionTime})]
 public string Get()
 {
     ...
@@ -125,7 +129,8 @@ An alternative method is to supply instance name (also useful when you want to s
 
 ``` C#
 [PerfItFilter(Description = "Gets all items",
-    Counters = CounterTypes.StandardCounters, InstanceName="AnyName")]
+    Counters = ..., 
+    InstanceName="AnyName")]
 public string Get()
 {
     ...
