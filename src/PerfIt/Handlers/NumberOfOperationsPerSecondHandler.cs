@@ -9,7 +9,7 @@ namespace PerfIt.Handlers
 {
     public class NumberOfOperationsPerSecondHandler : CounterHandlerBase
     {
-        private readonly Lazy<PerformanceCounter> _counter;
+        private Lazy<PerformanceCounter> _counter;
         private const string TimeTakenTicksKey = "NumberOfOperationsPerSecondHandler_#_StopWatch_#_";
 
         public NumberOfOperationsPerSecondHandler
@@ -19,19 +19,7 @@ namespace PerfIt.Handlers
             PerfItFilterAttribute filter)
             : base(categoryName, instanceName, filter)
         {
-            _counter = new Lazy<PerformanceCounter>(() =>
-            {
-                var counter = new PerformanceCounter()
-                {
-                    CategoryName = categoryName,
-                    CounterName = Name,
-                    InstanceName = instanceName,
-                    ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
-                };
-                counter.RawValue = 0;
-                return counter;
-            });
+           BuildCounters();
         }
 
         public override string CounterType
@@ -49,6 +37,23 @@ namespace PerfIt.Handlers
             var sw = (Stopwatch)context.Data[TimeTakenTicksKey + _instanceName];
             sw.Stop();
             _counter.Value.Increment();
+        }
+
+        protected override void BuildCounters(bool newInstanceName = false)
+        {
+            _counter = new Lazy<PerformanceCounter>(() =>
+            {
+                var counter = new PerformanceCounter()
+                {
+                    CategoryName = _categoryName,
+                    CounterName = Name,
+                    InstanceName = GetInstanceName(newInstanceName),
+                    ReadOnly = false,
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                };
+                counter.RawValue = 0;
+                return counter;
+            });
         }
 
         protected override CounterCreationData[] DoGetCreationData()

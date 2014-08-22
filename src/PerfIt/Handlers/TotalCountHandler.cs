@@ -7,7 +7,7 @@ namespace PerfIt.Handlers
     public class TotalCountHandler : CounterHandlerBase
     {
 
-        private readonly Lazy<PerformanceCounter> _counter;
+        private Lazy<PerformanceCounter> _counter;
 
         public TotalCountHandler
             (
@@ -15,23 +15,8 @@ namespace PerfIt.Handlers
             string instanceName,
             PerfItFilterAttribute filter)
             : base(categoryName, instanceName, filter)
-        {
-            
-            _counter = new Lazy<PerformanceCounter>(() =>
-            {
-                var counter = new PerformanceCounter()
-                {
-                    CategoryName = categoryName,
-                    CounterName = Name,
-                    InstanceName = instanceName,
-                    ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
-                };
-                counter.RawValue = 0;
-                return counter;
-            }
-              );
-             
+        {           
+            BuildCounters();
         }
 
         public override string CounterType
@@ -47,6 +32,24 @@ namespace PerfIt.Handlers
         protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
         {
             _counter.Value.Increment();
+        }
+
+        protected override void BuildCounters(bool newInstanceName = false)
+        {
+            _counter = new Lazy<PerformanceCounter>(() =>
+            {
+                var counter = new PerformanceCounter()
+                {
+                    CategoryName = _categoryName,
+                    CounterName = Name,
+                    InstanceName = GetInstanceName(newInstanceName),
+                    ReadOnly = false,
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                };
+                counter.RawValue = 0;
+                return counter;
+            }
+          );
         }
 
         protected override CounterCreationData[] DoGetCreationData()

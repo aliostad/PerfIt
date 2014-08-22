@@ -82,12 +82,12 @@ namespace PerfIt
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, 
             CancellationToken cancellationToken)
         {
+
+            if (!_publish)
+                return base.SendAsync(request, cancellationToken);
             try
             {
                 // check whether turned off in config
-
-                if (!_publish)
-                    return base.SendAsync(request, cancellationToken);
                 
                 request.Properties.Add(Constants.PerfItKey, new PerfItContext());
                 foreach (var context in _counterContexts.Values)

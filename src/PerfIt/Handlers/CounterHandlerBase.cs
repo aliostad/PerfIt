@@ -51,7 +51,14 @@ namespace PerfIt.Handlers
         /// <param name="response"></param>
         /// <param name="context"></param>
         protected abstract void OnRequestEnding(HttpResponseMessage response, PerfItContext context);
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="newInstanceName"></param>
+        protected abstract void BuildCounters(bool newInstanceName = false);
+
+
         /// <summary>
         /// Handler to return data for creating counters
         /// </summary>
@@ -63,7 +70,18 @@ namespace PerfIt.Handlers
         {
             if (request.Properties.ContainsKey(Constants.PerfItKey))
             {
-                OnRequestStarting(request, (PerfItContext) request.Properties[Constants.PerfItKey]);
+                try
+                {
+                    OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);
+
+                }
+                catch (InvalidOperationException exception)
+                {
+
+                    Trace.TraceError(exception.ToString());
+                    BuildCounters(true);
+                    OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);                    
+                }
             }
         }
 
@@ -71,7 +89,18 @@ namespace PerfIt.Handlers
         {
             if (response.RequestMessage.Properties.ContainsKey(Constants.PerfItKey))
             {
-                OnRequestEnding(response, (PerfItContext) response.RequestMessage.Properties[Constants.PerfItKey]);
+                try
+                {
+                    OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
+
+                }
+                catch (InvalidOperationException exception)
+                {
+                    
+                    Trace.TraceError(exception.ToString());
+                    BuildCounters(true);
+                    OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
+                }
             }
         }
 
@@ -87,6 +116,15 @@ namespace PerfIt.Handlers
         {
             return DoGetCreationData();
         }
+
+        protected string GetInstanceName(bool newName = false)
+        {
+            return
+                _instanceName +
+                (newName ? "_" + Guid.NewGuid().ToString("N").Substring(6) : string.Empty);
+        }
+
+      
 
     }
 }
