@@ -93,6 +93,11 @@ namespace PerfIt
                 {
                     if (!HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not defined: " + counterType);
+
+                    // if already exists in the set then ignore
+                    if(counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
+                        continue;
+
                     using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName, filter))
                     {
                         counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
