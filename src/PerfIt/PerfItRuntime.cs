@@ -83,31 +83,42 @@ namespace PerfIt
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = assembly.GetName().Name;
 
-            var perfItFilterAttributes = FindAllFilters(assembly);
+            var perfItFilterAttributes = FindAllFilters(assembly).ToArray();
 
             var counterCreationDataCollection = new CounterCreationDataCollection();
 
+            Trace.TraceInformation("Number of filters: {0}", perfItFilterAttributes.Length);
+
             foreach (var filter in perfItFilterAttributes)
             {
+
+                Trace.TraceInformation("Setting up filters '{0}'", filter.Description);
+
                 foreach (var counterType in filter.Counters)
                 {
                     if (!HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not defined: " + counterType);
 
                     // if already exists in the set then ignore
-                    if(counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
-                        continue;
+                    if (counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
+                    {
+                        Trace.TraceInformation("Counter type '{0}' was duplicate", counterType);
+                        continue;                        
+                    }
 
                     using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName, filter))
                     {
                         counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
+                        Trace.TraceInformation("Added counter type '{0}'", counterType);
                     }
                 }   
             }
-
            
+
             PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
                 PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
+
+            Trace.TraceInformation("Built category '{0}' with {1} items", categoryName, counterCreationDataCollection.Count);
             
            
         }
@@ -135,11 +146,12 @@ namespace PerfIt
             var attributes = new List<PerfItFilterAttribute>();
                var apiControllers = assembly.GetExportedTypes()
                                            .Where(t => typeof(ApiController).IsAssignableFrom(t) &&
-                                                        !t.IsAbstract);
+                                                        !t.IsAbstract).ToArray();
+
+            Trace.TraceInformation("Found '{0}' controllers", apiControllers.Length);
 
             foreach (var apiController in apiControllers)
             {
-                var controllerName = apiController.Name;
                 var methodInfos = apiController.GetMethods(BindingFlags.Instance | BindingFlags.Public);
                 foreach (var methodInfo in methodInfos)
                 {
@@ -157,6 +169,7 @@ namespace PerfIt
                         }
 
 						attributes.Add(attr);
+                        Trace.TraceInformation("Added '{0}' to the list", attr.Counters);
                         
                     }
                 }
