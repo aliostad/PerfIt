@@ -78,6 +78,9 @@ namespace PerfIt
         {
             Uninstall(installerAssembly, categoryName);
 
+            if (string.IsNullOrEmpty(categoryName))
+                categoryName = installerAssembly.GetName().Name;
+
             var perfItFilterAttributes = FindAllFilters(installerAssembly).ToArray();
 
             var counterCreationDataCollection = new CounterCreationDataCollection();
