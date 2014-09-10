@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web.Http;
 using PerfIt.Handlers;
@@ -43,13 +44,11 @@ namespace PerfIt
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
         /// <param name="categoryName">if you have provided a categoryName for the installation, you must supply the same here</param>
-        public static void Uninstall(string categoryName = null)
+        public static void Uninstall(Assembly installerAssembly, string categoryName = null)
         {
 
-            var frames = new StackTrace().GetFrames();
-            var assembly = frames[1].GetMethod().ReflectedType.Assembly;
             if (string.IsNullOrEmpty(categoryName))
-                categoryName = assembly.GetName().Name;
+                categoryName = installerAssembly.GetName().Name;
 
             try
             {
@@ -59,10 +58,10 @@ namespace PerfIt
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }       
-                   
-            
+            } 
         }
+
+       
 
         /// <summary>
         /// By default True. If false, errors encountered at publishing performance counters will be captured and 
@@ -73,17 +72,13 @@ namespace PerfIt
         /// <summary>
         /// Installs performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
+        /// 
         /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
-        public static void Install(string categoryName = null)
+        public static void Install(Assembly installerAssembly, string categoryName = null)
         {
-            Uninstall();
+            Uninstall(installerAssembly, categoryName);
 
-            var frames = new StackTrace().GetFrames();
-            var assembly = frames[1].GetMethod().ReflectedType.Assembly;
-            if (string.IsNullOrEmpty(categoryName))
-                categoryName = assembly.GetName().Name;
-
-            var perfItFilterAttributes = FindAllFilters(assembly).ToArray();
+            var perfItFilterAttributes = FindAllFilters(installerAssembly).ToArray();
 
             var counterCreationDataCollection = new CounterCreationDataCollection();
 
