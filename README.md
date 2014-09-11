@@ -173,3 +173,5 @@ Or by configuration:
 A common problem is to encounter `FileNotFoundException` when registering your counters using `InstallUtil`. This is more common when your use Web API 2. In any case, this is a problem with InstallUtil not honouring your assembly redirects. To solve the problem (and it is just a workaround), simply copy the assembly redirect directives to `InstallUtil.exe.config`, run the installation and then remove them.
 
 This has been raised a few times (see the issues, for example [#11](https://github.com/aliostad/PerfIt/issues/11)) but the problem is simply the way InstallUtil works - or rather doesn't.
+
+What I found the best solution is to include a copy of InstallUtil.exe and its custom config (which works for your project) along with your deployables and have a script to install the counter, rather than relying on the standard InstallUtil on the box. These files are small and certainly a good solution.
