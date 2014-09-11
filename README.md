@@ -77,13 +77,13 @@ Once added, click F7 to see the code and then add these lines:
 public override void Install(IDictionary stateSaver)
 {
     base.Install(stateSaver);
-    PerfItRuntime.Install();
+    PerfItRuntime.Install(Assembly.GetExecutingAssembly()));
 }
 
 public override void Uninstall(IDictionary savedState)
 {
     base.Uninstall(savedState);
-    PerfItRuntime.Uninstall();
+    PerfItRuntime.Uninstall(Assembly.GetExecutingAssembly()));
 }
 ```
 
