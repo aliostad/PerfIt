@@ -174,4 +174,4 @@ A common problem is to encounter `FileNotFoundException` when registering your c
 
 This has been raised a few times (see the issues, for example [#11](https://github.com/aliostad/PerfIt/issues/11)) but the problem is simply the way InstallUtil works - or rather doesn't.
 
-What I found the best solution is to include a copy of InstallUtil.exe and its custom config (which works for your project) along with your deployables and have a script to install the counter, rather than relying on the standard InstallUtil on the box. These files are small and certainly a good solution.
+What I found the best solution is to include a copy of InstallUtil.exe and its custom config (which works for your project by copying content if assemblyBinding section of the web.config) along with your deployables and have a script to install the counter, rather than relying on the standard InstallUtil on the box. These files are small and certainly a good solution.
