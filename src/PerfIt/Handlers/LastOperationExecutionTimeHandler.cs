@@ -15,9 +15,8 @@ namespace PerfIt.Handlers
 
         public LastOperationExecutionTimeHandler(
             string categoryName,
-            string instanceName,
-            PerfItFilterAttribute filter)
-            : base(categoryName, instanceName, filter)
+            string instanceName)
+            : base(categoryName, instanceName)
         {
             BuildCounters();
         }
@@ -64,7 +63,7 @@ namespace PerfIt.Handlers
             {
                 CounterType = PerformanceCounterType.NumberOfItems32,
                 CounterName = Name,
-                CounterHelp = _filter.Description
+                CounterHelp = "Time in ms to run last request"
             };
 
             return counterCreationDatas;

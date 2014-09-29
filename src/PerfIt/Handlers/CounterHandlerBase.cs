@@ -10,19 +10,16 @@ namespace PerfIt.Handlers
     public abstract class CounterHandlerBase : ICounterHandler
     {
 
-        protected PerfItFilterAttribute _filter;
         protected string _instanceName;
         protected string _categoryName;
         protected string _uniqueName;
 
         public CounterHandlerBase( 
             string categoryName,
-            string instanceName, 
-            PerfItFilterAttribute filter)
+            string instanceName)
         {
             _categoryName = categoryName;
             _instanceName = instanceName;
-            _filter = filter;
             Name = CounterType;
 
             _uniqueName = PerfItRuntime.GetUniqueName(instanceName, Name);

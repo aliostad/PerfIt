@@ -12,9 +12,8 @@ namespace PerfIt.Handlers
         public TotalCountHandler
             (
             string categoryName,
-            string instanceName,
-            PerfItFilterAttribute filter)
-            : base(categoryName, instanceName, filter)
+            string instanceName)
+            : base(categoryName, instanceName)
         {           
             BuildCounters();
         }
@@ -60,7 +59,7 @@ namespace PerfIt.Handlers
                                {
                                    CounterName = Name,
                                    CounterType = PerformanceCounterType.NumberOfItems32,
-                                   CounterHelp = _filter.Description
+                                   CounterHelp = "Total # of operations"
                                }
                        };
         }

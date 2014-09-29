@@ -47,7 +47,7 @@ namespace PerfIt
                     if(!PerfItRuntime.HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not registered: " + counterType);
 
-                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](categoryName, filter.InstanceName, filter);
+                    var counterHandler = PerfItRuntime.HandlerFactories[counterType](categoryName, filter.InstanceName);
                     if (!_counterContexts.Keys.Contains(counterHandler.UniqueName))
                     {
                         _counterContexts.Add(counterHandler.UniqueName, new PerfItCounterContext()
@@ -129,12 +129,7 @@ namespace PerfIt
 
         }
 
-        private class PerfItCounterContext
-        {
-            public string Name { get; set; }
-            public ICounterHandler Handler { get; set; }
-
-        }
+     
 
         protected override void Dispose(bool disposing)
         {
@@ -147,5 +142,12 @@ namespace PerfIt
                 _counterContexts.Clear();
             }
         }
+    }
+
+    internal class PerfItCounterContext
+    {
+        public string Name { get; set; }
+        public ICounterHandler Handler { get; set; }
+
     }
 }

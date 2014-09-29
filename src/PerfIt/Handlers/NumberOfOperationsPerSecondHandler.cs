@@ -15,9 +15,8 @@ namespace PerfIt.Handlers
         public NumberOfOperationsPerSecondHandler
             (
             string categoryName,
-            string instanceName,
-            PerfItFilterAttribute filter)
-            : base(categoryName, instanceName, filter)
+            string instanceName)
+            : base(categoryName, instanceName)
         {
            BuildCounters();
         }
@@ -63,7 +62,7 @@ namespace PerfIt.Handlers
             {
                 CounterType = PerformanceCounterType.RateOfCountsPerSecond32,
                 CounterName = Name,
-                CounterHelp = _filter.Description
+                CounterHelp = "# of operations / sec"
             };
 
             return counterCreationDatas;

@@ -17,9 +17,8 @@ namespace PerfIt.Handlers
 
         public AverageTimeHandler(
             string categoryName,
-            string instanceName,
-            PerfItFilterAttribute filter)
-            : base(categoryName,instanceName, filter)
+            string instanceName)
+            : base(categoryName,instanceName)
         {
             BuildCounters();
         }
@@ -83,13 +82,13 @@ namespace PerfIt.Handlers
                                           {
                                               CounterType = PerformanceCounterType.AverageTimer32,
                                               CounterName = Name,
-                                              CounterHelp = _filter.Description
+                                              CounterHelp = "Average seconds taken to execute"
                                           };
             counterCreationDatas[1] = new CounterCreationData()
                                           {
                                               CounterType = PerformanceCounterType.AverageBase,
                                               CounterName = GetBaseCounterName(),
-                                              CounterHelp = _filter.Description
+                                              CounterHelp = "Average seconds taken to execute"
                                           };
             return counterCreationDatas;
         }

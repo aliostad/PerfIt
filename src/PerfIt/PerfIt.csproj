@@ -76,6 +76,7 @@
     <Compile Include="Internal\TaskHelpers.cs" />
     <Compile Include="Internal\TaskHelpersExtensions.cs" />
     <Compile Include="Handlers\LastOperationExecutionTimeHandler.cs" />
+    <Compile Include="PerfitClientDelegatingHandler.cs" />
     <Compile Include="PerfItContext.cs" />
     <Compile Include="PerfItFilterAttribute.cs" />
     <Compile Include="PerfItDelegatingHandler.cs" />

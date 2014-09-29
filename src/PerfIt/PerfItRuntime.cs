@@ -16,19 +16,19 @@ namespace PerfIt
         static PerfItRuntime()
         {
 
-            HandlerFactories = new Dictionary<string, Func<string, string, PerfItFilterAttribute, ICounterHandler>>();
+            HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
 
             HandlerFactories.Add(CounterTypes.TotalNoOfOperations, 
-                (categoryName, instanceName, filter) => new TotalCountHandler(categoryName, instanceName, filter));
+                (categoryName, instanceName) => new TotalCountHandler(categoryName, instanceName));
 
             HandlerFactories.Add(CounterTypes.AverageTimeTaken,
-                (categoryName, instanceName, filter) => new AverageTimeHandler(categoryName, instanceName, filter));
+                (categoryName, instanceName) => new AverageTimeHandler(categoryName, instanceName));
 
             HandlerFactories.Add(CounterTypes.LastOperationExecutionTime,
-                (categoryName, instanceName, filter) => new LastOperationExecutionTimeHandler(categoryName, instanceName, filter));
+                (categoryName, instanceName) => new LastOperationExecutionTimeHandler(categoryName, instanceName));
 
             HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
-                (categoryName, instanceName, filter) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName, filter));
+                (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName));
 
             ThrowPublishingErrors = true;
         }
@@ -38,7 +38,7 @@ namespace PerfIt
         /// Factory's first param is applicationName and second is the filter
         /// Use it to register your own counters or replace built-in implementations
         /// </summary>
-        public static Dictionary<string, Func<string, string, PerfItFilterAttribute, ICounterHandler>> HandlerFactories { get; private set; }
+        public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }
     
         /// <summary>
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
@@ -104,7 +104,7 @@ namespace PerfIt
                         continue;                        
                     }
 
-                    using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName, filter))
+                    using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName))
                     {
                         counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
                         Trace.TraceInformation("Added counter type '{0}'", counterType);
@@ -119,6 +119,39 @@ namespace PerfIt
             Trace.TraceInformation("Built category '{0}' with {1} items", categoryName, counterCreationDataCollection.Count);
             
            
+        }
+
+        /// <summary>
+        ///  installs 4 standard counters for the category provided
+        /// </summary>
+        /// <param name="categoryName"></param>
+
+        public static void InstallStandardCounters(string categoryName)
+        {
+            var creationDatas = new CounterHandlerBase[]
+            {
+                new AverageTimeHandler(categoryName, string.Empty),
+                new LastOperationExecutionTimeHandler(categoryName, string.Empty),
+                new TotalCountHandler(categoryName, string.Empty),
+                new NumberOfOperationsPerSecondHandler(categoryName, string.Empty) 
+            }.SelectMany(x => x.BuildCreationData());
+
+            var counterCreationDataCollection = new CounterCreationDataCollection();
+            counterCreationDataCollection.AddRange(creationDatas.ToArray());
+            PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
+                PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
+
+        }
+
+        /// <summary>
+        ///  Uninstalls the category provided
+        /// </summary>
+        /// <param name="categoryName"></param>
+        public static void Uninstall(string categoryName)
+        {
+
+            if (PerformanceCounterCategory.Exists(categoryName))
+                PerformanceCounterCategory.Delete(categoryName);           
         }
 
         internal static string GetUniqueName(string instanceName, string counterType)
