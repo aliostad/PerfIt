@@ -39,6 +39,13 @@ namespace PerfIt
         {
             base.OnActionExecuted(actionExecutedContext);
 
+            bool raiseErrors = true;
+            if(actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItPublishErrorsKey))
+            {
+                raiseErrors =
+                    Convert.ToBoolean(actionExecutedContext.Request.Properties[Constants.PerfItPublishErrorsKey]);
+            }
+
             try
             {
                 var instanceName = InstanceName;
@@ -65,7 +72,7 @@ namespace PerfIt
             catch (Exception exception)
             {
                 Trace.TraceError(exception.ToString());
-                if(PerfItRuntime.ThrowPublishingErrors)
+                if(raiseErrors)
                     throw exception;
             }
             

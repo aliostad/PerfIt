@@ -12,7 +12,7 @@
     <copyright>Copyright 2013</copyright>
     <tags>aspnetwebapi performance monitor monitoring perfmon counter</tags>
 	<dependencies>
-      <dependency id="Microsoft.AspNet.WebApi.WebHost" version="4.0.30506" />	  
+      <dependency id="Microsoft.AspNet.WebApi.Core" version="4.0.30506" />	  
     </dependencies>
 	
   </metadata>

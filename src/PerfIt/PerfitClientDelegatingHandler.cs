@@ -18,37 +18,46 @@ namespace PerfIt
     public class PerfitClientDelegatingHandler : DelegatingHandler
     {
 
-
-
         private ConcurrentDictionary<string, Lazy<PerfItCounterContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfItCounterContext>>();
 
-        
-
-        private readonly string _applicationName;
-        private bool _publish = false;
         private string _categoryName;
 
         public PerfitClientDelegatingHandler(string categoryName)
         {
             _categoryName = categoryName;
+            PublishCounters = true;
+            RaisePublishErrors = true;
 
             SetErrorPolicy();
             SetPublish();
+
+            InstanceNameProvider = request =>
+                string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());
         }
+
+        public bool PublishCounters { get; set; }
+
+        public bool RaisePublishErrors { get; set; }
 
         private string GetKey(string counterName, string instanceName)
         {
             return string.Format("{0}_{1}", counterName, instanceName);
         }
 
+        /// <summary>
+        /// Provides the performance counter instance name.
+        /// Default impl combines method and the host name of the request.
+        /// </summary>
+        public Func<HttpRequestMessage, string> InstanceNameProvider { get; set; }
+           
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
 
-            if (!_publish)
+            if (!PublishCounters)
                 return base.SendAsync(request, cancellationToken);
 
-            var instanceName = request.RequestUri.Host;
+            var instanceName = InstanceNameProvider(request);
 
             var contexts = new List<PerfItCounterContext>();
             foreach (var handlerFactory in PerfItRuntime.HandlerFactories)
@@ -63,11 +72,12 @@ namespace PerfIt
             }
 
             request.Properties.Add(Constants.PerfItKey, new PerfItContext());
+            request.Properties.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
+            
             foreach (var context in contexts)
             {
                 context.Handler.OnRequestStarting(request);
             }
-
 
             return base.SendAsync(request, cancellationToken)
                 .Then((response) => 
@@ -83,7 +93,7 @@ namespace PerfIt
                             catch (Exception e)
                             {
                                 Trace.TraceError(e.ToString());
-                                if(PerfItRuntime.ThrowPublishingErrors)
+                                if(RaisePublishErrors)
                                     throw e;
                             }
                             
@@ -96,18 +106,13 @@ namespace PerfIt
         private void SetPublish()
         {
             var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? "true";
-            _publish = Convert.ToBoolean(value);
+            PublishCounters = Convert.ToBoolean(value);
         }
 
         protected void SetErrorPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? "true";
-            PerfItRuntime.ThrowPublishingErrors = Convert.ToBoolean(value);
-        }
-
-        public string ApplicationName
-        {
-            get { return _applicationName; }
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
+            RaisePublishErrors = Convert.ToBoolean(value);
         }
 
         protected override void Dispose(bool disposing)

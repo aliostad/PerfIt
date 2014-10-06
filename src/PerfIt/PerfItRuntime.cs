@@ -30,7 +30,6 @@ namespace PerfIt
             HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
                 (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName));
 
-            ThrowPublishingErrors = true;
         }
 
         /// <summary>
@@ -61,13 +60,6 @@ namespace PerfIt
             } 
         }
 
-       
-
-        /// <summary>
-        /// By default True. If false, errors encountered at publishing performance counters will be captured and 
-        /// not thrown. They will be logged on the Trace.
-        /// </summary>
-        public static bool ThrowPublishingErrors { get; set; }
 
         /// <summary>
         /// Installs performance counters in the current assembly using PerfItFilterAttribute.

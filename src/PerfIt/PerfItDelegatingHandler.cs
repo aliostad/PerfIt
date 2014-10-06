@@ -17,9 +17,9 @@ namespace PerfIt
         private Dictionary<string, PerfItCounterContext> _counterContexts = 
             new Dictionary<string, PerfItCounterContext>();
 
-        private readonly string _applicationName;
-        private bool _publish = false;
+        public bool PublishCounters { get; set; }
 
+        public bool RaisePublishErrors { get; set; }
 
         /// <summary>
         /// 
@@ -29,7 +29,9 @@ namespace PerfIt
         /// </param>
         public PerfItDelegatingHandler(string categoryName = null)
         {
-   
+
+            PublishCounters = true;
+            RaisePublishErrors = true;
 
             SetPublish();
             SetErrorPolicy();
@@ -64,26 +66,21 @@ namespace PerfIt
 
         private void SetPublish()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? "true";
-            _publish = Convert.ToBoolean(value);
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? PublishCounters.ToString();
+            PublishCounters = Convert.ToBoolean(value);
         }
 
         protected void SetErrorPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? "true";
-            PerfItRuntime.ThrowPublishingErrors = Convert.ToBoolean(value);
-        }
-
-        public string ApplicationName
-        {
-            get { return _applicationName; }
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
+            RaisePublishErrors = Convert.ToBoolean(value);
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, 
             CancellationToken cancellationToken)
         {
 
-            if (!_publish)
+            if (!PublishCounters)
                 return base.SendAsync(request, cancellationToken);
             try
             {
@@ -99,7 +96,7 @@ namespace PerfIt
             {
                 Trace.TraceError(exception.ToString());
 
-                if(PerfItRuntime.ThrowPublishingErrors)
+                if(RaisePublishErrors)
                     throw exception;
             }
             
@@ -119,7 +116,7 @@ namespace PerfIt
                             catch (Exception e)
                             {
                                 Trace.TraceError(e.ToString());
-                                if(PerfItRuntime.ThrowPublishingErrors)
+                                if(RaisePublishErrors)
                                     throw e;
                             }
                             
