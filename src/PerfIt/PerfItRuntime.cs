@@ -8,13 +8,23 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web.Http;
 using PerfIt.Handlers;
+using System.Configuration;
+using System.Collections.Concurrent;
 
 namespace PerfIt
 {
     public static class PerfItRuntime
     {
+       
+
         static PerfItRuntime()
         {
+            PublishCounters = true;
+            RaisePublishErrors = true;
+            SetErrorPolicy();
+            SetPublish();
+
+            MonitoredCountersContexts = new ConcurrentDictionary<string, PerfItCounterContext>();
 
             HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
 
@@ -30,6 +40,25 @@ namespace PerfIt
             HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
                 (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName));
 
+        }
+
+        public static bool PublishCounters { get; private set; }
+
+        public static bool RaisePublishErrors { get; private set; }
+
+
+        internal static ConcurrentDictionary<string, PerfItCounterContext> MonitoredCountersContexts { get; private set; }
+
+        private static void  SetPublish()
+        {
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? PublishCounters.ToString();
+            PublishCounters = Convert.ToBoolean(value);
+        }
+
+        private static void SetErrorPolicy()
+        {
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
+            RaisePublishErrors = Convert.ToBoolean(value);
         }
 
         /// <summary>
@@ -72,8 +101,8 @@ namespace PerfIt
 
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = installerAssembly.GetName().Name;
-
-            var perfItFilterAttributes = FindAllFilters(installerAssembly).ToArray();
+            
+            var perfItFilterAttributes = FindAllPerfItAttributes(installerAssembly).ToArray();
 
             var counterCreationDataCollection = new CounterCreationDataCollection();
 
@@ -153,52 +182,82 @@ namespace PerfIt
 
         internal static string GetCounterInstanceName(Type controllerType, string actionName)
         {
-            return string.Format("{0}.{1}", controllerType.Name, actionName);
+            return string.Format("{0}_{1}", controllerType.FullName, actionName);
         }
 
        
         /// <summary>
-        /// Extracts all filters in the current assembly defined on ApiControllers
+        /// Extracts all PerfIt attributes in the current assembly defined on Service Classes
         /// </summary>
         /// <returns></returns>
-        internal static IEnumerable<PerfItFilterAttribute> FindAllFilters(
+        internal static IEnumerable<IPerfItAttribute> FindAllPerfItAttributes(
             Assembly assembly)
         {
+
             
+            var attributes = new List<IPerfItAttribute>();
+            var servicesToMonitor = assembly.GetExportedTypes();
+               
+               Trace.TraceInformation("Found '{0}' classes", servicesToMonitor.Length);
 
-            var attributes = new List<PerfItFilterAttribute>();
-               var apiControllers = assembly.GetExportedTypes()
-                                           .Where(t => typeof(ApiController).IsAssignableFrom(t) &&
-                                                        !t.IsAbstract).ToArray();
-
-            Trace.TraceInformation("Found '{0}' controllers", apiControllers.Length);
-
-            foreach (var apiController in apiControllers)
+               foreach (var service in servicesToMonitor)
             {
-                var methodInfos = apiController.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                foreach (var methodInfo in methodInfos)
+                attributes.AddRange((List<IPerfItAttribute>)FindAllPerfItAttributes((Type)service));
+            }
+
+            return attributes;
+        }
+
+        internal static IEnumerable<IPerfItAttribute> FindAllPerfItAttributes(
+            Type monitoredClass)
+        {
+
+
+            var attributes = new List<IPerfItAttribute>();
+
+            var methodInfos = monitoredClass.GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(t => t.GetCustomAttributes(typeof(IPerfItAttribute), true).Length > 0 ).ToArray();
+
+            
+            foreach (var methodInfo in methodInfos)
+            {
+                var attr = FindPerfItAttribute(methodInfo);
+                if (attr != null)
                 {
-                    var attr = (PerfItFilterAttribute)methodInfo.GetCustomAttributes(typeof(PerfItFilterAttribute), true).FirstOrDefault();
-                    if (attr != null)
-                    {
-                        if (string.IsNullOrEmpty(attr.InstanceName)) // default name
-                        {
-                            var actionNameAttr = (ActionNameAttribute)
-                                             methodInfo.GetCustomAttributes(typeof (ActionNameAttribute), true)
-                                                       .FirstOrDefault();
-
-                            string actionName = actionNameAttr == null ? methodInfo.Name : actionNameAttr.Name;
-                            attr.InstanceName = GetCounterInstanceName(apiController, actionName);
-                        }
-
-						attributes.Add(attr);
-                        Trace.TraceInformation("Added '{0}' to the list", attr.Counters);
-                        
-                    }
+                    attributes.Add(attr);
                 }
             }
 
             return attributes;
         }
+
+        public static IPerfItAttribute FindPerfItAttribute(MethodInfo methodInfo)
+        {
+            var attr = (IPerfItAttribute)methodInfo.GetCustomAttributes(typeof(IPerfItAttribute), true).FirstOrDefault();
+            if (attr != null)
+            {
+                if (string.IsNullOrEmpty(attr.InstanceName)) // default name
+                {
+                    var actionNameAttr = (ActionNameAttribute)
+                                        methodInfo.GetCustomAttributes(typeof(ActionNameAttribute), true)
+                                                .FirstOrDefault();
+
+                    string actionName = actionNameAttr == null ? methodInfo.Name : actionNameAttr.Name;
+                    attr.InstanceName = GetCounterInstanceName(methodInfo.DeclaringType, actionName);
+                }
+
+                Trace.TraceInformation("Added '{0}' to the list", attr.Counters);
+                return attr;
+
+
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        
     }
+
+
 }

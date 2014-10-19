@@ -14,12 +14,7 @@ namespace PerfIt
 {
     public class PerfItDelegatingHandler : DelegatingHandler
     {
-        private Dictionary<string, PerfItCounterContext> _counterContexts = 
-            new Dictionary<string, PerfItCounterContext>();
-
-        public bool PublishCounters { get; set; }
-
-        public bool RaisePublishErrors { get; set; }
+       
 
         /// <summary>
         /// 
@@ -30,18 +25,14 @@ namespace PerfIt
         public PerfItDelegatingHandler(string categoryName = null)
         {
 
-            PublishCounters = true;
-            RaisePublishErrors = true;
-
-            SetPublish();
-            SetErrorPolicy();
+            
 
             var frames = new StackTrace().GetFrames();
             var assembly = frames[1].GetMethod().ReflectedType.Assembly;
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = assembly.GetName().Name;
 
-            var filters = PerfItRuntime.FindAllFilters(assembly);
+            var filters = PerfItRuntime.FindAllPerfItAttributes(assembly);
             foreach (var filter in filters)
             {
                 foreach (var counterType in filter.Counters)
@@ -50,13 +41,13 @@ namespace PerfIt
                         throw new ArgumentException("Counter type not registered: " + counterType);
 
                     var counterHandler = PerfItRuntime.HandlerFactories[counterType](categoryName, filter.InstanceName);
-                    if (!_counterContexts.Keys.Contains(counterHandler.UniqueName))
+                    if (!PerfItRuntime.MonitoredCountersContexts.Keys.Contains(counterHandler.UniqueName))
                     {
-                        _counterContexts.Add(counterHandler.UniqueName, new PerfItCounterContext()
+                        PerfItRuntime.MonitoredCountersContexts.AddOrUpdate(counterHandler.UniqueName, new PerfItCounterContext()
                                                                              {
                                                                                  Handler = counterHandler,
                                                                                  Name = counterHandler.UniqueName
-                                                                             });
+                                                                             }, (key, existingCounter) => existingCounter);
                     }
                 }
                     
@@ -64,59 +55,35 @@ namespace PerfIt
 
         }
 
-        private void SetPublish()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? PublishCounters.ToString();
-            PublishCounters = Convert.ToBoolean(value);
-        }
-
-        protected void SetErrorPolicy()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
-            RaisePublishErrors = Convert.ToBoolean(value);
-        }
-
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, 
             CancellationToken cancellationToken)
         {
-
-            if (!PublishCounters)
-                return base.SendAsync(request, cancellationToken);
-            try
-            {
-                // check whether turned off in config
-                
-                request.Properties.Add(Constants.PerfItKey, new PerfItContext());
-                foreach (var context in _counterContexts.Values)
-                {
-                    context.Handler.OnRequestStarting(request);
-                }
-            }
-            catch (Exception exception)
-            {
-                Trace.TraceError(exception.ToString());
-
-                if(RaisePublishErrors)
-                    throw exception;
-            }
             
+            if (!PerfItRuntime.PublishCounters)
+                return base.SendAsync(request, cancellationToken);
+            
+                      
 
             return base.SendAsync(request, cancellationToken)
                 .Then((response) => 
                         {
                             try
                             {
-                                var ctx = (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey];
 
-                                foreach (var counter in ctx.CountersToRun)
+                                if (response.RequestMessage.Properties.Keys.Contains(Constants.PerfItKey))
                                 {
-                                    _counterContexts[counter].Handler.OnRequestEnding(response);
+                                    var invocationContext = (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey];
+
+                                    foreach (var counter in invocationContext.CountersToRun)
+                                    {
+                                        PerfItRuntime.MonitoredCountersContexts[counter].Handler.OnRequestEnding(invocationContext);
+                                    }
                                 }
                             }
                             catch (Exception e)
                             {
                                 Trace.TraceError(e.ToString());
-                                if(RaisePublishErrors)
+                                if(PerfItRuntime.RaisePublishErrors)
                                     throw e;
                             }
                             
@@ -128,23 +95,7 @@ namespace PerfIt
 
      
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                foreach (var context in _counterContexts.Values)
-                {
-                    context.Handler.Dispose();
-                }
-                _counterContexts.Clear();
-            }
-        }
+        
     }
 
-    internal class PerfItCounterContext
-    {
-        public string Name { get; set; }
-        public ICounterHandler Handler { get; set; }
-
-    }
 }

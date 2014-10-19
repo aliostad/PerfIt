@@ -34,6 +34,10 @@
     <DocumentationFile>bin\Release\PerfIt.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=3.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Store\Search-Ajax\Store\packages\Castle.Core.3.1.0\lib\net40-client\Castle.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -73,17 +77,21 @@
     <Compile Include="Internal\TaskHelpers.cs" />
     <Compile Include="Internal\TaskHelpersExtensions.cs" />
     <Compile Include="Handlers\LastOperationExecutionTimeHandler.cs" />
+    <Compile Include="IPerfItAttribute.cs" />
+    <Compile Include="IPerfItContext.cs" />
+    <Compile Include="PerfItAttribute.cs" />
     <Compile Include="PerfitClientDelegatingHandler.cs" />
     <Compile Include="PerfItContext.cs" />
-    <Compile Include="PerfItFilterAttribute.cs" />
+    <Compile Include="PerfItCounterContext.cs" />
     <Compile Include="PerfItDelegatingHandler.cs" />
+    <Compile Include="PerfItFilterAttribute.cs" />
+    <Compile Include="PerfItInterceptor.cs" />
     <Compile Include="PerfItRuntime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -35,19 +35,7 @@ namespace PerfIt.Handlers
         /// </summary>
         public abstract string CounterType { get; }
 
-        /// <summary>
-        /// called when request arrives in delegating handler
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="context"></param> 
-        protected abstract void OnRequestStarting(HttpRequestMessage request, PerfItContext context);
-        
-        /// <summary>
-        /// called as the async continuation on the delegating handler (when response is sent back)
-        /// </summary>
-        /// <param name="response"></param>
-        /// <param name="context"></param>
-        protected abstract void OnRequestEnding(HttpResponseMessage response, PerfItContext context);
+       
 
         /// <summary>
         /// 
@@ -63,42 +51,47 @@ namespace PerfIt.Handlers
         /// <returns></returns>
         protected abstract CounterCreationData[] DoGetCreationData();
 
-        public void OnRequestStarting(HttpRequestMessage request)
+
+        protected abstract void DoOnRequestStarting(IPerfItContext context);
+
+        protected abstract void DoOnRequestEnding(IPerfItContext context);
+
+        public void OnRequestStarting(IPerfItContext context)
         {
-            if (request.Properties.ContainsKey(Constants.PerfItKey))
-            {
+            
                 try
                 {
-                    OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);
+                    DoOnRequestStarting( context);
 
                 }
                 catch (InvalidOperationException exception)
                 {
 
                     Trace.TraceError(exception.ToString());
-                    BuildCounters(true);
-                    OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);                    
+                    //could cause a nasty infinite loop?
+                    //BuildCounters(true);
+                    //OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);                    
                 }
-            }
+           
         }
 
-        public void OnRequestEnding(HttpResponseMessage response)
+        public void OnRequestEnding(IPerfItContext context)
         {
-            if (response.RequestMessage.Properties.ContainsKey(Constants.PerfItKey))
-            {
+           
                 try
                 {
-                    OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
+                    DoOnRequestEnding( context);
 
                 }
                 catch (InvalidOperationException exception)
                 {
                     
                     Trace.TraceError(exception.ToString());
-                    BuildCounters(true);
-                    OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
+                    //could cause a nasty infinite loop?
+                    //BuildCounters(true);
+                    //OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
                 }
-            }
+           
         }
 
         public string Name { get; private set; }

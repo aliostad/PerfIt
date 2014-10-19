@@ -13,7 +13,7 @@ namespace PerfIt.Handlers
         private const string AverageTimeTakenTicksKey = "AverageTimeHandler_#_StopWatch_#_";
         private  Lazy<PerformanceCounter> _counter;
         private Lazy<PerformanceCounter> _baseCounter;
-
+        
 
         public AverageTimeHandler(
             string categoryName,
@@ -28,12 +28,12 @@ namespace PerfIt.Handlers
             get { return CounterTypes.AverageTimeTaken; }
         }
 
-        protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
+        protected override void DoOnRequestStarting(IPerfItContext context)
         {
             context.Data.Add(AverageTimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
         }
 
-        protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
+        protected override void DoOnRequestEnding(IPerfItContext context)
         {
             var sw = (Stopwatch)context.Data[AverageTimeTakenTicksKey + _instanceName];
             sw.Stop();

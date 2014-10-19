@@ -11,7 +11,7 @@ using System.Web.Http.Filters;
 namespace PerfIt
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class PerfItFilterAttribute : ActionFilterAttribute
+    public class PerfItFilterAttribute : ActionFilterAttribute, IPerfItAttribute
     {
         public PerfItFilterAttribute()
         {
@@ -35,38 +35,44 @@ namespace PerfIt
         /// </summary>
         public string[] Counters { get; set; }
 
-        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+       
+        public override void OnActionExecuting(HttpActionContext actionContext)
         {
-            base.OnActionExecuted(actionExecutedContext);
+            base.OnActionExecuting(actionContext);
 
             bool raiseErrors = true;
-            if(actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItPublishErrorsKey))
-            {
-                raiseErrors =
-                    Convert.ToBoolean(actionExecutedContext.Request.Properties[Constants.PerfItPublishErrorsKey]);
-            }
+
+            raiseErrors = PerfItRuntime.RaisePublishErrors;
+                    
+           
 
             try
             {
                 var instanceName = InstanceName;
                 if (string.IsNullOrEmpty(instanceName))
                 {
-                    HttpActionContext actionContext = actionExecutedContext.ActionContext;
+                    
                     HttpActionDescriptor actionDescriptor = actionContext.ActionDescriptor;
                     instanceName = PerfItRuntime.GetCounterInstanceName(actionDescriptor.ControllerDescriptor.ControllerType,
                         actionDescriptor.ActionName);
                 }
 
-                if (actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItKey))
+                actionContext.Request.Properties.Add(Constants.PerfItKey, new PerfItContext());
+
+                if (actionContext.Request.Properties.ContainsKey(Constants.PerfItKey))
                 {
-                    var context = (PerfItContext)actionExecutedContext.Request.Properties[Constants.PerfItKey];
+                    var invocationContext = (PerfItContext)actionContext.Request.Properties[Constants.PerfItKey];
 
                     foreach (var counter in Counters)
                     {
-                        context.CountersToRun.Add(PerfItRuntime.GetUniqueName(instanceName, counter));
+                        invocationContext.CountersToRun.Add(PerfItRuntime.GetUniqueName(instanceName, counter));
+
+
+                        PerfItRuntime.MonitoredCountersContexts[PerfItRuntime.GetUniqueName(instanceName, counter)].Handler.OnRequestStarting(invocationContext);
+                       
                     }
 
-                    context.Filter = this;
+                    invocationContext.Filter = this;
                 }
             }
             catch (Exception exception)
