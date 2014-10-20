@@ -39,9 +39,9 @@ namespace PerfIt
 
         public void Intercept(IInvocation invocation)
         {
-            
 
-            if (!PerfItRuntime.PublishCounters)
+            var filter = PerfItRuntime.FindPerfItAttribute(invocation.MethodInvocationTarget);
+            if (!PerfItRuntime.PublishCounters || filter==null)
             {
 
                 invocation.Proceed();
@@ -51,7 +51,7 @@ namespace PerfIt
             {
                 try
                 {
-                    var filter = PerfItRuntime.FindPerfItAttribute(invocation.MethodInvocationTarget);
+                   
                     var invocationContext = new PerfItContext();
                     if (filter != null)
                     {
