@@ -26,19 +26,12 @@ namespace PerfIt
         public PerfitClientDelegatingHandler(string categoryName)
         {
             _categoryName = categoryName;
-            PublishCounters = true;
-            RaisePublishErrors = true;
-
-            SetErrorPolicy();
-            SetPublish();
+        
 
             InstanceNameProvider = request =>
                 string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());
         }
 
-        public bool PublishCounters { get; set; }
-
-        public bool RaisePublishErrors { get; set; }
 
         private string GetKey(string counterName, string instanceName)
         {
@@ -54,7 +47,7 @@ namespace PerfIt
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
 
-            if (!PublishCounters)
+            if (!PerfItRuntime.PublishCounters)
                 return base.SendAsync(request, cancellationToken);
 
             var instanceName = InstanceNameProvider(request);
@@ -72,11 +65,11 @@ namespace PerfIt
             }
 
             request.Properties.Add(Constants.PerfItKey, new PerfItContext());
-            request.Properties.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
+            
             
             foreach (var context in contexts)
             {
-                context.Handler.OnRequestStarting(request);
+                context.Handler.OnRequestStarting((PerfItContext)request.Properties[Constants.PerfItKey]);
             }
 
             return base.SendAsync(request, cancellationToken)
@@ -87,13 +80,13 @@ namespace PerfIt
 
                                 foreach (var counter in contexts)
                                 {
-                                    counter.Handler.OnRequestEnding(response);
+                                    counter.Handler.OnRequestEnding((PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
                                 }
                             }
                             catch (Exception e)
                             {
                                 Trace.TraceError(e.ToString());
-                                if(RaisePublishErrors)
+                                if(PerfItRuntime.RaisePublishErrors)
                                     throw e;
                             }
                             
@@ -103,17 +96,7 @@ namespace PerfIt
         }
 
 
-        private void SetPublish()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? "true";
-            PublishCounters = Convert.ToBoolean(value);
-        }
-
-        protected void SetErrorPolicy()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
-            RaisePublishErrors = Convert.ToBoolean(value);
-        }
+      
 
         protected override void Dispose(bool disposing)
         {

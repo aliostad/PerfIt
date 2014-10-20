@@ -6,7 +6,7 @@ using System.Text;
 
 namespace PerfIt
 {
-    public class PerfItContext
+    public class PerfItContext :IPerfItContext
     {
 
         public PerfItContext()

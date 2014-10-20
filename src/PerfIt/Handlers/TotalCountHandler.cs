@@ -23,12 +23,12 @@ namespace PerfIt.Handlers
             get { return CounterTypes.TotalNoOfOperations; }
         }
 
-        protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
+        protected override void DoOnRequestStarting(IPerfItContext context)
         {
             // nothing 
         }
 
-        protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
+        protected override void DoOnRequestEnding(IPerfItContext context)
         {
             _counter.Value.Increment();
         }
