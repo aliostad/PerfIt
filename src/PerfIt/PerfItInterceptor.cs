@@ -7,23 +7,24 @@ using System.Text;
 using Castle.DynamicProxy;
 using System.Reflection;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public class PerfItInterceptor: IInterceptor
+    public class PerfItInterceptor : IInterceptor
     {
 
-        
-        
+
+
 
         private string CategoryName { get; set; }
 
-        
+
 
 
         public PerfItInterceptor(string categoryName)
         {
-           
+
 
             //Build all the counter handlers beforehand
             var frames = new StackTrace().GetFrames();
@@ -32,16 +33,16 @@ namespace PerfIt
                 categoryName = monitoredType.Assembly.GetName().Name;
 
             CategoryName = categoryName;
-            
+
         }
-        
+
 
 
         public void Intercept(IInvocation invocation)
         {
 
             var filter = PerfItRuntime.FindPerfItAttribute(invocation.MethodInvocationTarget);
-            if (!PerfItRuntime.PublishCounters || filter==null)
+            if (!PerfItRuntime.PublishCounters || filter == null)
             {
 
                 invocation.Proceed();
@@ -51,7 +52,7 @@ namespace PerfIt
             {
                 try
                 {
-                   
+
                     var invocationContext = new PerfItContext();
                     if (filter != null)
                     {
@@ -77,12 +78,47 @@ namespace PerfIt
                     }
 
 
-                    invocation.Proceed();
 
-                    foreach (var counter in filter.Counters)
+                    try
                     {
-                        PerfItRuntime.MonitoredCountersContexts[PerfItRuntime.GetUniqueName(filter.InstanceName, counter)].Handler.OnRequestEnding(invocationContext);
+                        invocation.Proceed();
+
+
+                        var returnType = invocation.Method.ReturnType;
+                        if (returnType != typeof(void))
+                        {
+                            var returnValue = invocation.ReturnValue;
+                            if (returnType == typeof(Task))
+                            {
+                                var task = (Task)returnValue;
+                                task.ContinueWith((antecedent) =>
+                                {
+                                    WrapUpCounters(filter, invocationContext);
+                                });
+                            }
+                            else if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                            {
+
+                                var task = (Task)returnValue;
+                                task.ContinueWith((antecedent) =>
+                                {
+                                    WrapUpCounters(filter, invocationContext);
+                                });
+                            }
+                            else
+                            {
+                                // Log.Debug("Returning with: " + returnValue);
+                                WrapUpCounters(filter, invocationContext);
+                            }
+                        }
+
                     }
+                    catch (Exception ex)
+                    {
+                        //if (Log.IsErrorEnabled) Log.Error(CreateInvocationLogString("ERROR", invocation), ex);
+                        throw;
+                    }
+
                 }
                 catch (Exception exception)
                 {
@@ -93,12 +129,20 @@ namespace PerfIt
                 }
 
 
-               
+
 
 
             }
         }
 
-       
+        private static void WrapUpCounters(IPerfItAttribute filter, PerfItContext invocationContext)
+        {
+            foreach (var counter in filter.Counters)
+            {
+                PerfItRuntime.MonitoredCountersContexts[PerfItRuntime.GetUniqueName(filter.InstanceName, counter)].Handler.OnRequestEnding(invocationContext);
+            }
+        }
+
+
     }
 }
