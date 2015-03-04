@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 
 namespace PerfIt
 {
     public class PerfItDelegatingHandler : DelegatingHandler
     {
-        private Dictionary<string, PerfItCounterContext> _counterContexts = 
+        private Dictionary<string, PerfItCounterContext> _counterContexts =
             new Dictionary<string, PerfItCounterContext>();
 
         public bool PublishCounters { get; set; }
@@ -46,7 +43,7 @@ namespace PerfIt
             {
                 foreach (var counterType in filter.Counters)
                 {
-                    if(!PerfItRuntime.HandlerFactories.ContainsKey(counterType))
+                    if (!PerfItRuntime.HandlerFactories.ContainsKey(counterType))
                         throw new ArgumentException("Counter type not registered: " + counterType);
 
                     var counterHandler = PerfItRuntime.HandlerFactories[counterType](categoryName, filter.InstanceName);
@@ -59,7 +56,7 @@ namespace PerfIt
                                                                              });
                     }
                 }
-                    
+
             }
 
         }
@@ -76,7 +73,7 @@ namespace PerfIt
             RaisePublishErrors = Convert.ToBoolean(value);
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, 
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
 
@@ -85,7 +82,7 @@ namespace PerfIt
             try
             {
                 // check whether turned off in config
-                
+
                 request.Properties.Add(Constants.PerfItKey, new PerfItContext());
                 foreach (var context in _counterContexts.Values)
                 {
@@ -96,13 +93,13 @@ namespace PerfIt
             {
                 Trace.TraceError(exception.ToString());
 
-                if(RaisePublishErrors)
-                    throw exception;
+                if (RaisePublishErrors)
+                    throw;
             }
-            
+
 
             return base.SendAsync(request, cancellationToken)
-                .Then((response) => 
+                .Then((response) =>
                         {
                             try
                             {
@@ -116,17 +113,17 @@ namespace PerfIt
                             catch (Exception e)
                             {
                                 Trace.TraceError(e.ToString());
-                                if(RaisePublishErrors)
-                                    throw e;
+                                if (RaisePublishErrors)
+                                    throw;
                             }
-                            
+
                             return response;
 
                         }, cancellationToken);
 
         }
 
-     
+
 
         protected override void Dispose(bool disposing)
         {

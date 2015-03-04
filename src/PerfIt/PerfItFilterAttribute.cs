@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
@@ -40,7 +35,7 @@ namespace PerfIt
             base.OnActionExecuted(actionExecutedContext);
 
             bool raiseErrors = true;
-            if(actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItPublishErrorsKey))
+            if (actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItPublishErrorsKey))
             {
                 raiseErrors =
                     Convert.ToBoolean(actionExecutedContext.Request.Properties[Constants.PerfItPublishErrorsKey]);
@@ -72,10 +67,10 @@ namespace PerfIt
             catch (Exception exception)
             {
                 Trace.TraceError(exception.ToString());
-                if(raiseErrors)
-                    throw exception;
+                if (raiseErrors)
+                    throw;
             }
-            
-        } 
+
+        }
     }
 }
