@@ -3,9 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -50,7 +48,7 @@ namespace PerfIt
         /// Default impl combines method and the host name of the request.
         /// </summary>
         public Func<HttpRequestMessage, string> InstanceNameProvider { get; set; }
-           
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
 
@@ -63,24 +61,24 @@ namespace PerfIt
             foreach (var handlerFactory in PerfItRuntime.HandlerFactories)
             {
                 var key = GetKey(handlerFactory.Key, instanceName);
-                var ctx = _counterContexts.GetOrAdd(key, k => 
-                    new Lazy<PerfItCounterContext>( () => new PerfItCounterContext()
+                var ctx = _counterContexts.GetOrAdd(key, k =>
+                    new Lazy<PerfItCounterContext>(() => new PerfItCounterContext()
                     {
                         Handler = handlerFactory.Value(_categoryName, instanceName)
-                    } ));   
+                    }));
                 contexts.Add(ctx.Value);
             }
 
             request.Properties.Add(Constants.PerfItKey, new PerfItContext());
             request.Properties.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
-            
+
             foreach (var context in contexts)
             {
                 context.Handler.OnRequestStarting(request);
             }
 
             return base.SendAsync(request, cancellationToken)
-                .Then((response) => 
+                .Then((response) =>
                         {
                             try
                             {
@@ -93,10 +91,10 @@ namespace PerfIt
                             catch (Exception e)
                             {
                                 Trace.TraceError(e.ToString());
-                                if(RaisePublishErrors)
-                                    throw e;
+                                if (RaisePublishErrors)
+                                    throw;
                             }
-                            
+
                             return response;
 
                         }, cancellationToken);
