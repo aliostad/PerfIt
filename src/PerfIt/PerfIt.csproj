@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Handlers\NumberOfOperationsPerSecondHandler.cs" />
+    <Compile Include="Handlers\CurrentConcurrentCountHandler.cs" />
     <Compile Include="Internal\Constants.cs" />
     <Compile Include="CounterTypes.cs" />
     <Compile Include="Handlers\AverageTimeHandler.cs" />
