@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using PerfIt.WebApi;
 
 namespace PerfIt
 {
@@ -24,7 +25,7 @@ namespace PerfIt
         /// <param name="categoryName">Name of the grouping category of counters (e.g. Process, Processor, Network Interface are all categories)
         /// if not provided, it will use name of the assembly.
         /// </param>
-        public PerfItDelegatingHandler(string categoryName = null)
+        public PerfItDelegatingHandler(string categoryName = null, IInspectDiscoverer discoverer = null)
         {
 
             PublishCounters = true;
@@ -33,12 +34,13 @@ namespace PerfIt
             SetPublish();
             SetErrorPolicy();
 
+            discoverer = discoverer ?? new FilterDiscoverer();
             var frames = new StackTrace().GetFrames();
             var assembly = frames[1].GetMethod().ReflectedType.Assembly;
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = assembly.GetName().Name;
 
-            var filters = PerfItRuntime.FindAllFilters(assembly);
+            var filters = discoverer.Discover(assembly);
             foreach (var filter in filters)
             {
                 foreach (var counterType in filter.Counters)
@@ -73,12 +75,12 @@ namespace PerfIt
             RaisePublishErrors = Convert.ToBoolean(value);
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
 
             if (!PublishCounters)
-                return base.SendAsync(request, cancellationToken);
+                return await base.SendAsync(request, cancellationToken);
             try
             {
                 // check whether turned off in config
@@ -86,7 +88,7 @@ namespace PerfIt
                 request.Properties.Add(Constants.PerfItKey, new PerfItContext());
                 foreach (var context in _counterContexts.Values)
                 {
-                    context.Handler.OnRequestStarting(request);
+                    context.Handler.OnRequestStarting(request.Properties);
                 }
             }
             catch (Exception exception)
@@ -98,32 +100,26 @@ namespace PerfIt
             }
 
 
-            return base.SendAsync(request, cancellationToken)
-                .Then((response) =>
-                        {
-                            try
-                            {
-                                var ctx = (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey];
+            var response = await base.SendAsync(request, cancellationToken);
 
-                                foreach (var counter in ctx.CountersToRun)
-                                {
-                                    _counterContexts[counter].Handler.OnRequestEnding(response);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Trace.TraceError(e.ToString());
-                                if (RaisePublishErrors)
-                                    throw;
-                            }
+            try
+            {
+                var ctx = (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey];
 
-                            return response;
+                foreach (var counter in ctx.CountersToRun)
+                {
+                    _counterContexts[counter].Handler.OnRequestEnding(response.RequestMessage.Properties);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                if (RaisePublishErrors)
+                    throw;
+            }
 
-                        }, cancellationToken);
-
+            return response;
         }
-
-
 
         protected override void Dispose(bool disposing)
         {

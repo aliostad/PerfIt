@@ -3,10 +3,10 @@ using System.Diagnostics;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace PerfIt
+namespace PerfIt.WebApi
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class PerfItFilterAttribute : ActionFilterAttribute
+    public class PerfItFilterAttribute : ActionFilterAttribute, IInstrumentationInfo
     {
         public PerfItFilterAttribute()
         {
@@ -60,8 +60,6 @@ namespace PerfIt
                     {
                         context.CountersToRun.Add(PerfItRuntime.GetUniqueName(instanceName, counter));
                     }
-
-                    context.Filter = this;
                 }
             }
             catch (Exception exception)

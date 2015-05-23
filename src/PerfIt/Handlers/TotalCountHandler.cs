@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net.Http;
 
 namespace PerfIt.Handlers
 {
@@ -23,12 +23,12 @@ namespace PerfIt.Handlers
             get { return CounterTypes.TotalNoOfOperations; }
         }
 
-        protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
+        protected override void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context)
         {
             // nothing 
         }
 
-        protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
+        protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
             _counter.Value.Increment();
         }

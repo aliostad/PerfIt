@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web.Http;
 using PerfIt.Handlers;
 
 namespace PerfIt
@@ -60,20 +59,23 @@ namespace PerfIt
             } 
         }
 
-
-        /// <summary>
-        /// Installs performance counters in the current assembly using PerfItFilterAttribute.
-        /// </summary>
-        /// 
+ 
+       /// <summary>
+        /// Installs performance counters in the assembly
+       /// </summary>
+       /// <param name="installerAssembly"></param>
+       /// <param name="discoverer">object that can discover aspects inside and assembly</param>
         /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
-        public static void Install(Assembly installerAssembly, string categoryName = null)
+        public static void Install(Assembly installerAssembly, 
+            IInspectDiscoverer discoverer, 
+            string categoryName = null)
         {
             Uninstall(installerAssembly, categoryName);
 
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = installerAssembly.GetName().Name;
 
-            var perfItFilterAttributes = FindAllFilters(installerAssembly).ToArray();
+            var perfItFilterAttributes = discoverer.Discover(installerAssembly).ToArray();
 
             var counterCreationDataCollection = new CounterCreationDataCollection();
 
@@ -146,59 +148,19 @@ namespace PerfIt
                 PerformanceCounterCategory.Delete(categoryName);           
         }
 
-        internal static string GetUniqueName(string instanceName, string counterType)
+        public static string GetUniqueName(string instanceName, string counterType)
         {
             return string.Format("{0}.{1}", instanceName, counterType);
         }
 
-        internal static string GetCounterInstanceName(Type controllerType, string actionName)
+        public static string GetCounterInstanceName(Type controllerType, string actionName)
         {
             return string.Format("{0}.{1}", controllerType.Name, actionName);
         }
 
-       
-        /// <summary>
-        /// Extracts all filters in the current assembly defined on ApiControllers
-        /// </summary>
-        /// <returns></returns>
-        internal static IEnumerable<PerfItFilterAttribute> FindAllFilters(
-            Assembly assembly)
+        public static IInstrumenter Build(IInstrumentationInfo infoInfo)
         {
-            
-
-            var attributes = new List<PerfItFilterAttribute>();
-               var apiControllers = assembly.GetExportedTypes()
-                                           .Where(t => typeof(ApiController).IsAssignableFrom(t) &&
-                                                        !t.IsAbstract).ToArray();
-
-            Trace.TraceInformation("Found '{0}' controllers", apiControllers.Length);
-
-            foreach (var apiController in apiControllers)
-            {
-                var methodInfos = apiController.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                foreach (var methodInfo in methodInfos)
-                {
-                    var attr = (PerfItFilterAttribute)methodInfo.GetCustomAttributes(typeof(PerfItFilterAttribute), true).FirstOrDefault();
-                    if (attr != null)
-                    {
-                        if (string.IsNullOrEmpty(attr.InstanceName)) // default name
-                        {
-                            var actionNameAttr = (ActionNameAttribute)
-                                             methodInfo.GetCustomAttributes(typeof (ActionNameAttribute), true)
-                                                       .FirstOrDefault();
-
-                            string actionName = actionNameAttr == null ? methodInfo.Name : actionNameAttr.Name;
-                            attr.InstanceName = GetCounterInstanceName(apiController, actionName);
-                        }
-
-						attributes.Add(attr);
-                        Trace.TraceInformation("Added '{0}' to the list", attr.Counters);
-                        
-                    }
-                }
-            }
-
-            return attributes;
+            return null;
         }
     }
 }

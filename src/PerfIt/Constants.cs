@@ -5,7 +5,7 @@ using System.Text;
 
 namespace PerfIt
 {
-    internal class Constants
+    public class Constants
     {
         public const string PerfItKey = "_#_PerfIt_#_";
         public const string PerfItPublishErrorsKey = "_#_PerfIt_Publish_Error_#_";

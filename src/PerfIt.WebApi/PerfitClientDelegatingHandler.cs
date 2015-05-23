@@ -49,11 +49,11 @@ namespace PerfIt
         /// </summary>
         public Func<HttpRequestMessage, string> InstanceNameProvider { get; set; }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
 
             if (!PublishCounters)
-                return base.SendAsync(request, cancellationToken);
+                return await base.SendAsync(request, cancellationToken);
 
             var instanceName = InstanceNameProvider(request);
 
@@ -74,30 +74,25 @@ namespace PerfIt
 
             foreach (var context in contexts)
             {
-                context.Handler.OnRequestStarting(request);
+                context.Handler.OnRequestStarting(request.Properties);
             }
 
-            return base.SendAsync(request, cancellationToken)
-                .Then((response) =>
-                        {
-                            try
-                            {
+            var response = await base.SendAsync(request, cancellationToken);
+            try
+            {
+                foreach (var counter in contexts)
+                {
+                    counter.Handler.OnRequestEnding(response.RequestMessage.Properties);
+                }
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError(e.ToString());
+                if (RaisePublishErrors)
+                    throw;
+            }
 
-                                foreach (var counter in contexts)
-                                {
-                                    counter.Handler.OnRequestEnding(response);
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Trace.TraceError(e.ToString());
-                                if (RaisePublishErrors)
-                                    throw;
-                            }
-
-                            return response;
-
-                        }, cancellationToken);
+            return response;
         }
 
 
