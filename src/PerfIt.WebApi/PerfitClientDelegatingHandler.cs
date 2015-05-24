@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,10 +17,9 @@ namespace PerfIt
     public class PerfitClientDelegatingHandler : DelegatingHandler
     {
 
-        private ConcurrentDictionary<string, Lazy<PerfItCounterContext>> _counterContexts =
-          new ConcurrentDictionary<string, Lazy<PerfItCounterContext>>();
-
         private string _categoryName;
+        private ConcurrentDictionary<string, SimpleInstrumenter>
+            _instrumenters = new ConcurrentDictionary<string, SimpleInstrumenter>();
 
         public PerfitClientDelegatingHandler(string categoryName)
         {
@@ -56,42 +56,19 @@ namespace PerfIt
                 return await base.SendAsync(request, cancellationToken);
 
             var instanceName = InstanceNameProvider(request);
-
-            var contexts = new List<PerfItCounterContext>();
-            foreach (var handlerFactory in PerfItRuntime.HandlerFactories)
+            var counters = PerfItRuntime.HandlerFactories.Keys.ToArray();
+            var instrumenter =_instrumenters.GetOrAdd(instanceName, (insName) => new SimpleInstrumenter(new InstrumentationInfo()
             {
-                var key = GetKey(handlerFactory.Key, instanceName);
-                var ctx = _counterContexts.GetOrAdd(key, k =>
-                    new Lazy<PerfItCounterContext>(() => new PerfItCounterContext()
-                    {
-                        Handler = handlerFactory.Value(_categoryName, instanceName)
-                    }));
-                contexts.Add(ctx.Value);
-            }
+                Counters = counters,
+                Description = "Counter for " + insName,
+                InstanceName = insName
+            }, _categoryName, PublishCounters, RaisePublishErrors));
 
-            request.Properties.Add(Constants.PerfItKey, new PerfItContext());
-            request.Properties.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
+            HttpResponseMessage response = null;
 
-            foreach (var context in contexts)
-            {
-                context.Handler.OnRequestStarting(request.Properties);
-            }
+            Func<Task> t = async () => response = await base.SendAsync(request, cancellationToken);
 
-            var response = await base.SendAsync(request, cancellationToken);
-            try
-            {
-                foreach (var counter in contexts)
-                {
-                    counter.Handler.OnRequestEnding(response.RequestMessage.Properties);
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.ToString());
-                if (RaisePublishErrors)
-                    throw;
-            }
-
+            await instrumenter.InstrumentAsync(t);
             return response;
         }
 
@@ -112,11 +89,12 @@ namespace PerfIt
         {
             if (disposing)
             {
-                foreach (var context in _counterContexts.Values)
+                foreach (var instrumenter in _instrumenters.Values)
                 {
-                    context.Value.Handler.Dispose();
+                    instrumenter.Dispose();
                 }
-                _counterContexts.Clear();
+
+                _instrumenters.Clear();
             }
         }
     }

@@ -10,14 +10,14 @@ namespace PerfIt.Handlers
     {
 
         private const string AverageTimeTakenTicksKey = "AverageTimeHandler_#_StopWatch_#_";
-        private  Lazy<PerformanceCounter> _counter;
+        private Lazy<PerformanceCounter> _counter;
         private Lazy<PerformanceCounter> _baseCounter;
 
 
         public AverageTimeHandler(
             string categoryName,
             string instanceName)
-            : base(categoryName,instanceName)
+            : base(categoryName, instanceName)
         {
             BuildCounters();
         }
@@ -54,9 +54,7 @@ namespace PerfIt.Handlers
                 };
                 counter.RawValue = 0;
                 return counter;
-            }
-      );
-
+            });
 
             _baseCounter = new Lazy<PerformanceCounter>(() =>
             {
@@ -70,25 +68,24 @@ namespace PerfIt.Handlers
                 };
                 counter.RawValue = 0;
                 return counter;
-            }
-                );
+            });
         }
 
         protected override CounterCreationData[] DoGetCreationData()
         {
             var counterCreationDatas = new CounterCreationData[2];
             counterCreationDatas[0] = new CounterCreationData()
-                                          {
-                                              CounterType = PerformanceCounterType.AverageTimer32,
-                                              CounterName = Name,
-                                              CounterHelp = "Average seconds taken to execute"
-                                          };
+            {
+                CounterType = PerformanceCounterType.AverageTimer32,
+                CounterName = Name,
+                CounterHelp = "Average seconds taken to execute"
+            };
             counterCreationDatas[1] = new CounterCreationData()
-                                          {
-                                              CounterType = PerformanceCounterType.AverageBase,
-                                              CounterName = GetBaseCounterName(),
-                                              CounterHelp = "Average seconds taken to execute"
-                                          };
+            {
+                CounterType = PerformanceCounterType.AverageBase,
+                CounterName = GetBaseCounterName(),
+                CounterHelp = "Average seconds taken to execute"
+            };
             return counterCreationDatas;
         }
 
@@ -100,15 +97,15 @@ namespace PerfIt.Handlers
         public override void Dispose()
         {
             base.Dispose();
-            if (_counter!=null && _counter.IsValueCreated)
+            if (_counter != null && _counter.IsValueCreated)
             {
                 _counter.Value.RemoveInstance();
-                _counter.Value.Dispose();                
+                _counter.Value.Dispose();
             }
-            if (_baseCounter!=null && _baseCounter.IsValueCreated)
+            if (_baseCounter != null && _baseCounter.IsValueCreated)
             {
                 _baseCounter.Value.RemoveInstance();
-                _baseCounter.Value.Dispose();                
+                _baseCounter.Value.Dispose();
             }
 
         }

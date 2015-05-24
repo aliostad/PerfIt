@@ -12,8 +12,8 @@ namespace PerfIt
 {
     public class PerfItDelegatingHandler : DelegatingHandler
     {
-        private Dictionary<string, PerfItCounterContext> _counterContexts =
-            new Dictionary<string, PerfItCounterContext>();
+        private Dictionary<string, PerfitHandlerContext> _counterContexts =
+            new Dictionary<string, PerfitHandlerContext>();
 
         public bool PublishCounters { get; set; }
 
@@ -51,7 +51,7 @@ namespace PerfIt
                     var counterHandler = PerfItRuntime.HandlerFactories[counterType](categoryName, filter.InstanceName);
                     if (!_counterContexts.Keys.Contains(counterHandler.UniqueName))
                     {
-                        _counterContexts.Add(counterHandler.UniqueName, new PerfItCounterContext()
+                        _counterContexts.Add(counterHandler.UniqueName, new PerfitHandlerContext()
                                                                              {
                                                                                  Handler = counterHandler,
                                                                                  Name = counterHandler.UniqueName
@@ -134,10 +134,4 @@ namespace PerfIt
         }
     }
 
-    internal class PerfItCounterContext
-    {
-        public string Name { get; set; }
-        public ICounterHandler Handler { get; set; }
-
-    }
 }

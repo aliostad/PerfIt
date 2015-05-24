@@ -60,6 +60,7 @@
     <Compile Include="InstrumentationInfo.cs" />
     <Compile Include="IInstrumenter.cs" />
     <Compile Include="PerfItContext.cs" />
+    <Compile Include="PerfitHandlerContext.cs" />
     <Compile Include="PerfItRuntime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleInstrumenter.cs" />
