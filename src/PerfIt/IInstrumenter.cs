@@ -8,8 +8,8 @@ namespace PerfIt
 {
     public interface IInstrumenter
     {
-        void Instrument(Action aspect);
+        void Instrument(Action aspect, string instrumentationContext = null);
 
-        Task InstrumentAsync(Func<Task> asyncAspect);
+        Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null);
     }
 }

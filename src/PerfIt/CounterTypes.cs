@@ -12,5 +12,13 @@ namespace PerfIt
         public const string LastOperationExecutionTime = "LastOperationExecutionTime";
         public const string NumberOfOperationsPerSecond = "NumberOfOperationsPerSecond";
 
+        public static readonly string[] StandardCounters = new[]
+        {
+            AverageTimeTaken,
+            TotalNoOfOperations,
+            LastOperationExecutionTime,
+            NumberOfOperationsPerSecond
+        };
+
     }
 }

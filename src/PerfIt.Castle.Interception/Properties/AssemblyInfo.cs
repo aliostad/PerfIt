@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PerfIt.Castle.Interception")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("PerfIt.Castle.Interception")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyDescription("Performance monitoring for MVC")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Ali Kheyrollahi")]
+[assembly: AssemblyCopyright("Copyright Ali Kheyrollahi 2013-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

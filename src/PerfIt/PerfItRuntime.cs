@@ -122,6 +122,9 @@ namespace PerfIt
 
         public static void InstallStandardCounters(string categoryName)
         {
+            if(PerformanceCounterCategory.Exists(categoryName))
+                return;
+
             var creationDatas = new CounterHandlerBase[]
             {
                 new AverageTimeHandler(categoryName, string.Empty),

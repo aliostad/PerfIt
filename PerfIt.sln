@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{20A37C8B-4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.WebApi.Tests", "test\PerfIt.WebApi.Tests\PerfIt.WebApi.Tests.csproj", "{C1BE7276-6ADA-4BB7-9E0B-64123FA15D40}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{0AF64064-0911-4D53-9200-817ED7216654}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -15,17 +15,19 @@ namespace PerfIt
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
 
         public SimpleInstrumenter(IInstrumentationInfo info, string categoryName, 
-            bool publishCounters = true, bool raisePublishErrors = false)
+            bool publishCounters = true, 
+            bool publishEvent = true,
+            bool raisePublishErrors = false)
         {
             _categoryName = categoryName;
             _info = info;
 
             PublishCounters = publishCounters;
             RaisePublishErrors = raisePublishErrors;
-
+            PublishEvent = publishEvent;
         }
 
-        public void Instrument(Action aspect)
+        public void Instrument(Action aspect, string instrumentationContext = null)
         {
             if (!PublishCounters)
                 aspect();
@@ -42,8 +44,21 @@ namespace PerfIt
                 context.Handler.OnRequestStarting(ctx);
             }
 
-            aspect();
-
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
+                aspect();
+            }
+            finally
+            {
+                if (PublishEvent)
+                {
+                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_categoryName,
+                        _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                }
+            }
+           
+ 
             try
             {
                 foreach (var counter in contexts)
@@ -59,7 +74,7 @@ namespace PerfIt
             }
         }
 
-        public async Task InstrumentAsync(Func<Task> asyncAspect)
+        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null)
         {
             if (!PublishCounters)
                 await asyncAspect();
@@ -76,7 +91,20 @@ namespace PerfIt
                 context.Handler.OnRequestStarting(ctx);
             }
 
-            await asyncAspect();
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
+                await asyncAspect();
+            }
+            finally
+            {
+                if (PublishEvent)
+                {
+                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_categoryName,
+                        _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                }
+            }
+            
 
             try
             {
@@ -117,6 +145,8 @@ namespace PerfIt
 
         public bool RaisePublishErrors { get; set; }
 
+        public bool PublishEvent { get; set; }
+
         public void Dispose()
         {          
             foreach (var context in _counterContexts.Values)
@@ -124,7 +154,7 @@ namespace PerfIt
                 context.Value.Handler.Dispose();
             }
 
-            _counterContexts.Clear();   
+            _counterContexts.Clear(); 
         }
     }
 }
