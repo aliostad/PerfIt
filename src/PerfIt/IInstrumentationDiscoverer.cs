@@ -6,7 +6,7 @@ using System.Text;
 
 namespace PerfIt
 {
-    public interface IInspectDiscoverer
+    public interface IInstrumentationDiscoverer
     {
         IEnumerable<IInstrumentationInfo> Discover(Assembly assembly);
     }

@@ -6,7 +6,7 @@ using System.Web.Http.Filters;
 namespace PerfIt.WebApi
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class PerfItFilterAttribute : ActionFilterAttribute, IInstrumentationInfo
+    public class PerfItFilterAttribute : InstrumentationContextProviderBaseAttribute, IInstrumentationInfo
     {
         public PerfItFilterAttribute()
         {
@@ -55,7 +55,6 @@ namespace PerfIt.WebApi
                 if (actionExecutedContext.Request.Properties.ContainsKey(Constants.PerfItKey))
                 {
                     var context = (PerfItContext)actionExecutedContext.Request.Properties[Constants.PerfItKey];
-
                     foreach (var counter in Counters)
                     {
                         context.CountersToRun.Add(PerfItRuntime.GetUniqueName(instanceName, counter));
@@ -68,7 +67,14 @@ namespace PerfIt.WebApi
                 if (raiseErrors)
                     throw;
             }
+        }
 
+        protected override string ProvideInstrumentationContext(HttpActionExecutedContext actionExecutedContext)
+        {
+            return string.Join("#",
+                actionExecutedContext.Response.StatusCode.ToString(),
+                actionExecutedContext.Request.RequestUri.AbsoluteUri
+            );
         }
     }
 }

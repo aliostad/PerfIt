@@ -67,7 +67,7 @@ namespace PerfIt
        /// <param name="discoverer">object that can discover aspects inside and assembly</param>
         /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
         public static void Install(Assembly installerAssembly, 
-            IInspectDiscoverer discoverer, 
+            IInstrumentationDiscoverer discoverer, 
             string categoryName = null)
         {
             Uninstall(installerAssembly, categoryName);

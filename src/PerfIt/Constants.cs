@@ -9,7 +9,11 @@ namespace PerfIt
     {
         public const string PerfItKey = "_#_PerfIt_#_";
         public const string PerfItPublishErrorsKey = "_#_PerfIt_Publish_Error_#_";
+        public const string PerfItInstrumentationContextKey = "_#_PerfIt_Instrumentation_Context_#_";
+        public const string PerfItInstanceNameKey = "_#_PerfIt_Instance_Name_#_";
         public const string PerfItPublishCounters = "perfit:publishCounters";
         public const string PerfItPublishErrors = "perfit:publishErrors";
+        public const string PerfItPublishEvent = "perfit:publishEvent";
+
     }
 }

@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Handlers\NumberOfOperationsPerSecondHandler.cs" />
-    <Compile Include="IInspectDiscoverer.cs" />
+    <Compile Include="IInstrumentationDiscoverer.cs" />
     <Compile Include="IInstrumentationInfo.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="CounterTypes.cs" />

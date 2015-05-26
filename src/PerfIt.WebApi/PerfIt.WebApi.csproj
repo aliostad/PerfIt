@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FilterDiscoverer.cs" />
+    <Compile Include="InstrumentationContextProviderBaseAttribute.cs" />
     <Compile Include="PerfitClientDelegatingHandler.cs" />
     <Compile Include="PerfItDelegatingHandler.cs" />
     <Compile Include="PerfItFilterAttribute.cs" />

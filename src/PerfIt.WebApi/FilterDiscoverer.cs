@@ -9,7 +9,7 @@ using System.Web.Http;
 
 namespace PerfIt.WebApi
 {
-    public class FilterDiscoverer : IInspectDiscoverer
+    public class FilterDiscoverer : IInstrumentationDiscoverer
     {
 
         internal static IEnumerable<IInstrumentationInfo> FindAllFilters(

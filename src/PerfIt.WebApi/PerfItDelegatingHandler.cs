@@ -10,6 +10,9 @@ using PerfIt.WebApi;
 
 namespace PerfIt
 {
+
+    // NOTE: Due to nature of delegatinghandler, it is not possible to use aspect
+
     public class PerfItDelegatingHandler : DelegatingHandler
     {
         private Dictionary<string, PerfitHandlerContext> _counterContexts =
@@ -19,26 +22,39 @@ namespace PerfIt
 
         public bool RaisePublishErrors { get; set; }
 
+        public bool PublishEvent { get; set; }
+
+        private string _categoryName;
+
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="categoryName">Name of the grouping category of counters (e.g. Process, Processor, Network Interface are all categories)
         /// if not provided, it will use name of the assembly.
         /// </param>
-        public PerfItDelegatingHandler(string categoryName = null, IInspectDiscoverer discoverer = null)
+        public PerfItDelegatingHandler(string categoryName = null, 
+            IInstrumentationDiscoverer discoverer = null,
+            bool publishCounters = true,
+            bool raisePublishErrors = true,
+            bool publishEvent = true)
         {
 
-            PublishCounters = true;
-            RaisePublishErrors = true;
+            PublishCounters = publishCounters;
+            RaisePublishErrors = raisePublishErrors;
+            PublishEvent = publishEvent;
 
             SetPublish();
             SetErrorPolicy();
+            SetEventPolicy();
 
             discoverer = discoverer ?? new FilterDiscoverer();
             var frames = new StackTrace().GetFrames();
             var assembly = frames[1].GetMethod().ReflectedType.Assembly;
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = assembly.GetName().Name;
+
+            _categoryName = categoryName;
 
             var filters = discoverer.Discover(assembly);
             foreach (var filter in filters)
@@ -75,6 +91,12 @@ namespace PerfIt
             RaisePublishErrors = Convert.ToBoolean(value);
         }
 
+        protected void SetEventPolicy()
+        {
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
+            PublishEvent = Convert.ToBoolean(value);
+        }
+
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
@@ -99,13 +121,26 @@ namespace PerfIt
                     throw;
             }
 
+            var stopwatch = Stopwatch.StartNew();
+            HttpResponseMessage response = null;
+            stopwatch.Stop();
 
-            var response = await base.SendAsync(request, cancellationToken);
+            response = await base.SendAsync(request, cancellationToken);
+            var ctx = (PerfItContext) response.RequestMessage.Properties[Constants.PerfItKey];
+            if (PublishEvent && response.RequestMessage.Properties.ContainsKey(Constants.PerfItInstanceNameKey))
+            {
+                var instanceName = (string) response.RequestMessage.Properties[Constants.PerfItInstanceNameKey];
+                
+                InstrumentationEventSource.Instance.WriteInstrumentationEvent(
+                    _categoryName, instanceName, stopwatch.ElapsedMilliseconds,
+                    response.RequestMessage.Properties.ContainsKey(Constants.PerfItInstanceNameKey)
+                       ? (string) response.RequestMessage.Properties[Constants.PerfItInstanceNameKey]
+                        : response.RequestMessage.RequestUri.AbsoluteUri);
+            }
+            
 
             try
             {
-                var ctx = (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey];
-
                 foreach (var counter in ctx.CountersToRun)
                 {
                     _counterContexts[counter].Handler.OnRequestEnding(response.RequestMessage.Properties);

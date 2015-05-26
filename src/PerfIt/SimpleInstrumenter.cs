@@ -31,18 +31,8 @@ namespace PerfIt
         {
             if (!PublishCounters)
                 aspect();
-                   
-            var contexts = new List<PerfitHandlerContext>();
-            Prepare(contexts);
 
-            var ctx = new Dictionary<string, object>();
-
-            ctx.Add(Constants.PerfItKey, new PerfItContext());
-            ctx.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
-            foreach (var context in contexts)
-            {
-                context.Handler.OnRequestStarting(ctx);
-            }
+            var contexts = BuildContexts();
 
             var stopwatch = Stopwatch.StartNew();
             try
@@ -58,20 +48,8 @@ namespace PerfIt
                 }
             }
            
- 
-            try
-            {
-                foreach (var counter in contexts)
-                {
-                    counter.Handler.OnRequestEnding(ctx);
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.ToString());
-                if (RaisePublishErrors)
-                    throw;
-            }
+            CompleteContexts(contexts);
+          
         }
 
         public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null)
@@ -79,17 +57,7 @@ namespace PerfIt
             if (!PublishCounters)
                 await asyncAspect();
 
-            var contexts = new List<PerfitHandlerContext>();
-            Prepare(contexts);
-
-            var ctx = new Dictionary<string, object>();
-
-            ctx.Add(Constants.PerfItKey, new PerfItContext());
-            ctx.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
-            foreach (var context in contexts)
-            {
-                context.Handler.OnRequestStarting(ctx);
-            }
+            var contexts = BuildContexts();
 
             var stopwatch = Stopwatch.StartNew();
             try
@@ -105,12 +73,34 @@ namespace PerfIt
                 }
             }
             
+            CompleteContexts(contexts);
+           
+        }
 
+        private Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> BuildContexts()
+        {
+            var contexts = new List<PerfitHandlerContext>();
+            Prepare(contexts);
+
+            var ctx = new Dictionary<string, object>();
+
+            ctx.Add(Constants.PerfItKey, new PerfItContext());
+            ctx.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
+            foreach (var context in contexts)
+            {
+                context.Handler.OnRequestStarting(ctx);
+            }
+
+            return new Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>>(contexts, ctx);
+        }
+
+        private void CompleteContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
+        {
             try
             {
-                foreach (var counter in contexts)
+                foreach (var counter in contexts.Item1)
                 {
-                    counter.Handler.OnRequestEnding(ctx);
+                    counter.Handler.OnRequestEnding(contexts.Item2);
                 }
             }
             catch (Exception e)

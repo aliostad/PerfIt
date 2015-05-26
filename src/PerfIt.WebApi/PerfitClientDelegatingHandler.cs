@@ -26,9 +26,11 @@ namespace PerfIt
             _categoryName = categoryName;
             PublishCounters = true;
             RaisePublishErrors = true;
+            PublishEvent = true;
 
             SetErrorPolicy();
             SetPublish();
+            SetEventPolicy();
 
             InstanceNameProvider = request =>
                 string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());
@@ -38,10 +40,8 @@ namespace PerfIt
 
         public bool RaisePublishErrors { get; set; }
 
-        private string GetKey(string counterName, string instanceName)
-        {
-            return string.Format("{0}_{1}", counterName, instanceName);
-        }
+        public bool PublishEvent { get; set; }
+       
 
         /// <summary>
         /// Provides the performance counter instance name.
@@ -68,7 +68,7 @@ namespace PerfIt
 
             Func<Task> t = async () => response = await base.SendAsync(request, cancellationToken);
 
-            await instrumenter.InstrumentAsync(t);
+            await instrumenter.InstrumentAsync(t, request.RequestUri.AbsoluteUri);
             return response;
         }
 
@@ -84,6 +84,14 @@ namespace PerfIt
             var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
             RaisePublishErrors = Convert.ToBoolean(value);
         }
+
+        protected void SetEventPolicy()
+        {
+            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
+            PublishEvent = Convert.ToBoolean(value);
+        }
+
+
 
         protected override void Dispose(bool disposing)
         {
