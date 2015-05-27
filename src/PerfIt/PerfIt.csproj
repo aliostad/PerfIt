@@ -59,12 +59,12 @@
     <Compile Include="Handlers\LastOperationExecutionTimeHandler.cs" />
     <Compile Include="InstrumentationEventSource.cs" />
     <Compile Include="InstrumentationInfo.cs" />
-    <Compile Include="IInstrumenter.cs" />
+    <Compile Include="IInstrumentor.cs" />
     <Compile Include="PerfItContext.cs" />
     <Compile Include="PerfitHandlerContext.cs" />
     <Compile Include="PerfItRuntime.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleInstrumenter.cs" />
+    <Compile Include="SimpleInstrumentor.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

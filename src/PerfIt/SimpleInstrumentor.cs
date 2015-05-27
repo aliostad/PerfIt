@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public class SimpleInstrumenter : IInstrumenter, IDisposable
+    public class SimpleInstrumentor : IInstrumentor, IDisposable
     {
         private IInstrumentationInfo _info;
         private string _categoryName;
@@ -14,7 +14,7 @@ namespace PerfIt
         private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
 
-        public SimpleInstrumenter(IInstrumentationInfo info, string categoryName, 
+        public SimpleInstrumentor(IInstrumentationInfo info, string categoryName, 
             bool publishCounters = true, 
             bool publishEvent = true,
             bool raisePublishErrors = false)

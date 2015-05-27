@@ -161,7 +161,7 @@ namespace PerfIt
             return string.Format("{0}.{1}", controllerType.Name, actionName);
         }
 
-        public static IInstrumenter Build(IInstrumentationInfo infoInfo)
+        public static IInstrumentor Build(IInstrumentationInfo infoInfo)
         {
             return null;
         }

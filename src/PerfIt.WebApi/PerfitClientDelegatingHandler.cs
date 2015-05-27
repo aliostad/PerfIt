@@ -18,8 +18,8 @@ namespace PerfIt
     {
 
         private string _categoryName;
-        private ConcurrentDictionary<string, SimpleInstrumenter>
-            _instrumenters = new ConcurrentDictionary<string, SimpleInstrumenter>();
+        private ConcurrentDictionary<string, SimpleInstrumentor>
+            _instrumenters = new ConcurrentDictionary<string, SimpleInstrumentor>();
 
         public PerfitClientDelegatingHandler(string categoryName)
         {
@@ -57,7 +57,7 @@ namespace PerfIt
 
             var instanceName = InstanceNameProvider(request);
             var counters = PerfItRuntime.HandlerFactories.Keys.ToArray();
-            var instrumenter =_instrumenters.GetOrAdd(instanceName, (insName) => new SimpleInstrumenter(new InstrumentationInfo()
+            var instrumenter =_instrumenters.GetOrAdd(instanceName, (insName) => new SimpleInstrumentor(new InstrumentationInfo()
             {
                 Counters = counters,
                 Description = "Counter for " + insName,
