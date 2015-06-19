@@ -122,10 +122,9 @@ namespace PerfIt
             }
 
             var stopwatch = Stopwatch.StartNew();
-            HttpResponseMessage response = null;
+            var response = await base.SendAsync(request, cancellationToken);
             stopwatch.Stop();
 
-            response = await base.SendAsync(request, cancellationToken);
             var ctx = (PerfItContext) response.RequestMessage.Properties[Constants.PerfItKey];
             if (PublishEvent && response.RequestMessage.Properties.ContainsKey(Constants.PerfItInstanceNameKey))
             {
@@ -137,7 +136,6 @@ namespace PerfIt
                        ? (string) response.RequestMessage.Properties[Constants.PerfItInstanceNameKey]
                         : response.RequestMessage.RequestUri.AbsoluteUri);
             }
-            
 
             try
             {
