@@ -60,6 +60,7 @@
     <Compile Include="InstrumentationEventSource.cs" />
     <Compile Include="InstrumentationInfo.cs" />
     <Compile Include="IInstrumentor.cs" />
+    <Compile Include="ITwoStageInstrumentor.cs" />
     <Compile Include="PerfItContext.cs" />
     <Compile Include="PerfitHandlerContext.cs" />
     <Compile Include="PerfItRuntime.cs" />

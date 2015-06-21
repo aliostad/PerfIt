@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.Http.Routing;
+using System.Web.Http.SelfHost;
+using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using Xunit;
+using System.Diagnostics.Tracing;
 
 namespace PerfIt.WebApi.Tests
 {
     public class IntegrationTest
     {
 
-         private const string TestCategory = "PerfItTests";
+        // this category must have been installed for the tests to run successfully
+        private const string TestCategory = "PerfItTests";
 
         public IntegrationTest()
         {
@@ -31,6 +38,39 @@ namespace PerfIt.WebApi.Tests
             {
                 var response = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "http://google.com")).Result;                
             }
+        }
+
+        [Fact]
+        public void Server_CanServe()
+        {
+            var listener = ConsoleLog.CreateListener();
+            listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
+                Keywords.All);
+
+            string baseAddress = "http://localhost:34543/";
+            var configuration = new HttpSelfHostConfiguration(baseAddress);
+            configuration.Routes.Add("def", new HttpRoute("api/{controller}"));
+            var server = new HttpSelfHostServer(configuration);
+            server.OpenAsync().Wait();
+            var client = new HttpClient();
+            var result = client.GetAsync(baseAddress + "api/test").Result;
+            Console.WriteLine(result.Content.ReadAsStringAsync().Result);
+
+            result.EnsureSuccessStatusCode();
+            server.CloseAsync().Wait();
+
+        }
+    }
+
+    public class TestController : ApiController
+    {
+        [PerfItFilter("PerfItTests",
+            Counters = new[] {CounterTypes.AverageTimeTaken, CounterTypes.LastOperationExecutionTime, CounterTypes.NumberOfOperationsPerSecond, CounterTypes.TotalNoOfOperations},
+            InstanceName = "Washah",
+            RaisePublishErrors = true)]
+        public string Get()
+        {
+            return Guid.NewGuid().ToString();
         }
     }
 }

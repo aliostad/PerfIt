@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public class SimpleInstrumentor : IInstrumentor, IDisposable
+    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor, IDisposable
     {
         private IInstrumentationInfo _info;
         private string _categoryName;
@@ -145,6 +145,41 @@ namespace PerfIt
             }
 
             _counterContexts.Clear(); 
+        }
+
+        /// <summary>
+        /// Starts instrumentation
+        /// </summary>
+        /// <returns>The token to be passed to Finish method when finished</returns>
+        public object Start()
+        {
+            return new InstrumentationToken()
+            {
+                Contexts = BuildContexts(),
+                Kronometer = Stopwatch.StartNew()
+            };
+        }
+
+        public void Finish(object token, string instrumentationContext = null)
+        {
+            var itoken = token as InstrumentationToken;
+            if(itoken == null)
+                throw new ArgumentException("This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
+
+            if (PublishEvent)
+            {
+                InstrumentationEventSource.Instance.WriteInstrumentationEvent(_categoryName,
+                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
+            }
+
+            CompleteContexts(itoken.Contexts);
+        }
+
+        private class InstrumentationToken
+        {
+            public Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> Contexts { get; set; }
+
+            public Stopwatch Kronometer { get; set; }
         }
     }
 }

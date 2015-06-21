@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>$version$-alpha2</version>
+    <version>$version$-alpha-3</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -13,7 +13,7 @@
     <tags>aspnetwebapi performance monitor monitoring perfmon counter</tags>
 	<dependencies>
       <dependency id="Microsoft.AspNet.WebApi.Core" version="4.0.30506" />	
-      <dependency id="PerfIt" version="1.0.0-alpha-1" />		  
+      <dependency id="PerfIt" version="1.0.0-alpha-2" />		  
     </dependencies>
 	
   </metadata>
