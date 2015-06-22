@@ -24,5 +24,10 @@ namespace PerfIt
         /// </summary>
         string[] Counters { get; set; }
 
+        /// <summary>
+        /// The categoryName of the stuff
+        /// </summary>
+        string CategoryName { get; set; }
+
     }
 }

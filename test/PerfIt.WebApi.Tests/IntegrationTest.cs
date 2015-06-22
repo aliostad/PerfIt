@@ -11,6 +11,7 @@ using System.Web.Http.SelfHost;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using Xunit;
 using System.Diagnostics.Tracing;
+using System.Reflection;
 
 namespace PerfIt.WebApi.Tests
 {
@@ -60,12 +61,33 @@ namespace PerfIt.WebApi.Tests
             server.CloseAsync().Wait();
 
         }
+
+        [Fact]
+        public void InstallWillInstallTheCategoryAndUseCatProvidedForTheNullOne()
+        {
+            PerfItRuntime.Install(Assembly.GetExecutingAssembly(), new FilterDiscoverer(), "Woohooo");
+        }
+
     }
+
+
 
     public class TestController : ApiController
     {
         [PerfItFilter("PerfItTests",
             Counters = new[] {CounterTypes.AverageTimeTaken, CounterTypes.LastOperationExecutionTime, CounterTypes.NumberOfOperationsPerSecond, CounterTypes.TotalNoOfOperations},
+            InstanceName = "Washah",
+            RaisePublishErrors = true)]
+        public string Get()
+        {
+            return Guid.NewGuid().ToString();
+        }
+    }
+
+    public class TestController2 : ApiController
+    {
+        [PerfItFilter(null,
+            Counters = new[] { CounterTypes.AverageTimeTaken, CounterTypes.LastOperationExecutionTime, CounterTypes.NumberOfOperationsPerSecond, CounterTypes.TotalNoOfOperations },
             InstanceName = "Washah",
             RaisePublishErrors = true)]
         public string Get()

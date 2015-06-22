@@ -33,7 +33,7 @@ namespace PerfIt.WebApi
                             methodInfo.GetCustomAttributes(typeof (PerfItFilterAttribute), true).FirstOrDefault();
                     if (attr != null)
                     {
-                        if (string.IsNullOrEmpty(attr.InstanceName)) // default name
+                        if (string.IsNullOrEmpty(attr.InstanceName)) // !!! NOTE: default name - this is just a hacky fallback to get install working runtime instance name could be different
                         {
                             var actionNameAttr = (ActionNameAttribute)
                                 methodInfo.GetCustomAttributes(typeof (ActionNameAttribute), true)

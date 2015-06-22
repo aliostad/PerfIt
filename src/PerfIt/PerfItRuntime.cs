@@ -17,7 +17,7 @@ namespace PerfIt
 
             HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
 
-            HandlerFactories.Add(CounterTypes.TotalNoOfOperations, 
+            HandlerFactories.Add(CounterTypes.TotalNoOfOperations,
                 (categoryName, instanceName) => new TotalCountHandler(categoryName, instanceName));
 
             HandlerFactories.Add(CounterTypes.AverageTimeTaken,
@@ -37,7 +37,7 @@ namespace PerfIt
         /// Use it to register your own counters or replace built-in implementations
         /// </summary>
         public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }
-    
+
         /// <summary>
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
@@ -50,70 +50,93 @@ namespace PerfIt
 
             try
             {
-                if(PerformanceCounterCategory.Exists(categoryName))
+                if (PerformanceCounterCategory.Exists(categoryName))
                     PerformanceCounterCategory.Delete(categoryName);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            } 
+            }
         }
 
- 
-       /// <summary>
+
+        /// <summary>
         /// Installs performance counters in the assembly
-       /// </summary>
-       /// <param name="installerAssembly"></param>
-       /// <param name="discoverer">object that can discover aspects inside and assembly</param>
+        /// </summary>
+        /// <param name="installerAssembly"></param>
+        /// <param name="discoverer">object that can discover aspects inside and assembly</param>
         /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
-        public static void Install(Assembly installerAssembly, 
-            IInstrumentationDiscoverer discoverer, 
+        public static void Install(Assembly installerAssembly,
+            IInstrumentationDiscoverer discoverer,
             string categoryName = null)
         {
-            Uninstall(installerAssembly, categoryName);
+            Uninstall(installerAssembly, discoverer, categoryName);
 
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = installerAssembly.GetName().Name;
 
             var perfItFilterAttributes = discoverer.Discover(installerAssembly).ToArray();
-
             var counterCreationDataCollection = new CounterCreationDataCollection();
-
             Trace.TraceInformation("Number of filters: {0}", perfItFilterAttributes.Length);
 
-            foreach (var filter in perfItFilterAttributes)
+
+            foreach (var group in perfItFilterAttributes.GroupBy(x => x.CategoryName))
             {
-
-                Trace.TraceInformation("Setting up filters '{0}'", filter.Description);
-
-                foreach (var counterType in filter.Counters)
+                foreach (var filter in group)
                 {
-                    if (!HandlerFactories.ContainsKey(counterType))
-                        throw new ArgumentException("Counter type not defined: " + counterType);
 
-                    // if already exists in the set then ignore
-                    if (counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
-                    {
-                        Trace.TraceInformation("Counter type '{0}' was duplicate", counterType);
-                        continue;                        
-                    }
+                    Trace.TraceInformation("Setting up filters '{0}'", filter.Description);
 
-                    using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName))
+                    foreach (var counterType in filter.Counters)
                     {
-                        counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
-                        Trace.TraceInformation("Added counter type '{0}'", counterType);
+                        if (!HandlerFactories.ContainsKey(counterType))
+                            throw new ArgumentException("Counter type not defined: " + counterType);
+
+                        // if already exists in the set then ignore
+                        if (counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
+                        {
+                            Trace.TraceInformation("Counter type '{0}' was duplicate", counterType);
+                            continue;
+                        }
+
+                        using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName))
+                        {
+                            counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
+                            Trace.TraceInformation("Added counter type '{0}'", counterType);
+                        }
                     }
-                }   
+                }
+
+                var catName = string.IsNullOrEmpty(group.Key) ? categoryName : group.Key;
+                
+                PerformanceCounterCategory.Create(catName, "PerfIt category for " + catName,
+                     PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
             }
-           
-
-            PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
-                PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
 
             Trace.TraceInformation("Built category '{0}' with {1} items", categoryName, counterCreationDataCollection.Count);
-            
-           
+
+
         }
+
+        public static void Uninstall(Assembly installerAssembly,
+        IInstrumentationDiscoverer discoverer,
+        string categoryName = null)
+        {
+
+            if (string.IsNullOrEmpty(categoryName))
+                categoryName = installerAssembly.GetName().Name;
+
+            var perfItFilterAttributes = discoverer.Discover(installerAssembly).ToArray();
+            Trace.TraceInformation("Number of filters: {0}", perfItFilterAttributes.Length);
+
+            foreach (var group in perfItFilterAttributes.GroupBy(x => x.CategoryName))
+            {
+                var catName = string.IsNullOrEmpty(group.Key) ? categoryName : group.Key;
+                Trace.TraceInformation("Deleted category '{0}'", catName);
+                Uninstall(catName);
+            }
+        }
+
 
         /// <summary>
         ///  installs 4 standard counters for the category provided
@@ -122,7 +145,7 @@ namespace PerfIt
 
         public static void InstallStandardCounters(string categoryName)
         {
-            if(PerformanceCounterCategory.Exists(categoryName))
+            if (PerformanceCounterCategory.Exists(categoryName))
                 return;
 
             var creationDatas = new CounterHandlerBase[]
@@ -148,7 +171,7 @@ namespace PerfIt
         {
 
             if (PerformanceCounterCategory.Exists(categoryName))
-                PerformanceCounterCategory.Delete(categoryName);           
+                PerformanceCounterCategory.Delete(categoryName);
         }
 
         public static string GetUniqueName(string instanceName, string counterType)
