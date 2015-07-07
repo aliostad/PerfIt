@@ -35,9 +35,18 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\..\packages\Newtonsoft.Json.4.5.6\lib\net40\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Asos.Core.Cache">
+      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\Asos.Core.Cache.Redis.1.0.15147.1-Int\lib\net45\Asos.Core.Cache.dll</HintPath>
+    </Reference>
+    <Reference Include="Asos.Core.Cache.Redis">
+      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\Asos.Core.Cache.Redis.1.0.15147.1-Int\lib\net45\Asos.Core.Cache.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis">
+      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -68,6 +77,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +86,7 @@
       <Name>PerfIt</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

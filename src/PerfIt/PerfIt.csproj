@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\CurrentConcurrentCountHandler.cs" />
     <Compile Include="Handlers\NumberOfOperationsPerSecondHandler.cs" />
     <Compile Include="IInstrumentationDiscoverer.cs" />
     <Compile Include="IInstrumentationInfo.cs" />
