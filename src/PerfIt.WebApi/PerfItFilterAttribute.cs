@@ -101,6 +101,7 @@ namespace PerfIt.WebApi
                     if (!_inited)
                     {
                         Init(actionContext);
+                        _inited = true;
                     }
                 }
             }
