@@ -1,3 +1,5 @@
+![AppVeyor](https://ci.appveyor.com/api/projects/status/github/aliostad/PerfIt?svg=True)
+
 PerfIt!
 ======
 
