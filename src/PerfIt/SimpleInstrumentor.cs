@@ -9,17 +9,15 @@ namespace PerfIt
     public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor, IDisposable
     {
         private IInstrumentationInfo _info;
-        private string _categoryName;
 
         private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
 
-        public SimpleInstrumentor(IInstrumentationInfo info, string categoryName, 
+        public SimpleInstrumentor(IInstrumentationInfo info, 
             bool publishCounters = true, 
             bool publishEvent = true,
             bool raisePublishErrors = false)
         {
-            _categoryName = categoryName;
             _info = info;
 
             PublishCounters = publishCounters;
@@ -43,7 +41,7 @@ namespace PerfIt
             {
                 if (PublishEvent)
                 {
-                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_categoryName,
+                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
                         _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                 }
             }
@@ -68,7 +66,7 @@ namespace PerfIt
             {
                 if (PublishEvent)
                 {
-                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_categoryName,
+                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
                         _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                 }
             }
@@ -119,7 +117,7 @@ namespace PerfIt
                 var ctx = _counterContexts.GetOrAdd(key, k =>
                     new Lazy<PerfitHandlerContext>(() => new PerfitHandlerContext()
                     {
-                        Handler = handlerFactory.Value(_categoryName, _info.InstanceName),
+                        Handler = handlerFactory.Value(_info.CategoryName, _info.InstanceName),
                         Name = _info.InstanceName
                     }));
                 contexts.Add(ctx.Value);
@@ -168,7 +166,7 @@ namespace PerfIt
 
             if (PublishEvent)
             {
-                InstrumentationEventSource.Instance.WriteInstrumentationEvent(_categoryName,
+                InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
                    _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
             }
 

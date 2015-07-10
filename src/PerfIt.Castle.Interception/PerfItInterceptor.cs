@@ -99,8 +99,10 @@ namespace PerfIt.Castle.Interception
                                                     {
                                                         Description = instrumentationInfo.Description,
                                                         Counters = instrumentationInfo.Counters,
-                                                        InstanceName = instanceName
-                                                    }, string.IsNullOrEmpty(this.CategoryName)? instrumentationInfo.CategoryName:this.CategoryName, PublishCounters, PublishEvent, RaisePublishErrors);
+                                                        InstanceName = instanceName,
+                                                        CategoryName = string.IsNullOrEmpty(this.CategoryName) ? instrumentationInfo.CategoryName : this.CategoryName
+                                                        
+                                                    }, PublishCounters, PublishEvent, RaisePublishErrors);
                     _instrumentors.AddOrUpdate(instrumentationContext, instrumentor, (key, inst) => instrumentor);
 
 

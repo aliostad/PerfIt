@@ -29,8 +29,9 @@ namespace PerfIt.Tests
             {
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
-                InstanceName = "Test instance"
-            }, TestCategory);
+                InstanceName = "Test instance",
+                CategoryName = TestCategory
+            });
 
             var listener = ConsoleLog.CreateListener();
             listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
@@ -49,8 +50,9 @@ namespace PerfIt.Tests
             {
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
-                InstanceName = "Test instance"
-            }, TestCategory);
+                InstanceName = "Test instance",
+                CategoryName = TestCategory
+            });
 
             ins.InstrumentAsync( () => Task.Delay(100), "test...").Wait();
 

@@ -56,8 +56,9 @@ namespace PerfIt.WebApi
             {
                 Description = Description,
                 Counters = Counters,
-                InstanceName = InstanceName
-            }, CategoryName, PublishCounters, PublishEvent, RaisePublishErrors);
+                InstanceName = InstanceName,
+                CategoryName = CategoryName
+            }, PublishCounters, PublishEvent, RaisePublishErrors);
 
         }
 

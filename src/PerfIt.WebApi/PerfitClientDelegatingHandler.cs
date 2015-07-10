@@ -61,8 +61,9 @@ namespace PerfIt
             {
                 Counters = counters,
                 Description = "Counter for " + insName,
-                InstanceName = insName
-            }, _categoryName, PublishCounters, RaisePublishErrors));
+                InstanceName = insName,
+                CategoryName = _categoryName
+            }, PublishCounters, RaisePublishErrors));
 
             HttpResponseMessage response = null;
 
