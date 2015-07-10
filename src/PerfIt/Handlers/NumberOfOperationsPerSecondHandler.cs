@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 
 namespace PerfIt.Handlers
@@ -26,12 +25,12 @@ namespace PerfIt.Handlers
             get { return CounterTypes.NumberOfOperationsPerSecond; }
         }
 
-        protected override void OnRequestStarting(HttpRequestMessage request, PerfItContext context)
+        protected override void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context)
         {
             context.Data.Add(TimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
         }
 
-        protected override void OnRequestEnding(HttpResponseMessage response, PerfItContext context)
+        protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
             var sw = (Stopwatch)context.Data[TimeTakenTicksKey + _instanceName];
             sw.Stop();

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 
 namespace PerfIt.Handlers
@@ -40,14 +39,14 @@ namespace PerfIt.Handlers
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param> 
-        protected abstract void OnRequestStarting(HttpRequestMessage request, PerfItContext context);
+        protected abstract void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context);
         
         /// <summary>
         /// called as the async continuation on the delegating handler (when response is sent back)
         /// </summary>
         /// <param name="response"></param>
         /// <param name="context"></param>
-        protected abstract void OnRequestEnding(HttpResponseMessage response, PerfItContext context);
+        protected abstract void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context);
 
         /// <summary>
         /// 
@@ -63,13 +62,13 @@ namespace PerfIt.Handlers
         /// <returns></returns>
         protected abstract CounterCreationData[] DoGetCreationData();
 
-        public void OnRequestStarting(HttpRequestMessage request)
+        public void OnRequestStarting(IDictionary<string, object> contextBag)
         {
-            if (request.Properties.ContainsKey(Constants.PerfItKey))
+            if (contextBag.ContainsKey(Constants.PerfItKey))
             {
                 try
                 {
-                    OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);
+                    OnRequestStarting(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);
 
                 }
                 catch (InvalidOperationException exception)
@@ -77,18 +76,18 @@ namespace PerfIt.Handlers
 
                     Trace.TraceError(exception.ToString());
                     BuildCounters(true);
-                    OnRequestStarting(request, (PerfItContext)request.Properties[Constants.PerfItKey]);                    
+                    OnRequestStarting(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);                    
                 }
             }
         }
 
-        public void OnRequestEnding(HttpResponseMessage response)
+        public void OnRequestEnding(IDictionary<string, object> contextBag)
         {
-            if (response.RequestMessage.Properties.ContainsKey(Constants.PerfItKey))
+            if (contextBag.ContainsKey(Constants.PerfItKey))
             {
                 try
                 {
-                    OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
+                    OnRequestEnding(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);
 
                 }
                 catch (InvalidOperationException exception)
@@ -96,7 +95,7 @@ namespace PerfIt.Handlers
                     
                     Trace.TraceError(exception.ToString());
                     BuildCounters(true);
-                    OnRequestEnding(response, (PerfItContext)response.RequestMessage.Properties[Constants.PerfItKey]);
+                    OnRequestEnding(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);
                 }
             }
         }

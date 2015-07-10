@@ -10,6 +10,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>Copyright 2013-2015</copyright>
-    <tags>performance monitor monitoring perfmon counter EventSource Instrumentation</tags>
+    <tags>aspnetwebapi performance monitor monitoring perfmon counter</tags>
+	<dependencies>
+      <dependency id="Microsoft.AspNet.WebApi.Core" version="4.0.30506" />	
+      <dependency id="PerfIt" version="1.0.0-beta-3" />		  
+    </dependencies>
+	
   </metadata>
 </package>

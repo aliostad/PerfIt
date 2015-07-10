@@ -4,12 +4,12 @@ using System.Diagnostics;
 
 namespace PerfIt.Handlers
 {
-    public class TotalCountHandler : CounterHandlerBase
+    public class CurrentConcurrentCountHandler : CounterHandlerBase
     {
 
         private Lazy<PerformanceCounter> _counter;
 
-        public TotalCountHandler
+        public CurrentConcurrentCountHandler
             (
             string categoryName,
             string instanceName)
@@ -20,35 +20,38 @@ namespace PerfIt.Handlers
 
         public override string CounterType
         {
-            get { return CounterTypes.TotalNoOfOperations; }
+            get { return CounterTypes.CurrentConcurrentOperationsCount; }
         }
 
         protected override void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            // nothing 
+            _counter.Value.Increment();
         }
 
         protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            _counter.Value.Increment();
+            _counter.Value.Decrement();
         }
 
         protected override void BuildCounters(bool newInstanceName = false)
         {
-            _counter = new Lazy<PerformanceCounter>(() =>
+            if (_counter == null)
             {
-                var counter = new PerformanceCounter()
+                _counter = new Lazy<PerformanceCounter>(() =>
                 {
-                    CategoryName = _categoryName,
-                    CounterName = Name,
-                    InstanceName = GetInstanceName(newInstanceName),
-                    ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
-                };
-                counter.RawValue = 0;
-                return counter;
+                    var counter = new PerformanceCounter()
+                    {
+                        CategoryName = _categoryName,
+                        CounterName = Name,
+                        InstanceName = GetInstanceName(newInstanceName),
+                        ReadOnly = false,
+                        InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    };
+                    counter.RawValue = 0;
+                    return counter;
+                }
+              );
             }
-          );
         }
 
         protected override CounterCreationData[] DoGetCreationData()
@@ -59,7 +62,7 @@ namespace PerfIt.Handlers
                                {
                                    CounterName = Name,
                                    CounterType = PerformanceCounterType.NumberOfItems32,
-                                   CounterHelp = "Total # of operations"
+                                   CounterHelp = "# of requests running concurrently"
                                }
                        };
         }

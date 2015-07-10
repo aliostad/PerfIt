@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Web.Http;
 using PerfIt.Handlers;
 
 namespace PerfIt
@@ -18,7 +17,7 @@ namespace PerfIt
 
             HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
 
-            HandlerFactories.Add(CounterTypes.TotalNoOfOperations, 
+            HandlerFactories.Add(CounterTypes.TotalNoOfOperations,
                 (categoryName, instanceName) => new TotalCountHandler(categoryName, instanceName));
 
             HandlerFactories.Add(CounterTypes.AverageTimeTaken,
@@ -30,6 +29,9 @@ namespace PerfIt
             HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
                 (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName));
 
+            HandlerFactories.Add(CounterTypes.CurrentConcurrentOperationsCount,
+                (categoryName, instanceName) => new CurrentConcurrentCountHandler(categoryName, instanceName));
+
         }
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace PerfIt
         /// Use it to register your own counters or replace built-in implementations
         /// </summary>
         public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }
-    
+
         /// <summary>
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
@@ -51,67 +53,93 @@ namespace PerfIt
 
             try
             {
-                if(PerformanceCounterCategory.Exists(categoryName))
+                if (PerformanceCounterCategory.Exists(categoryName))
                     PerformanceCounterCategory.Delete(categoryName);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            } 
+            }
         }
 
 
         /// <summary>
-        /// Installs performance counters in the current assembly using PerfItFilterAttribute.
+        /// Installs performance counters in the assembly
         /// </summary>
-        /// 
+        /// <param name="installerAssembly"></param>
+        /// <param name="discoverer">object that can discover aspects inside and assembly</param>
         /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
-        public static void Install(Assembly installerAssembly, string categoryName = null)
+        public static void Install(Assembly installerAssembly,
+            IInstrumentationDiscoverer discoverer,
+            string categoryName = null)
         {
-            Uninstall(installerAssembly, categoryName);
+            Uninstall(installerAssembly, discoverer, categoryName);
 
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = installerAssembly.GetName().Name;
 
-            var perfItFilterAttributes = FindAllFilters(installerAssembly).ToArray();
-
+            var perfItFilterAttributes = discoverer.Discover(installerAssembly).ToArray();
             var counterCreationDataCollection = new CounterCreationDataCollection();
-
             Trace.TraceInformation("Number of filters: {0}", perfItFilterAttributes.Length);
 
-            foreach (var filter in perfItFilterAttributes)
+
+            foreach (var group in perfItFilterAttributes.GroupBy(x => x.CategoryName))
             {
-
-                Trace.TraceInformation("Setting up filters '{0}'", filter.Description);
-
-                foreach (var counterType in filter.Counters)
+                foreach (var filter in group)
                 {
-                    if (!HandlerFactories.ContainsKey(counterType))
-                        throw new ArgumentException("Counter type not defined: " + counterType);
 
-                    // if already exists in the set then ignore
-                    if (counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
-                    {
-                        Trace.TraceInformation("Counter type '{0}' was duplicate", counterType);
-                        continue;                        
-                    }
+                    Trace.TraceInformation("Setting up filters '{0}'", filter.Description);
 
-                    using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName))
+                    foreach (var counterType in filter.Counters)
                     {
-                        counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
-                        Trace.TraceInformation("Added counter type '{0}'", counterType);
+                        if (!HandlerFactories.ContainsKey(counterType))
+                            throw new ArgumentException("Counter type not defined: " + counterType);
+
+                        // if already exists in the set then ignore
+                        if (counterCreationDataCollection.Cast<CounterCreationData>().Any(x => x.CounterName == counterType))
+                        {
+                            Trace.TraceInformation("Counter type '{0}' was duplicate", counterType);
+                            continue;
+                        }
+
+                        using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName))
+                        {
+                            counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
+                            Trace.TraceInformation("Added counter type '{0}'", counterType);
+                        }
                     }
-                }   
+                }
+
+                var catName = string.IsNullOrEmpty(group.Key) ? categoryName : group.Key;
+                
+                PerformanceCounterCategory.Create(catName, "PerfIt category for " + catName,
+                     PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
             }
-           
-
-            PerformanceCounterCategory.Create(categoryName, "PerfIt category for " + categoryName,
-                PerformanceCounterCategoryType.MultiInstance, counterCreationDataCollection);
 
             Trace.TraceInformation("Built category '{0}' with {1} items", categoryName, counterCreationDataCollection.Count);
-            
-           
+
+
         }
+
+        public static void Uninstall(Assembly installerAssembly,
+        IInstrumentationDiscoverer discoverer,
+        string categoryName = null)
+        {
+
+            if (string.IsNullOrEmpty(categoryName))
+                categoryName = installerAssembly.GetName().Name;
+
+            var perfItFilterAttributes = discoverer.Discover(installerAssembly).ToArray();
+            Trace.TraceInformation("Number of filters: {0}", perfItFilterAttributes.Length);
+
+            foreach (var group in perfItFilterAttributes.GroupBy(x => x.CategoryName))
+            {
+                var catName = string.IsNullOrEmpty(group.Key) ? categoryName : group.Key;
+                Trace.TraceInformation("Deleted category '{0}'", catName);
+                Uninstall(catName);
+            }
+        }
+
 
         /// <summary>
         ///  installs 4 standard counters for the category provided
@@ -120,6 +148,9 @@ namespace PerfIt
 
         public static void InstallStandardCounters(string categoryName)
         {
+            if (PerformanceCounterCategory.Exists(categoryName))
+                return;
+
             var creationDatas = new CounterHandlerBase[]
             {
                 new AverageTimeHandler(categoryName, string.Empty),
@@ -143,62 +174,22 @@ namespace PerfIt
         {
 
             if (PerformanceCounterCategory.Exists(categoryName))
-                PerformanceCounterCategory.Delete(categoryName);           
+                PerformanceCounterCategory.Delete(categoryName);
         }
 
-        internal static string GetUniqueName(string instanceName, string counterType)
+        public static string GetUniqueName(string instanceName, string counterType)
         {
             return string.Format("{0}.{1}", instanceName, counterType);
         }
 
-        internal static string GetCounterInstanceName(Type controllerType, string actionName)
+        public static string GetCounterInstanceName(Type controllerType, string actionName)
         {
             return string.Format("{0}.{1}", controllerType.Name, actionName);
         }
 
-       
-        /// <summary>
-        /// Extracts all filters in the current assembly defined on ApiControllers
-        /// </summary>
-        /// <returns></returns>
-        internal static IEnumerable<PerfItFilterAttribute> FindAllFilters(
-            Assembly assembly)
+        public static IInstrumentor Build(IInstrumentationInfo infoInfo)
         {
-            
-
-            var attributes = new List<PerfItFilterAttribute>();
-               var apiControllers = assembly.GetExportedTypes()
-                                           .Where(t => typeof(ApiController).IsAssignableFrom(t) &&
-                                                        !t.IsAbstract).ToArray();
-
-            Trace.TraceInformation("Found '{0}' controllers", apiControllers.Length);
-
-            foreach (var apiController in apiControllers)
-            {
-                var methodInfos = apiController.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-                foreach (var methodInfo in methodInfos)
-                {
-                    var attr = (PerfItFilterAttribute)methodInfo.GetCustomAttributes(typeof(PerfItFilterAttribute), true).FirstOrDefault();
-                    if (attr != null)
-                    {
-                        if (string.IsNullOrEmpty(attr.InstanceName)) // default name
-                        {
-                            var actionNameAttr = (ActionNameAttribute)
-                                             methodInfo.GetCustomAttributes(typeof (ActionNameAttribute), true)
-                                                       .FirstOrDefault();
-
-                            string actionName = actionNameAttr == null ? methodInfo.Name : actionNameAttr.Name;
-                            attr.InstanceName = GetCounterInstanceName(apiController, actionName);
-                        }
-
-						attributes.Add(attr);
-                        Trace.TraceInformation("Added '{0}' to the list", attr.Counters);
-                        
-                    }
-                }
-            }
-
-            return attributes;
+            return null;
         }
     }
 }

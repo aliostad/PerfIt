@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PerfIt")]
-[assembly: AssemblyDescription("Performance Instrumentation Library")]
+[assembly: AssemblyTitle("PerfIt.WebApi")]
+[assembly: AssemblyDescription("Performance monitoring for ASP.NET Web API - Server and client")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Ali Kheyrollahi")]
-[assembly: AssemblyProduct("PerfIt")]
+[assembly: AssemblyProduct("PerfIt.WebApi")]
 [assembly: AssemblyCopyright("Copyright Ali Kheyrollahi 2013-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b3b26334-052e-4409-952e-66b23260a36f")]
+[assembly: Guid("694decf2-b73a-45b8-918e-7782ba361c55")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,4 +35,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: AssemblyInformationalVersion("1.0.0")]
-[assembly: InternalsVisibleTo("PerfIt.Tests")]
+[assembly: InternalsVisibleTo("PerfIt.WebApi.Tests")]
