@@ -43,20 +43,25 @@ namespace PerfIt.WebApi
                 _instrumentationContextProvider = (IInstrumentationContextProvider)Activator.CreateInstance(InstrumentationContextProviderType);
             }
 
+            if (Counters == null || Counters.Length == 0)
+            {
+                Counters = CounterTypes.StandardCounters;
+            }
+
             var instanceName = InstanceName;
             if (_instanceNameProvider != null)
                 instanceName = _instanceNameProvider.GetInstanceName(actionContext);
 
-            if (string.IsNullOrEmpty(instanceName))
-            {
-                throw new InvalidOperationException("Either InstanceName or InstanceNameProviderType must be supplied.");
-            }
+            if (instanceName == null)
+                instanceName =
+                    PerfItRuntime.GetCounterInstanceName(actionContext.ControllerContext.ControllerDescriptor.ControllerType,
+                        actionContext.ActionDescriptor.ActionName);
 
             _instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
             {
                 Description = Description,
                 Counters = Counters,
-                InstanceName = InstanceName,
+                InstanceName =  instanceName,
                 CategoryName = CategoryName
             }, PublishCounters, PublishEvent, RaisePublishErrors);
 

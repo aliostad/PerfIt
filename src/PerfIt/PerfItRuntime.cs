@@ -182,14 +182,9 @@ namespace PerfIt
             return string.Format("{0}.{1}", instanceName, counterType);
         }
 
-        public static string GetCounterInstanceName(Type controllerType, string actionName)
+        public static string GetCounterInstanceName(Type rootClass, string methodName)
         {
-            return string.Format("{0}.{1}", controllerType.Name, actionName);
-        }
-
-        public static IInstrumentor Build(IInstrumentationInfo infoInfo)
-        {
-            return null;
+            return string.Format("{0}.{1}", rootClass.Name, methodName);
         }
     }
 }

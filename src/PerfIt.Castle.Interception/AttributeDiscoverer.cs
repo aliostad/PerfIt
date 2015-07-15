@@ -60,6 +60,8 @@ namespace PerfIt.Castle.Interception
         {
             return FindAllAttributes(assembly);
         }
+
+       
     }
 
 
