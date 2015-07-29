@@ -22,14 +22,14 @@ namespace PerfIt.WebApi
             Description = string.Empty;
             PublishCounters = true;
             RaisePublishErrors = false;
-            PublishEvent = true;
+        
             CategoryName = categoryName;
             
         }
 
         private void Init(HttpActionContext actionContext)
         {
-            SetEventPolicy();
+           
             SetPublish();
             SetErrorPolicy();
 
@@ -63,7 +63,7 @@ namespace PerfIt.WebApi
                 Counters = Counters,
                 InstanceName =  instanceName,
                 CategoryName = CategoryName
-            }, PublishCounters, PublishEvent, RaisePublishErrors);
+            }, PublishCounters,  RaisePublishErrors);
 
         }
 
@@ -88,7 +88,7 @@ namespace PerfIt.WebApi
 
         public bool RaisePublishErrors { get; set; }
 
-        public bool PublishEvent { get; set; }
+
 
         public string CategoryName { get; set; }
 
@@ -131,12 +131,7 @@ namespace PerfIt.WebApi
             RaisePublishErrors = Convert.ToBoolean(value);
         }
 
-        protected void SetEventPolicy()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
-            PublishEvent = Convert.ToBoolean(value);
-        }
-
+    
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
 

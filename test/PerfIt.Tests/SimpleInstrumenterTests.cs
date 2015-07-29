@@ -21,27 +21,7 @@ namespace PerfIt.Tests
             PerfItRuntime.InstallStandardCounters(TestCategory);
         }
 
-        [Fact]
-        public void CanPublishAspect()
-        {
-
-            var ins = new SimpleInstrumentor(new InstrumentationInfo()
-            {
-                Counters = CounterTypes.StandardCounters,
-                Description = "test",
-                InstanceName = "Test instance",
-                CategoryName = TestCategory
-            });
-
-            var listener = ConsoleLog.CreateListener();
-            listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
-                Keywords.All);
-            
-            ins.Instrument(() => Thread.Sleep(100), "test...");
-     
-            listener.DisableEvents(InstrumentationEventSource.Instance);
-            listener.Dispose();
-        }
+        
 
         [Fact]
         public void CanPublishAsyncAspect()

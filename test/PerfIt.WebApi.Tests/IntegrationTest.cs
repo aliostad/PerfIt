@@ -44,9 +44,7 @@ namespace PerfIt.WebApi.Tests
         [Fact]
         public void Server_CanServe()
         {
-            var listener = ConsoleLog.CreateListener();
-            listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
-                Keywords.All);
+           
 
             string baseAddress = "http://localhost:34543/";
             var configuration = new HttpSelfHostConfiguration(baseAddress);

@@ -15,14 +15,13 @@ namespace PerfIt
 
         public SimpleInstrumentor(IInstrumentationInfo info, 
             bool publishCounters = true, 
-            bool publishEvent = true,
             bool raisePublishErrors = false)
         {
             _info = info;
 
             PublishCounters = publishCounters;
             RaisePublishErrors = raisePublishErrors;
-            PublishEvent = publishEvent;
+       
         }
 
         public void Instrument(Action aspect, string instrumentationContext = null)
@@ -39,11 +38,7 @@ namespace PerfIt
             }
             finally
             {
-                if (PublishEvent)
-                {
-                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
-                        _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
-                }
+               
             }
            
             CompleteContexts(contexts);
@@ -64,11 +59,7 @@ namespace PerfIt
             }
             finally
             {
-                if (PublishEvent)
-                {
-                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
-                        _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
-                }
+               
             }
             
             CompleteContexts(contexts);
@@ -133,7 +124,7 @@ namespace PerfIt
 
         public bool RaisePublishErrors { get; set; }
 
-        public bool PublishEvent { get; set; }
+
 
         public void Dispose()
         {          
@@ -164,11 +155,7 @@ namespace PerfIt
             if(itoken == null)
                 throw new ArgumentException("This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
 
-            if (PublishEvent)
-            {
-                InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
-                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
-            }
+          
 
             CompleteContexts(itoken.Contexts);
         }

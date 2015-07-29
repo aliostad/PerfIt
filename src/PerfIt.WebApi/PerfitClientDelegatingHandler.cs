@@ -26,11 +26,11 @@ namespace PerfIt
             _categoryName = categoryName;
             PublishCounters = true;
             RaisePublishErrors = true;
-            PublishEvent = true;
+      
 
             SetErrorPolicy();
             SetPublish();
-            SetEventPolicy();
+    
 
             InstanceNameProvider = request =>
                 string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());
@@ -40,7 +40,7 @@ namespace PerfIt
 
         public bool RaisePublishErrors { get; set; }
 
-        public bool PublishEvent { get; set; }
+
        
 
         /// <summary>
@@ -86,11 +86,7 @@ namespace PerfIt
             RaisePublishErrors = Convert.ToBoolean(value);
         }
 
-        protected void SetEventPolicy()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
-            PublishEvent = Convert.ToBoolean(value);
-        }
+  
 
 
 

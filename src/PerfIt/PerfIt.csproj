@@ -58,7 +58,6 @@
     <Compile Include="Handlers\TotalCountHandler.cs" />
     <Compile Include="Handlers\ICounterHandler.cs" />
     <Compile Include="Handlers\LastOperationExecutionTimeHandler.cs" />
-    <Compile Include="InstrumentationEventSource.cs" />
     <Compile Include="InstrumentationInfo.cs" />
     <Compile Include="IInstrumentor.cs" />
     <Compile Include="ITwoStageInstrumentor.cs" />

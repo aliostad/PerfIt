@@ -29,7 +29,7 @@ namespace PerfIt.Castle.Interception
             CategoryName = categoryName;
             PublishCounters = true;
             RaisePublishErrors = false;
-            PublishEvent = true;
+   
 
         }
 
@@ -43,7 +43,7 @@ namespace PerfIt.Castle.Interception
 
         private void Init()
         {
-            SetEventPolicy();
+      
             SetPublish();
             SetErrorPolicy();
 
@@ -102,7 +102,7 @@ namespace PerfIt.Castle.Interception
                                                         InstanceName = instanceName,
                                                         CategoryName = string.IsNullOrEmpty(this.CategoryName) ? instrumentationInfo.CategoryName : this.CategoryName
                                                         
-                                                    }, PublishCounters, PublishEvent, RaisePublishErrors);
+                                                    }, PublishCounters, RaisePublishErrors);
                     _instrumentors.AddOrUpdate(instrumentationContext, instrumentor, (key, inst) => instrumentor);
 
 
@@ -201,11 +201,7 @@ namespace PerfIt.Castle.Interception
             RaisePublishErrors = Convert.ToBoolean(value);
         }
 
-        protected void SetEventPolicy()
-        {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
-            PublishEvent = Convert.ToBoolean(value);
-        }
+      
 
         
 
@@ -219,7 +215,7 @@ namespace PerfIt.Castle.Interception
 
         public bool RaisePublishErrors { get; set; }
 
-        public bool PublishEvent { get; set; }
+
 
         public string CategoryName { get; set; }
 
