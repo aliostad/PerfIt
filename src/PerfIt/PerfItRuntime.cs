@@ -78,19 +78,28 @@ namespace PerfIt
             if (string.IsNullOrEmpty(categoryName))
                 categoryName = installerAssembly.GetName().Name;
 
-            var perfItFilterAttributes = discoverer.Discover(installerAssembly).ToArray();
-            var counterCreationDataCollection = new CounterCreationDataCollection();
-            Trace.TraceInformation("Number of filters: {0}", perfItFilterAttributes.Length);
+            var instrumentationInfos = discoverer.Discover(installerAssembly).ToArray();
 
-
-            foreach (var group in perfItFilterAttributes.GroupBy(x => x.CategoryName))
+            if (instrumentationInfos.Length == 0)
             {
-                foreach (var filter in group)
+                throw new InvalidOperationException("There are no instrumentationInfos found by the discoverer!");
+            }
+
+            var counterCreationDataCollection = new CounterCreationDataCollection();
+            Trace.TraceInformation("Number of filters: {0}", instrumentationInfos.Length);
+
+
+            foreach (var group in instrumentationInfos.GroupBy(x => x.CategoryName))
+            {
+                foreach (var instrumentationInfo in group)
                 {
 
-                    Trace.TraceInformation("Setting up filters '{0}'", filter.Description);
+                    Trace.TraceInformation("Setting up filters '{0}'", instrumentationInfo.Description);
 
-                    foreach (var counterType in filter.Counters)
+                    if (instrumentationInfo.Counters == null || instrumentationInfo.Counters.Length == 0)
+                        instrumentationInfo.Counters = CounterTypes.StandardCounters;
+
+                    foreach (var counterType in instrumentationInfo.Counters)
                     {
                         if (!HandlerFactories.ContainsKey(counterType))
                             throw new ArgumentException("Counter type not defined: " + counterType);
@@ -102,7 +111,7 @@ namespace PerfIt
                             continue;
                         }
 
-                        using (var counterHandler = HandlerFactories[counterType](categoryName, filter.InstanceName))
+                        using (var counterHandler = HandlerFactories[counterType](categoryName, instrumentationInfo.InstanceName))
                         {
                             counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
                             Trace.TraceInformation("Added counter type '{0}'", counterType);
