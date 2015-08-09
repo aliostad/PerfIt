@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>$version$-beta-5</version>
+    <version>$version$-beta-6</version>
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
@@ -15,6 +15,5 @@
       <dependency id="Microsoft.AspNet.WebApi.Core" version="4.0.30506" />	
       <dependency id="PerfIt" version="1.0.0-beta-5" />		  
     </dependencies>
-	
   </metadata>
 </package>

@@ -166,8 +166,8 @@ namespace PerfIt.WebApi
         protected override string ProvideInstrumentationContext(HttpActionExecutedContext actionExecutedContext)
         {
             return string.Join("#",
-                actionExecutedContext.Response.StatusCode.ToString(),
-                actionExecutedContext.Request.RequestUri.AbsoluteUri
+                actionExecutedContext.Response == null ? "NoResponse" : actionExecutedContext.Response.StatusCode.ToString(),
+                actionExecutedContext.Request == null ? "NoRequest" : actionExecutedContext.Request.RequestUri.AbsoluteUri
             );
         }
     }
