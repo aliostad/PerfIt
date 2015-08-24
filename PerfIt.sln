@@ -1,18 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt", "src\PerfIt\PerfIt.csproj", "{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Tests", "test\PerfIt.Tests\PerfIt.Tests.csproj", "{061A498A-632C-4B45-9557-7AC321794AA0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{99DD1B1D-8220-4730-A755-CC12A7831BA6}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.WebApi", "src\PerfIt.WebApi\PerfIt.WebApi.csproj", "{EDB39A5F-EDBE-4BEC-A8A4-B04B26ED2483}"
 EndProject

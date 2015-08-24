@@ -15,12 +15,14 @@
     <AppProjFiles Include="..\src\**\*.csproj" />
     <TestProjFiles Include="..\test\**\*.csproj" />
     <ScriptsDir Include="..\scripts\" />
-    <NugetExeDir Include="..\.nuget\" />
+    <NugetExeDir Include=".\" />
   </ItemGroup>
 
-  <Target Name="Default" DependsOnTargets="Compile; Package" />
-  <Target Name="DefaultCI" DependsOnTargets="Compile; Package; Publish" />
-  
+  <Target Name="Default" DependsOnTargets="Restore; Compile; Package" />
+  <Target Name="DefaultCI" DependsOnTargets="Restore; Compile; Package; Publish" />
+  <Target Name="Restore">
+    <Exec Command="nuget.exe restore ..\PerfIt.sln" />
+  </Target>  
   <Target Name="Clean">
     <RemoveDir Directories="@(BuildArtifactsDir)" />
   </Target>
