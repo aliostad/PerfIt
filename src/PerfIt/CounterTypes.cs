@@ -18,7 +18,8 @@ namespace PerfIt
             AverageTimeTaken,
             TotalNoOfOperations,
             LastOperationExecutionTime,
-            NumberOfOperationsPerSecond
+            NumberOfOperationsPerSecond,
+            CurrentConcurrentOperationsCount
         };
 
     }

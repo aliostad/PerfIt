@@ -35,19 +35,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Asos.Core.Cache">
-      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\Asos.Core.Cache.Redis.1.0.15147.1-Int\lib\net45\Asos.Core.Cache.dll</HintPath>
-    </Reference>
-    <Reference Include="Asos.Core.Cache.Redis">
-      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\Asos.Core.Cache.Redis.1.0.15147.1-Int\lib\net45\Asos.Core.Cache.Redis.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="StackExchange.Redis">
-      <HintPath>..\..\..\..\..\..\..\tfs\ASOS\Search\SearchAPI\Dev\Source\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />

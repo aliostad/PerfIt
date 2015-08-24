@@ -101,6 +101,7 @@ namespace PerfIt.Handlers
         }
 
         public string Name { get; private set; }
+
         public string UniqueName { get { return _uniqueName; } }
 
         public string GetUniqueName()

@@ -45,7 +45,6 @@ namespace PerfIt.WebApi
 
                         attributes.Add(attr);
                         Trace.TraceInformation("Added '{0}' to the list", attr.Counters);
-
                     }
                 }
             }

@@ -165,7 +165,8 @@ namespace PerfIt
                 new AverageTimeHandler(categoryName, string.Empty),
                 new LastOperationExecutionTimeHandler(categoryName, string.Empty),
                 new TotalCountHandler(categoryName, string.Empty),
-                new NumberOfOperationsPerSecondHandler(categoryName, string.Empty) 
+                new NumberOfOperationsPerSecondHandler(categoryName, string.Empty) ,
+                new CurrentConcurrentCountHandler(categoryName, string.Empty)
             }.SelectMany(x => x.BuildCreationData());
 
             var counterCreationDataCollection = new CounterCreationDataCollection();
