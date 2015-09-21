@@ -34,24 +34,21 @@ namespace PerfIt.Handlers
         }
 
         protected override void BuildCounters(bool newInstanceName = false)
-        {
-            if (_counter == null)
+        {         
+            _counter = new Lazy<PerformanceCounter>(() =>
             {
-                _counter = new Lazy<PerformanceCounter>(() =>
+                var counter = new PerformanceCounter()
                 {
-                    var counter = new PerformanceCounter()
-                    {
-                        CategoryName = _categoryName,
-                        CounterName = Name,
-                        InstanceName = GetInstanceName(newInstanceName),
-                        ReadOnly = false,
-                        InstanceLifetime = PerformanceCounterInstanceLifetime.Process
-                    };
-                    counter.RawValue = 0;
-                    return counter;
-                }
-              );
-            }
+                    CategoryName = _categoryName,
+                    CounterName = Name,
+                    InstanceName = GetInstanceName(newInstanceName),
+                    ReadOnly = false,
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                };
+
+                counter.RawValue = 0;
+                return counter;
+            });
         }
 
         protected override CounterCreationData[] DoGetCreationData()

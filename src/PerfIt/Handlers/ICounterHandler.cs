@@ -16,7 +16,6 @@ namespace PerfIt
 
         string Name { get; }
 
-        string UniqueName { get; }
         CounterCreationData[] BuildCreationData();
     }
 }

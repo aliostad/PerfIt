@@ -13,7 +13,7 @@ namespace PerfIt.Handlers
         protected string _categoryName;
         protected string _uniqueName;
 
-        public CounterHandlerBase( 
+        public CounterHandlerBase(
             string categoryName,
             string instanceName)
         {
@@ -26,7 +26,7 @@ namespace PerfIt.Handlers
 
         public virtual void Dispose()
         {
-            
+
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace PerfIt.Handlers
         /// <param name="request"></param>
         /// <param name="context"></param> 
         protected abstract void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context);
-        
+
         /// <summary>
         /// called as the async continuation on the delegating handler (when response is sent back)
         /// </summary>
@@ -69,16 +69,27 @@ namespace PerfIt.Handlers
                 try
                 {
                     OnRequestStarting(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);
-
                 }
-                catch (InvalidOperationException exception)
+                catch (Exception exception) // changed to do on exception name
                 {
-
                     Trace.TraceError(exception.ToString());
-                    BuildCounters(true);
-                    OnRequestStarting(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);                    
+                    if (!CaterForWorkerProcessRecycle(exception, contextBag))
+                        throw;
                 }
             }
+        }
+
+        private bool CaterForWorkerProcessRecycle(Exception exception, IDictionary<string, object> contextBag)
+        {
+            if (exception.Message.Contains("already exists with a lifetime of Process"))
+            {
+                BuildCounters(true);
+                Trace.TraceInformation("Now rebuilt with better look.");
+                OnRequestStarting(contextBag, (PerfItContext)contextBag[Constants.PerfItKey]);
+                return true;
+            }
+
+            return false;
         }
 
         public void OnRequestEnding(IDictionary<string, object> contextBag)
@@ -88,26 +99,17 @@ namespace PerfIt.Handlers
                 try
                 {
                     OnRequestEnding(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);
-
                 }
-                catch (InvalidOperationException exception)
+                catch (Exception exception) // changed to do on exception name 
                 {
-                    
                     Trace.TraceError(exception.ToString());
-                    BuildCounters(true);
-                    OnRequestEnding(contextBag, (PerfItContext) contextBag[Constants.PerfItKey]);
+                    if (!CaterForWorkerProcessRecycle(exception, contextBag))
+                        throw;
                 }
             }
         }
 
         public string Name { get; private set; }
-
-        public string UniqueName { get { return _uniqueName; } }
-
-        public string GetUniqueName()
-        {
-            return _categoryName + _instanceName + Name;
-        }
 
         public CounterCreationData[] BuildCreationData()
         {
@@ -116,9 +118,14 @@ namespace PerfIt.Handlers
 
         protected string GetInstanceName(bool newName = false)
         {
-            return
+            var name =
                 _instanceName +
                 (newName ? "_" + Guid.NewGuid().ToString("N").Substring(6) : string.Empty);
+
+            if(newName)
+                Trace.TraceInformation("GetInstanceName - New name => " + name);
+
+            return name;
         }
 
       

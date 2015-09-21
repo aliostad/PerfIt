@@ -86,7 +86,16 @@ namespace PerfIt
             ctx.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
             foreach (var context in contexts)
             {
-                context.Handler.OnRequestStarting(ctx);
+                try
+                {
+                    context.Handler.OnRequestStarting(ctx);
+                }
+                catch (Exception e)
+                {
+                    Trace.TraceError(e.ToString());
+                    if (RaisePublishErrors)
+                        throw;
+                }
             }
 
             return new Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>>(contexts, ctx);
