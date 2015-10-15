@@ -3,22 +3,23 @@
 PerfIt!
 ======
 
-Windows performance monitoring for ASP.NET Web API actions
+Windows performance monitoring and Eevent Tracing for Windows (ETW) instrumentation for .NET (including ASP.NET Web API)
 
 FAQ
 ===
 
 **What is PerfIt?**
 
-PerfIt is a performance counter publishing tool for ASP.NET Web API. By a little bit of setup, it *painlessly* publishes standard performance counters.
+PerfIt is a performance counter publishing library for .NET. By a little bit of setup, it *painlessly* publishes standard performance counters.
+What is also new in version 1.0, is the **ETW events** that can be published as part of 
 
 **Why should I use it?**
 
-If you have a serious project exposing an API, you would want to monitor performance of your API - and possibly tracking many other aspects of your application. PerfIt makes it painlessly easy to do so.
+If you are using .NET for a serious project, you need to instrument your code (and service). If you do not then PerfIt could do that easily without getting in your way to write your business logic.
 
 **What counters does it publish?**
 
-There are 4 standard counters that come with PerfIt out of the box (`TotalNoOfOperations`, `AverageTimeTaken`, `LastOperationExecutionTime`, `NumberOfOperationsPerSecond`) and you can choose one or all (typically you would choose **all**).
+There are 5 standard counters that come with PerfIt out of the box (`TotalNoOfOperations`, `AverageTimeTaken`, `LastOperationExecutionTime`, `NumberOfOperationsPerSecond` and `CurrentConcurrentOperationsCount`) and you can choose one or all (typically you would choose **all**).
 
 You can also create your own counters by implementing a simple base class.
 
@@ -30,7 +31,11 @@ It is negligible compared to the code you would normally find within an API. It 
 
 Yes, you can use it with any version of the ASP.NET Web API. There is a problem (that has a workaround) when registering Web API 2 which is an inherent problem with the `InstallUtil.exe` which does not honour `AssemblyRedirect` and the workaround has been discussed below.
 
-Getting Started
+Getting Started (Measuring any part of your code)
+==
+Please see the blog post [Here](http://byterot.blogspot.co.uk/2015/05/perfit-decoupled-from-web-api-measure-all-parts-of-your-.net-application-using-perfit-aspnetwebapi-telemetry-etw.html).
+
+Getting Started (ASP.NET Web API)
 ==
 
 ### Step 1: Create an ASP.NET Web API
@@ -42,34 +47,22 @@ Use Visual Studio to create an ASP.NET Web API and add a controller (such as `De
 In the package manager console, type:
 
 ```
-PM> Install-Package PerfIt
+PM> Install-Package PerfIt.WebApi
 ```
 
-### Step 3: Add PerfIt delegating handler
+### Step 3: Decorate your actions
 
-In the `WebApiConfig` class when setting up the configuration, add a PerfIt delegating handler:
-
-``` C#
-config.MessageHandlers.Add(new PerfItDelegatingHandler());
-```
-### Step 4: Decorate your actions
-
-In the actions you would want to monitor, add this attribute:
+In the actions you would want to monitor, add this attribute (we are using default counters so no need to specify them):
 
 ``` C#
-[PerfItFilter(Description = "Gets all items",
-            Counters = new[]{
-            CounterTypes.TotalNoOfOperations,
-            CounterTypes.AverageTimeTaken, 
-            CounterTypes.NumberOfOperationsPerSecond,
-            CounterTypes.LastOperationExecutionTime})]
+[PerfItFilter("MyApiCategory", Description = "My cool API"]
 public string Get()
 {
     ...
 }
 ```
 
-### Step 5: Add an installer class
+### Step 4: Add an installer class
 
 Right-click on your ASP.NET Web API and choose Add an Item and then from the menu choose "Installer Class".
 
@@ -89,7 +82,7 @@ public override void Uninstall(IDictionary savedState)
 }
 ```
 
-### Step 6: Register your counters using InstallUtil.exe
+### Step 5: Register your counters using InstallUtil.exe
 
 In the command line, change directory to the .NET framework in use and then use -i switch to install ASP.NET Web API dll:
 
@@ -97,7 +90,7 @@ In the command line, change directory to the .NET framework in use and then use 
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319>InstallUtil -i "c:\myproject\path\bin\MyAspNetWebApi.dll"
 ```
 
-### Step 7: Use your API and see the counters being published
+### Step 6: Use your API and see the counters being published
 
 Your counters will be published under a category, with the same name as your project. Underneath, you will see instance(s) of your individual counters.
 
