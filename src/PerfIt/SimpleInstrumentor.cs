@@ -27,10 +27,19 @@ namespace PerfIt
 
         public void Instrument(Action aspect, string instrumentationContext = null)
         {
-            if (!PublishCounters)
-                aspect();
+            Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
 
-            var contexts = BuildContexts();
+            try
+            {
+                if (PublishCounters)
+                    contexts = BuildContexts();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.ToString());
+                if (RaisePublishErrors)
+                    throw;
+            }
 
             var stopwatch = Stopwatch.StartNew();
             try
@@ -39,23 +48,42 @@ namespace PerfIt
             }
             finally
             {
-                if (PublishEvent)
+                try
                 {
-                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
-                        _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                    if (PublishEvent)
+                    {
+                        InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
+                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                    }
+
+                    if (PublishCounters)
+                        CompleteContexts(contexts);
                 }
-            }
-           
-            CompleteContexts(contexts);
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e.ToString());
+                    if (RaisePublishErrors)
+                        throw;
+                }
+            }           
           
         }
 
         public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null)
         {
-            if (!PublishCounters)
-                await asyncAspect();
+            Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
 
-            var contexts = BuildContexts();
+            try
+            {
+                if (PublishCounters)
+                    contexts = BuildContexts();
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine(e.ToString());
+                if (RaisePublishErrors)
+                    throw;
+            }
 
             var stopwatch = Stopwatch.StartNew();
             try
@@ -64,15 +92,24 @@ namespace PerfIt
             }
             finally
             {
-                if (PublishEvent)
+                try
                 {
-                    InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
-                        _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                    if (PublishEvent)
+                    {
+                        InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
+                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                    }
+
+                    if(PublishCounters)
+                        CompleteContexts(contexts);
                 }
-            }
-            
-            CompleteContexts(contexts);
-           
+                catch(Exception e)
+                {
+                    Trace.WriteLine(e.ToString());
+                    if(RaisePublishErrors)
+                        throw;
+                }
+            }           
         }
 
         private Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> BuildContexts()

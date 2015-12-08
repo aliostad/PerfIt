@@ -55,7 +55,42 @@ namespace PerfIt.Tests
             });
 
             ins.InstrumentAsync( () => Task.Delay(100), "test...").Wait();
-
         }
+
+        [Fact]
+        public void CanTurnOffPublishingCounters()
+        {
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
+            }, false, true, true);
+
+            ins.InstrumentAsync(() => Task.Delay(100), "test...").Wait();
+        }
+
+        [Fact]
+        public void DontRaiseErrorsDoesNotHideOriginalError()
+        {
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
+            }, true, true, false);
+
+            var ex = Assert.Throws<AggregateException>(() => ins.InstrumentAsync(() => 
+            {
+                throw new NotImplementedException();
+            }
+                , "test...").Wait());
+
+            Assert.IsType<NotImplementedException>(ex.InnerExceptions[0]);
+        }
+
+
     }
 }
