@@ -14,14 +14,11 @@ namespace PerfIt.Castle.Interception
 {
     public class PerfItInterceptor : IInterceptor
     {
-
-
         private IInstanceNameProvider _instanceNameProvider = null;
         private IInstrumentationContextProvider _instrumentationContextProvider = null;
         private ConcurrentDictionary<string, SimpleInstrumentor> _instrumentors;
         private bool _inited = false;
         private object _lock = new object();
-
 
 
         public PerfItInterceptor(string categoryName)
@@ -30,14 +27,11 @@ namespace PerfIt.Castle.Interception
             PublishCounters = true;
             RaisePublishErrors = false;
             PublishEvent = true;
-
         }
-
 
         private IInstrumentationInfo GetInstrumentationInfo(MethodInfo methodInfo)
         {
             var attr = (IInstrumentationInfo)methodInfo.GetCustomAttributes(typeof(IInstrumentationInfo), true).FirstOrDefault();
-
             return attr;
         }
 
@@ -55,7 +49,7 @@ namespace PerfIt.Castle.Interception
                 _instanceNameProvider = (IInstanceNameProvider)Activator.CreateInstance(InstanceNameProviderType);
             }
 
-            _instrumentationContextProvider= (IInstrumentationContextProvider) new InstrumentationContextProvider();
+            _instrumentationContextProvider = (IInstrumentationContextProvider)new InstrumentationContextProvider();
 
             if (InstrumentationContextProviderType != null)
             {
@@ -68,22 +62,18 @@ namespace PerfIt.Castle.Interception
         private ITwoStageInstrumentor InitInstrumentor(MethodInfo methodInfo)
         {
             string instrumentationContext = "";
-           
             var instrumentationInfo = GetInstrumentationInfo(methodInfo);
-
-
 
             if (instrumentationInfo != null)
             {
-
                 var instanceName = instrumentationInfo.InstanceName;
                 if (string.IsNullOrEmpty(instanceName) && _instanceNameProvider != null)
                     instanceName = _instanceNameProvider.GetInstanceName(methodInfo);
+
                 if (string.IsNullOrEmpty(instanceName))
                 {
                     throw new InvalidOperationException("Either InstanceName or InstanceNameProviderType must be supplied.");
                 }
-
 
                 if (_instrumentationContextProvider != null)
                 {
@@ -94,43 +84,33 @@ namespace PerfIt.Castle.Interception
                     throw new InvalidOperationException("The Instrumentation Context Cannot be Null. Define a InstrumentationContextProvider implementation.");
                 }
 
+                var instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
+                {
+                    Description = instrumentationInfo.Description,
+                    Counters = instrumentationInfo.Counters,
+                    InstanceName = instanceName,
+                    CategoryName = string.IsNullOrEmpty(this.CategoryName) ? instrumentationInfo.CategoryName : this.CategoryName
 
-                    var instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
-                                                    {
-                                                        Description = instrumentationInfo.Description,
-                                                        Counters = instrumentationInfo.Counters,
-                                                        InstanceName = instanceName,
-                                                        CategoryName = string.IsNullOrEmpty(this.CategoryName) ? instrumentationInfo.CategoryName : this.CategoryName
-                                                        
-                                                    }, PublishCounters, PublishEvent, RaisePublishErrors);
-                    _instrumentors.AddOrUpdate(instrumentationContext, instrumentor, (key, inst) => instrumentor);
+                }, PublishCounters, PublishEvent, RaisePublishErrors);
 
-
-
-                    return instrumentor;
-            
+                _instrumentors.AddOrUpdate(instrumentationContext, instrumentor, (key, inst) => instrumentor);
+                return instrumentor;
             }
             else
-                   return null;
+                return null;
         }
 
 
         public void Intercept(IInvocation invocation)
         {
-
-
-
-            if (!PublishCounters)
+            if (!PublishCounters && !PublishEvent)
             {
-
                 invocation.Proceed();
-
             }
             else
             {
                 try
                 {
-
                     string instrumentationContext = "";
 
                     if (_instrumentationContextProvider != null)
@@ -138,7 +118,6 @@ namespace PerfIt.Castle.Interception
 
                     if (!_inited)
                     {
-
                         lock (_lock)
                         {
                             if (!_inited)
@@ -148,33 +127,25 @@ namespace PerfIt.Castle.Interception
                         }
                     }
 
-
-
                     SimpleInstrumentor instrumentor = null;
 
-                    
-
-                    if (_instrumentors==null || !_instrumentors.TryGetValue(instrumentationContext,out instrumentor))
+                    if (_instrumentors == null || !_instrumentors.TryGetValue(instrumentationContext, out instrumentor))
                     {
                         instrumentor = (SimpleInstrumentor)InitInstrumentor(invocation.MethodInvocationTarget);
                     }
 
-
                     var returnType = invocation.Method.ReturnType;
-                    if (returnType != typeof(void))
+                    if (returnType != typeof(void) && 
+                        (   (returnType == typeof(Task) || 
+                            (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)))))
                     {
-                        if (returnType == typeof(Task) || (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)))
-                        {
-                            instrumentor.InstrumentAsync(async () => invocation.Proceed());
-
-                        }
-
-
-                        else
-                        {
-                            instrumentor.Instrument(() => invocation.Proceed());
-                        }
+                        instrumentor.InstrumentAsync(async () => invocation.Proceed());
                     }
+                    else
+                    {
+                        instrumentor.Instrument(invocation.Proceed);
+                    }
+                    
                 }
                 catch (Exception exception)
                 {
@@ -182,12 +153,10 @@ namespace PerfIt.Castle.Interception
                     if (RaisePublishErrors)
                         throw;
                 }
-
-
             }
         }
 
-       
+
 
         private void SetPublish()
         {
@@ -207,13 +176,13 @@ namespace PerfIt.Castle.Interception
             PublishEvent = Convert.ToBoolean(value);
         }
 
-        
+
 
         public Type InstanceNameProviderType { get; set; }
 
         public Type InstrumentationContextProviderType { get; set; }
 
-      
+
 
         public bool PublishCounters { get; set; }
 

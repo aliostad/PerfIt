@@ -15,14 +15,11 @@ namespace PerfIt.Castle.Interception
         public PerfItAttribute():this("")
         {
             Trace.TraceWarning("Performance Counter not specified at the Method level. Make sure you set it's at least set at the class level");
-
        }
 
         public PerfItAttribute(string categoryName)
         {
             Description = string.Empty;
-            
-
             CategoryName = categoryName;
         }
 
