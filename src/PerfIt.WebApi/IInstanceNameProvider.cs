@@ -8,7 +8,7 @@ using System.Web.Http.Filters;
 
 namespace PerfIt.WebApi
 {
-    interface IInstanceNameProvider
+    public interface IInstanceNameProvider
     {
         string GetInstanceName(HttpActionContext actionContext);
     }

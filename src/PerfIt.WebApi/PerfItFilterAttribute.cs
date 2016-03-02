@@ -92,8 +92,14 @@ namespace PerfIt.WebApi
 
         public string CategoryName { get; set; }
 
+        /// <summary>
+        /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
+        /// </summary>
         public Type InstanceNameProviderType { get; set; }
 
+         /// <summary>
+        /// Optional. A type implementing IInstrumentationContextProvider. If provided, it will be used to drive the context gathering at instrumentation time.
+        /// </summary>
         public Type InstrumentationContextProviderType { get; set; }
 
         public override void OnActionExecuting(HttpActionContext actionContext)

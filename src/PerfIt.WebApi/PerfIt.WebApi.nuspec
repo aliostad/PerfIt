@@ -13,7 +13,7 @@
     <tags>aspnetwebapi performance monitor monitoring perfmon counter</tags>
 	<dependencies>
       <dependency id="Microsoft.AspNet.WebApi.Core" version="4.0.30506" />	
-      <dependency id="PerfIt" version="1.0.2" />		  
+      <dependency id="PerfIt" version="1.4.0" />		  
     </dependencies>
   </metadata>
 </package>
