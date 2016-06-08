@@ -72,13 +72,13 @@ Once added, click F7 to see the code and then add these lines:
 public override void Install(IDictionary stateSaver)
 {
     base.Install(stateSaver);
-    PerfItRuntime.Install(Assembly.GetExecutingAssembly()));
+    PerfItRuntime.Install(Assembly.GetExecutingAssembly(), new FilterDiscoverer());
 }
 
 public override void Uninstall(IDictionary savedState)
 {
     base.Uninstall(savedState);
-    PerfItRuntime.Uninstall(Assembly.GetExecutingAssembly()));
+    PerfItRuntime.Uninstall(Assembly.GetExecutingAssembly());
 }
 ```
 
