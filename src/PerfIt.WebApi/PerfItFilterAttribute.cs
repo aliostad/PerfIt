@@ -157,7 +157,11 @@ namespace PerfIt.WebApi
 
                 if (actionExecutedContext.Request.Properties.ContainsKey(PerfItTwoStageKey))
                 {
-                    var token = actionExecutedContext.Request.Properties[PerfItTwoStageKey];
+                    var token = actionExecutedContext.Request.Properties[PerfItTwoStageKey] as InstrumentationToken;
+                    if (actionExecutedContext.Exception != null && token != null)
+                    {
+                        token.Contexts.Item2.SetContextToErrorState();
+                    }
                     _instrumentor.Finish(token, instrumentationContext);
                 }
             }

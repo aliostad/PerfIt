@@ -11,6 +11,7 @@ namespace PerfIt
         public const string TotalNoOfOperations = "TotalNoOfOperations";
         public const string LastOperationExecutionTime = "LastOperationExecutionTime";
         public const string NumberOfOperationsPerSecond = "NumberOfOperationsPerSecond";
+        public const string NumberOfErrorsPerSecond = "NumberOfErrorsPerSecond";
         public const string CurrentConcurrentOperationsCount = "CurrentConcurrentOperationsCount";
 
         public static readonly string[] StandardCounters = new[]
@@ -19,6 +20,7 @@ namespace PerfIt
             TotalNoOfOperations,
             LastOperationExecutionTime,
             NumberOfOperationsPerSecond,
+            NumberOfErrorsPerSecond,
             CurrentConcurrentOperationsCount
         };
 

@@ -9,7 +9,7 @@ namespace PerfIt
     public interface ITwoStageInstrumentor
     {
         object Start();
-
+        
         void Finish(object token, string instrumentationContext = null);
     }
 }
