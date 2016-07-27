@@ -46,6 +46,11 @@ namespace PerfIt
             {
                 aspect();
             }
+            catch (Exception)
+            {
+                SetErrorContexts(contexts);
+                throw;
+            }
             finally
             {
                 try
@@ -69,6 +74,14 @@ namespace PerfIt
           
         }
 
+        private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
+        {
+            if (contexts != null && contexts.Item2 != null)
+            {
+                contexts.Item2.SetContextToErrorState();
+            }
+        }
+
         public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null)
         {
             Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
@@ -90,6 +103,11 @@ namespace PerfIt
             {
                 await asyncAspect();
             }
+            catch (Exception)
+            {
+                SetErrorContexts(contexts);
+                throw;
+            }
             finally
             {
                 try
@@ -100,16 +118,16 @@ namespace PerfIt
                             _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                     }
 
-                    if(PublishCounters)
+                    if (PublishCounters)
                         CompleteContexts(contexts);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Trace.WriteLine(e.ToString());
-                    if(RaisePublishErrors)
+                    if (RaisePublishErrors)
                         throw;
                 }
-            }           
+            }
         }
 
         private Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> BuildContexts()
@@ -206,9 +224,7 @@ namespace PerfIt
 
         public void Finish(object token, string instrumentationContext = null)
         {
-            var itoken = token as InstrumentationToken;
-            if(itoken == null)
-                throw new ArgumentException("This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
+            var itoken = ValidateToken(token);
 
             if (PublishEvent)
             {
@@ -218,12 +234,14 @@ namespace PerfIt
 
             CompleteContexts(itoken.Contexts);
         }
-
-        private class InstrumentationToken
+        
+        private static InstrumentationToken ValidateToken(object token)
         {
-            public Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> Contexts { get; set; }
-
-            public Stopwatch Kronometer { get; set; }
+            var itoken = token as InstrumentationToken;
+            if (itoken == null)
+                throw new ArgumentException(
+                    "This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
+            return itoken;
         }
     }
 }

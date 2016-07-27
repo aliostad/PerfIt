@@ -32,6 +32,9 @@ namespace PerfIt
             HandlerFactories.Add(CounterTypes.CurrentConcurrentOperationsCount,
                 (categoryName, instanceName) => new CurrentConcurrentCountHandler(categoryName, instanceName));
 
+            HandlerFactories.Add(CounterTypes.NumberOfErrorsPerSecond,
+                (categoryName, instanceName) => new NumberOfErrorsPerSecondHandler(categoryName, instanceName));
+
         }
 
         /// <summary>
