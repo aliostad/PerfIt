@@ -20,7 +20,6 @@ namespace PerfIt
             TotalNoOfOperations,
             LastOperationExecutionTime,
             NumberOfOperationsPerSecond,
-            NumberOfErrorsPerSecond,
             CurrentConcurrentOperationsCount
         };
 

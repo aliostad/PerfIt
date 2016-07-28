@@ -9,7 +9,7 @@
     <projectUrl>https://github.com/aliostad/PerfIt</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2013-2015</copyright>
+    <copyright>Copyright 2013-2016</copyright>
     <tags>castle windsor performance monitor monitoring perfmon counter perfit</tags>
 	<dependencies>
       <dependency id="Castle.Core" version="3.3.3" />	

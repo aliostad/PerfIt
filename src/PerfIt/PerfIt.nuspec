@@ -9,7 +9,7 @@
     <projectUrl>https://github.com/aliostad/PerfIt</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2013-2015</copyright>
+    <copyright>Copyright 2013-2016</copyright>
     <tags>performance monitor monitoring perfmon counter EventSource Instrumentation</tags>
   </metadata>
 </package>
