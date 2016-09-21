@@ -9,5 +9,7 @@ namespace PerfIt
         public Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> Contexts { get; set; }
 
         public Stopwatch Kronometer { get; set; }
+
+        public double SamplingRate { get; set; }
     }
 }

@@ -24,7 +24,6 @@ namespace PerfIt.WebApi
             RaisePublishErrors = false;
             PublishEvent = true;
             CategoryName = categoryName;
-            
         }
 
         private void Init(HttpActionContext actionContext)
@@ -32,6 +31,11 @@ namespace PerfIt.WebApi
             SetEventPolicy();
             SetPublish();
             SetErrorPolicy();
+
+            if (SamplingRate == default(double))
+            {
+                SamplingRate = Constants.DefaultSamplingRate;
+            }
 
             if (InstanceNameProviderType != null)
             {
@@ -92,6 +96,8 @@ namespace PerfIt.WebApi
 
         public string CategoryName { get; set; }
 
+        public double SamplingRate { get; set; }
+
         /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
         /// </summary>
@@ -120,7 +126,7 @@ namespace PerfIt.WebApi
 
             if (PublishCounters)
             {
-                var token = _instrumentor.Start();
+                var token = _instrumentor.Start(SamplingRate);
                 actionContext.Request.Properties.Add(PerfItTwoStageKey, token);
             }
         }

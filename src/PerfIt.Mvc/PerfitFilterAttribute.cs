@@ -35,6 +35,11 @@ namespace PerfIt.Mvc
             SetPublish();
             SetErrorPolicy();
 
+            if (SamplingRate == default(double))
+            {
+                SamplingRate = Constants.DefaultSamplingRate;
+            }
+
             if (InstanceNameProviderType != null)
             {
                 _instanceNameProvider = (IInstanceNameProvider)Activator.CreateInstance(InstanceNameProviderType);
@@ -83,6 +88,8 @@ namespace PerfIt.Mvc
         public bool RaisePublishErrors { get; set; }
 
         public bool PublishEvent { get; set; }
+
+        public double SamplingRate { get; set; }
 
         /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
@@ -159,7 +166,7 @@ namespace PerfIt.Mvc
 
             if (PublishCounters)
             {
-                var token = _instrumentor.Start();
+                var token = _instrumentor.Start(SamplingRate);
                 actionContext.HttpContext.Items[PerfItTwoStageKey] = token;
             }
         }

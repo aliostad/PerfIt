@@ -27,6 +27,7 @@ namespace PerfIt
             PublishCounters = true;
             RaisePublishErrors = true;
             PublishEvent = true;
+            SamplingRate = Constants.DefaultSamplingRate;
 
             SetErrorPolicy();
             SetPublish();
@@ -41,7 +42,9 @@ namespace PerfIt
         public bool RaisePublishErrors { get; set; }
 
         public bool PublishEvent { get; set; }
-       
+
+        public double SamplingRate { get; set; }
+
 
         /// <summary>
         /// Provides the performance counter instance name.
@@ -69,7 +72,7 @@ namespace PerfIt
 
             Func<Task> t = async () => response = await base.SendAsync(request, cancellationToken);
 
-            await instrumenter.InstrumentAsync(t, request.RequestUri.AbsoluteUri);
+            await instrumenter.InstrumentAsync(t, request.RequestUri.AbsoluteUri, SamplingRate);
             return response;
         }
 

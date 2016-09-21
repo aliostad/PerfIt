@@ -91,6 +91,67 @@ namespace PerfIt.Tests
             Assert.IsType<NotImplementedException>(ex.InnerExceptions[0]);
         }
 
+        [Fact]
+        public void InstrumentationSamplingRateLimitsForSync()
+        {
+            int numberOfTimesInstrumented = 0;
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
+            }, true, true, false)
+            {
+                PublishInstrumentationCallback = (a,b,c,d) => numberOfTimesInstrumented++
+            };
 
+            double samplingRate = 0.01;
+            Enumerable.Range(0,1000).ToList().ForEach(x => ins.Instrument( () => { }, samplingRate: samplingRate));
+
+            Assert.InRange(numberOfTimesInstrumented, 1, 100);
+        }
+
+        [Fact]
+        public void InstrumentationSamplingRateLimitsForAsync()
+        {
+            int numberOfTimesInstrumented = 0;
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
+            }, true, true, false)
+            {
+                PublishInstrumentationCallback = (a, b, c, d) => numberOfTimesInstrumented++
+            };
+
+            double samplingRate = 0.01;
+            Enumerable.Range(0, 1000).ToList().ForEach(x => ins.InstrumentAsync(async () => { }, samplingRate: samplingRate).Wait());
+
+            Assert.InRange(numberOfTimesInstrumented, 1, 100);
+        }
+
+        [Fact]
+        public void InstrumentationSamplingRateLimitsForTwoStage()
+        {
+            int numberOfTimesInstrumented = 0;
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
+            }, true, true, false)
+            {
+                PublishInstrumentationCallback = (a, b, c, d) => numberOfTimesInstrumented++
+            };
+
+            double samplingRate = 0.01;
+            Enumerable.Range(0, 1000).ToList().ForEach(x => ins.Finish(ins.Start(samplingRate)));
+
+            Assert.InRange(numberOfTimesInstrumented, 1, 100);
+        }
     }
 }

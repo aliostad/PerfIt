@@ -8,7 +8,7 @@ namespace PerfIt
 {
     public interface ITwoStageInstrumentor
     {
-        object Start();
+        object Start(double samplingRate = Constants.DefaultSamplingRate);
         
         void Finish(object token, string instrumentationContext = null);
     }

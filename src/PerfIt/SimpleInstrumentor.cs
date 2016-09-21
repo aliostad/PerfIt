@@ -12,6 +12,7 @@ namespace PerfIt
 
         private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
+        private Random _random = new Random();
 
         public SimpleInstrumentor(IInstrumentationInfo info, 
             bool publishCounters = true, 
@@ -23,9 +24,16 @@ namespace PerfIt
             PublishCounters = publishCounters;
             RaisePublishErrors = raisePublishErrors;
             PublishEvent = publishEvent;
+
+            PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
         }
 
-        public void Instrument(Action aspect, string instrumentationContext = null)
+        private bool ShouldInstrument(double samplingRate)
+        {
+            return _random.NextDouble() < samplingRate;
+        }
+
+        public void Instrument(Action aspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
         {
             Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
 
@@ -55,9 +63,9 @@ namespace PerfIt
             {
                 try
                 {
-                    if (PublishEvent)
+                    if (PublishEvent && ShouldInstrument(samplingRate))
                     {
-                        InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
+                        PublishInstrumentationCallback(_info.CategoryName,
                             _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                     }
 
@@ -74,6 +82,8 @@ namespace PerfIt
           
         }
 
+        public Action<string, string, long, string> PublishInstrumentationCallback { get; set; }
+
         private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
         {
             if (contexts != null && contexts.Item2 != null)
@@ -82,7 +92,7 @@ namespace PerfIt
             }
         }
 
-        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null)
+        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
         {
             Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
 
@@ -112,9 +122,9 @@ namespace PerfIt
             {
                 try
                 {
-                    if (PublishEvent)
+                    if (PublishEvent && ShouldInstrument(samplingRate))
                     {
-                        InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
+                        PublishInstrumentationCallback(_info.CategoryName,
                             _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                     }
 
@@ -213,22 +223,26 @@ namespace PerfIt
         /// Starts instrumentation
         /// </summary>
         /// <returns>The token to be passed to Finish method when finished</returns>
-        public object Start()
+        public object Start(double samplingRate = Constants.DefaultSamplingRate)
         {
             return new InstrumentationToken()
             {
                 Contexts = BuildContexts(),
-                Kronometer = Stopwatch.StartNew()
+                Kronometer = Stopwatch.StartNew(),
+                SamplingRate = samplingRate
             };
         }
 
         public void Finish(object token, string instrumentationContext = null)
         {
+            if(token == null)
+                return; // not meant to be instrumented prob due to sampling rate
+
             var itoken = ValidateToken(token);
 
-            if (PublishEvent)
+            if (PublishEvent && ShouldInstrument(itoken.SamplingRate))
             {
-                InstrumentationEventSource.Instance.WriteInstrumentationEvent(_info.CategoryName,
+                PublishInstrumentationCallback(_info.CategoryName,
                    _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
             }
 
