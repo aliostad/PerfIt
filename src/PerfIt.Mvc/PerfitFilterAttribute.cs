@@ -164,7 +164,7 @@ namespace PerfIt.Mvc
                 }
             }
 
-            if (PublishCounters)
+            if (PublishCounters || PublishEvent)
             {
                 var token = _instrumentor.Start(SamplingRate);
                 actionContext.HttpContext.Items[PerfItTwoStageKey] = token;

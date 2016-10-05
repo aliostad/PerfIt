@@ -124,7 +124,7 @@ namespace PerfIt.WebApi
                 }
             }
 
-            if (PublishCounters)
+            if (PublishCounters || PublishEvent)
             {
                 var token = _instrumentor.Start(SamplingRate);
                 actionContext.Request.Properties.Add(PerfItTwoStageKey, token);
