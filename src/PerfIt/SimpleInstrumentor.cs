@@ -227,7 +227,7 @@ namespace PerfIt
         {
             return new InstrumentationToken()
             {
-                Contexts = BuildContexts(),
+                Contexts = PublishCounters ? BuildContexts() : null,
                 Kronometer = Stopwatch.StartNew(),
                 SamplingRate = samplingRate
             };
@@ -246,7 +246,8 @@ namespace PerfIt
                    _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
             }
 
-            CompleteContexts(itoken.Contexts);
+            if(PublishCounters)
+                CompleteContexts(itoken.Contexts);
         }
         
         private static InstrumentationToken ValidateToken(object token)
