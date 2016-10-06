@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -199,5 +200,37 @@ namespace PerfIt
         {
             return string.Format("{0}.{1}", rootClass.Name, methodName);
         }
+
+        internal static bool IsFeatureEnabled(string featureName, string categoryName, bool defaultValue)
+        {
+            var value = ConfigurationManager.AppSettings[featureName];
+            if (!string.IsNullOrEmpty(value))
+            {
+                return bool.Parse(value);
+            }
+
+            var categoryValue = ConfigurationManager.AppSettings[string.Format("{0}:{1}", featureName, categoryName)];
+            if (!string.IsNullOrEmpty(categoryValue))
+            {
+                return bool.Parse(categoryValue);
+            }
+
+            return defaultValue;
+        }
+
+        public static bool IsPublishCounterEnabled(string catgeoryName, bool defaultValue)
+        {
+            return IsFeatureEnabled(Constants.PerfItPublishCounters, catgeoryName, defaultValue);
+        }
+
+        public static bool IsPublishErrorsEnabled(string catgeoryName, bool defaultValue)
+        {
+            return IsFeatureEnabled(Constants.PerfItPublishErrors, catgeoryName, defaultValue);
+        }
+        public static bool IsPublishEventsEnabled(string catgeoryName, bool defaultValue)
+        {
+            return IsFeatureEnabled(Constants.PerfItPublishEvent, catgeoryName, defaultValue);
+        }
+
     }
 }

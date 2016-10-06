@@ -32,7 +32,7 @@ namespace PerfIt.Mvc
         private void Init(ActionExecutingContext actionContext)
         {
             SetEventPolicy();
-            SetPublish();
+            SetPublishCounterPolicy();
             SetErrorPolicy();
 
             if (SamplingRate == default(double))
@@ -101,22 +101,19 @@ namespace PerfIt.Mvc
         /// </summary>
         public Type InstrumentationContextProviderType { get; set; }
 
-        private void SetPublish()
+        private void SetPublishCounterPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? PublishCounters.ToString();
-            PublishCounters = Convert.ToBoolean(value);
+            PublishCounters = PerfItRuntime.IsPublishCounterEnabled(CategoryName, PublishCounters);
         }
 
         protected void SetErrorPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
-            RaisePublishErrors = Convert.ToBoolean(value);
+            RaisePublishErrors = PerfItRuntime.IsPublishErrorsEnabled(CategoryName, RaisePublishErrors);
         }
 
         protected void SetEventPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
-            PublishEvent = Convert.ToBoolean(value);
+            PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
         }
 
         public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)

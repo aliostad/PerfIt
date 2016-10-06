@@ -3,15 +3,15 @@
 PerfIt!
 ======
 
-Windows performance monitoring and Eevent Tracing for Windows (ETW) instrumentation for .NET (including ASP.NET Web API)
+Windows performance monitoring and Event Tracing for Windows (ETW) instrumentation for .NET (including ASP.NET Web API)
 
 FAQ
 ===
 
 **What is PerfIt?**
 
-PerfIt is a performance counter publishing library for .NET. By a little bit of setup, it *painlessly* publishes standard performance counters.
-What is also new in version 1.0, is the **ETW events** that can be published as part of 
+PerfIt is a performance counter publishing library for .NET. With a little bit of setup, it *painlessly* publishes standard performance counters.
+What is also new in version 1.0, is the **ETW events** (ETW = Event Tracing for Windows) that can be published as part of instrumentation of the application. In version 2.0, you can set a `SamplingRate` so it does not generate a lot of data in case your system handles a lot of load.
 
 **Why should I use it?**
 
@@ -30,6 +30,22 @@ It is negligible compared to the code you would normally find within an API. It 
 **Can I use it with ASP.NET Web API 2?**
 
 Yes, you can use it with any version of the ASP.NET Web API. There is a problem (that has a workaround) when registering Web API 2 which is an inherent problem with the `InstallUtil.exe` which does not honour `AssemblyRedirect` and the workaround has been discussed below.
+
+**What if I just want ETW events and no Performance Counters since installing them is a hassle?**
+
+You can turn only ETW or Performance Counters or both (or None).
+
+**I am using a library which publishes counters and I have my own counters in my project and I want to turn off library counters but keep mine?**
+
+As of version 2.1, you can control counters or raising ETW by their category name in your app.config (or web.config) appSettings. The syntax for category-based configuration is to have keys as `"perfit:<feature>:<categoryName>"` where feature is one of "publishCounters", "publishErrors" and "publishEvent" and value is boolean. The previous global syntax of `"perfit:<feature>"` which turns features blanket on or off. [Bear in mind, appSettings overrides values set in code.]
+
+Example:
+
+```
+<add key="perfit:publishCounters" value="true"/>
+<add key="perfit:publishErrors:a" value="false"/>
+```
+In this case, `publishCounters` is globally on and `publishErrors` for category `a` is off.
 
 Getting Started (Measuring any part of your code)
 ==
@@ -124,7 +140,7 @@ An alternative method is to supply instance name (also useful when you want to s
 
 ``` C#
 [PerfItFilter(Description = "Gets all items",
-    Counters = ..., 
+    Counters = ...,
     InstanceName="AnyName")]
 public string Get()
 {
@@ -144,6 +160,9 @@ For whatever reason you might decide to turn off publishing counters. All you ha
   </appSettings>
 
 ```
+
+As of version 2.1, there is option to turn on and off by CategoryName - see above.
+
 ### Not to throw publishing errors
 
 By default, publishing performance counters are regarded as having the same importance as the application's business logic and all publishing errors are thrown. If you would like to change this behaviour, you can do so both in code or in config:
@@ -163,6 +182,9 @@ Or by configuration:
   </appSettings>
 
 ```
+
+If you need to turn on or off publishErrors, publishCounters or publishEvents by category, please see examples above.
+
 ### FileNotFoundException when registering the DLL using InstallUtil.exe
 
 A common problem is to encounter `FileNotFoundException` when registering your counters using `InstallUtil`. This is more common when your use Web API 2. In any case, this is a problem with InstallUtil not honouring your assembly redirects. To solve the problem (and it is just a workaround), simply copy the assembly redirect directives to `InstallUtil.exe.config`, run the installation and then remove them.
