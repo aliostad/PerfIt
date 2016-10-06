@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    [EventSource(Name = "PerIt!Instrumentation", Guid = "{010380F8-40A7-45C3-B87B-FD4C6CC8700A}")]
+    [EventSource(Name = "PerfIt-Instrumentation")]
     public class InstrumentationEventSource : EventSource
     {
         public static readonly InstrumentationEventSource Instance = new InstrumentationEventSource();
