@@ -41,7 +41,7 @@ As of version 2.1, you can control counters or raising ETW by their category nam
 
 Example:
 
-```
+``` XML
 <add key="perfit:publishCounters" value="true"/>
 <add key="perfit:publishErrors:a" value="false"/>
 ```
