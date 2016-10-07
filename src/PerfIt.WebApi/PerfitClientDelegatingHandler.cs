@@ -45,7 +45,6 @@ namespace PerfIt
 
         public double SamplingRate { get; set; }
 
-
         /// <summary>
         /// Provides the performance counter instance name.
         /// Default impl combines method and the host name of the request.
@@ -65,8 +64,12 @@ namespace PerfIt
                 Counters = counters,
                 Description = "Counter for " + insName,
                 InstanceName = insName,
-                CategoryName = _categoryName
-            }, PublishCounters, PublishEvent, RaisePublishErrors));
+                CategoryName = _categoryName,
+                SamplingRate = SamplingRate,
+                PublishCounters = PublishCounters,
+                PublishEvent = PublishEvent,
+                RaisePublishErrors = RaisePublishErrors
+            }));
 
             HttpResponseMessage response = null;
 

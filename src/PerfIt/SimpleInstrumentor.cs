@@ -14,16 +14,9 @@ namespace PerfIt
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
         private Random _random = new Random();
 
-        public SimpleInstrumentor(IInstrumentationInfo info, 
-            bool publishCounters = true, 
-            bool publishEvent = true,
-            bool raisePublishErrors = false)
+        public SimpleInstrumentor(IInstrumentationInfo info)
         {
             _info = info;
-
-            PublishCounters = publishCounters;
-            RaisePublishErrors = raisePublishErrors;
-            PublishEvent = publishEvent;
 
             PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
         }
@@ -39,13 +32,13 @@ namespace PerfIt
 
             try
             {
-                if (PublishCounters)
+                if (_info.PublishCounters)
                     contexts = BuildContexts();
             }
             catch (Exception e)
             {
                 Trace.WriteLine(e.ToString());
-                if (RaisePublishErrors)
+                if (_info.RaisePublishErrors)
                     throw;
             }
 
@@ -63,19 +56,19 @@ namespace PerfIt
             {
                 try
                 {
-                    if (PublishEvent && ShouldInstrument(samplingRate))
+                    if (_info.PublishEvent && ShouldInstrument(samplingRate))
                     {
                         PublishInstrumentationCallback(_info.CategoryName,
                             _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                     }
 
-                    if (PublishCounters)
+                    if (_info.PublishCounters)
                         CompleteContexts(contexts);
                 }
                 catch (Exception e)
                 {
                     Trace.WriteLine(e.ToString());
-                    if (RaisePublishErrors)
+                    if (_info.RaisePublishErrors)
                         throw;
                 }
             }           
@@ -98,13 +91,13 @@ namespace PerfIt
 
             try
             {
-                if (PublishCounters)
+                if (_info.PublishCounters)
                     contexts = BuildContexts();
             }
             catch (Exception e)
             {
                 Trace.WriteLine(e.ToString());
-                if (RaisePublishErrors)
+                if (_info.RaisePublishErrors)
                     throw;
             }
 
@@ -122,19 +115,19 @@ namespace PerfIt
             {
                 try
                 {
-                    if (PublishEvent && ShouldInstrument(samplingRate))
+                    if (_info.PublishEvent && ShouldInstrument(samplingRate))
                     {
                         PublishInstrumentationCallback(_info.CategoryName,
                             _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
                     }
 
-                    if (PublishCounters)
+                    if (_info.PublishCounters)
                         CompleteContexts(contexts);
                 }
                 catch (Exception e)
                 {
                     Trace.WriteLine(e.ToString());
-                    if (RaisePublishErrors)
+                    if (_info.RaisePublishErrors)
                         throw;
                 }
             }
@@ -148,7 +141,7 @@ namespace PerfIt
             var ctx = new Dictionary<string, object>();
 
             ctx.Add(Constants.PerfItKey, new PerfItContext());
-            ctx.Add(Constants.PerfItPublishErrorsKey, this.RaisePublishErrors);
+            ctx.Add(Constants.PerfItPublishErrorsKey, _info.RaisePublishErrors);
             foreach (var context in contexts)
             {
                 try
@@ -158,7 +151,7 @@ namespace PerfIt
                 catch (Exception e)
                 {
                     Trace.TraceError(e.ToString());
-                    if (RaisePublishErrors)
+                    if (_info.RaisePublishErrors)
                         throw;
                 }
             }
@@ -178,7 +171,7 @@ namespace PerfIt
             catch (Exception e)
             {
                 Trace.TraceError(e.ToString());
-                if (RaisePublishErrors)
+                if (_info.RaisePublishErrors)
                     throw;
             }
         }
@@ -203,12 +196,6 @@ namespace PerfIt
             return string.Format("{0}_{1}", counterName, instanceName);
         }
 
-        public bool PublishCounters { get; set; }
-
-        public bool RaisePublishErrors { get; set; }
-
-        public bool PublishEvent { get; set; }
-
         public void Dispose()
         {          
             foreach (var context in _counterContexts.Values)
@@ -227,7 +214,7 @@ namespace PerfIt
         {
             return new InstrumentationToken()
             {
-                Contexts = PublishCounters ? BuildContexts() : null,
+                Contexts = _info.PublishCounters ? BuildContexts() : null,
                 Kronometer = Stopwatch.StartNew(),
                 SamplingRate = samplingRate
             };
@@ -240,13 +227,13 @@ namespace PerfIt
 
             var itoken = ValidateToken(token);
 
-            if (PublishEvent && ShouldInstrument(itoken.SamplingRate))
+            if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
             {
                 PublishInstrumentationCallback(_info.CategoryName,
                    _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
             }
 
-            if(PublishCounters)
+            if (_info.PublishCounters)
                 CompleteContexts(itoken.Contexts);
         }
         

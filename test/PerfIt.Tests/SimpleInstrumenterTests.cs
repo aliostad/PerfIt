@@ -65,8 +65,11 @@ namespace PerfIt.Tests
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
-                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
-            }, false, true, true);
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
+                PublishCounters = false,
+                PublishEvent = true,
+                RaisePublishErrors = true
+            });
 
             ins.InstrumentAsync(() => Task.Delay(100), "test...").Wait();
         }
@@ -79,8 +82,11 @@ namespace PerfIt.Tests
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
-                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
-            }, true, true, false);
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
+                PublishCounters = true,
+                PublishEvent = true,
+                RaisePublishErrors = false
+            });
 
             var ex = Assert.Throws<AggregateException>(() => ins.InstrumentAsync(() => 
             {
@@ -100,8 +106,11 @@ namespace PerfIt.Tests
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
-                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
-            }, true, true, false)
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
+                PublishCounters = true,
+                PublishEvent = true,
+                RaisePublishErrors = false
+            })
             {
                 PublishInstrumentationCallback = (a,b,c,d) => numberOfTimesInstrumented++
             };
@@ -121,8 +130,11 @@ namespace PerfIt.Tests
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
-                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
-            }, true, true, false)
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
+                PublishCounters = true,
+                PublishEvent = true,
+                RaisePublishErrors = false
+            })
             {
                 PublishInstrumentationCallback = (a, b, c, d) => numberOfTimesInstrumented++
             };
@@ -142,8 +154,11 @@ namespace PerfIt.Tests
                 Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
-                CategoryName = "DOESNOTEXISTDONTLOOKFORIT"
-            }, true, true, false)
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
+                PublishCounters = true,
+                PublishEvent = true,
+                RaisePublishErrors = false
+            })
             {
                 PublishInstrumentationCallback = (a, b, c, d) => numberOfTimesInstrumented++
             };

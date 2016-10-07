@@ -21,6 +21,9 @@ namespace PerfIt.Castle.Interception
         {
             Description = string.Empty;
             CategoryName = categoryName;
+            PublishCounters = true;
+            RaisePublishErrors = false;
+            PublishEvent = true;
         }
 
         /// <summary>
@@ -42,6 +45,13 @@ namespace PerfIt.Castle.Interception
 
         public string CategoryName { get; set; }
 
+        public bool PublishCounters { get; set; }
+
+        public bool RaisePublishErrors { get; set; }
+
+        public bool PublishEvent { get; set; }
+
+        public double SamplingRate { get; set; }
       
     }
 }

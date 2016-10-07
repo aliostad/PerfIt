@@ -37,10 +37,6 @@ namespace PerfIt.Castle.Interception
 
         private void Init()
         {
-            SetEventPolicy();
-            SetPublish();
-            SetErrorPolicy();
-
             _instrumentors = new ConcurrentDictionary<string, SimpleInstrumentor>();
 
 
@@ -67,6 +63,9 @@ namespace PerfIt.Castle.Interception
             if (instrumentationInfo != null)
             {
                 var instanceName = instrumentationInfo.InstanceName;
+                PublishCounters = instrumentationInfo.PublishCounters;
+
+
                 if (string.IsNullOrEmpty(instanceName) && _instanceNameProvider != null)
                     instanceName = _instanceNameProvider.GetInstanceName(methodInfo);
 
@@ -84,14 +83,21 @@ namespace PerfIt.Castle.Interception
                     throw new InvalidOperationException("The Instrumentation Context Cannot be Null. Define a InstrumentationContextProvider implementation.");
                 }
 
+                SetEventPolicy();
+                SetPublishCounterPolicy();
+                SetErrorPolicy();
+
                 var instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
                 {
                     Description = instrumentationInfo.Description,
                     Counters = instrumentationInfo.Counters,
                     InstanceName = instanceName,
-                    CategoryName = string.IsNullOrEmpty(this.CategoryName) ? instrumentationInfo.CategoryName : this.CategoryName
-
-                }, PublishCounters, PublishEvent, RaisePublishErrors);
+                    CategoryName = string.IsNullOrEmpty(this.CategoryName) ? instrumentationInfo.CategoryName : this.CategoryName,
+                    SamplingRate = SamplingRate,
+                    PublishCounters = PublishCounters,
+                    PublishEvent = PublishEvent,
+                    RaisePublishErrors = RaisePublishErrors
+                });
 
                 _instrumentors.AddOrUpdate(instrumentationContext, instrumentor, (key, inst) => instrumentor);
                 return instrumentor;
@@ -139,11 +145,11 @@ namespace PerfIt.Castle.Interception
                         (   (returnType == typeof(Task) || 
                             (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)))))
                     {
-                        instrumentor.InstrumentAsync(async () => invocation.Proceed());
+                        instrumentor.InstrumentAsync(async () => invocation.Proceed(), instrumentationContext: instrumentationContext, samplingRate: SamplingRate);
                     }
                     else
                     {
-                        instrumentor.Instrument(invocation.Proceed);
+                        instrumentor.Instrument(invocation.Proceed, instrumentationContext: instrumentationContext, samplingRate: SamplingRate);
                     }
                     
                 }
@@ -158,31 +164,26 @@ namespace PerfIt.Castle.Interception
 
 
 
-        private void SetPublish()
+        private void SetPublishCounterPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? PublishCounters.ToString();
-            PublishCounters = Convert.ToBoolean(value);
+            PublishCounters = PerfItRuntime.IsPublishCounterEnabled(CategoryName, PublishCounters);
         }
 
         protected void SetErrorPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
-            RaisePublishErrors = Convert.ToBoolean(value);
+            RaisePublishErrors = PerfItRuntime.IsPublishErrorsEnabled(CategoryName, RaisePublishErrors);
         }
 
         protected void SetEventPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
-            PublishEvent = Convert.ToBoolean(value);
+            PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
         }
-
-
 
         public Type InstanceNameProviderType { get; set; }
 
         public Type InstrumentationContextProviderType { get; set; }
 
-
+        public double SamplingRate { get; set; }
 
         public bool PublishCounters { get; set; }
 
@@ -191,7 +192,5 @@ namespace PerfIt.Castle.Interception
         public bool PublishEvent { get; set; }
 
         public string CategoryName { get; set; }
-
-
     }
 }

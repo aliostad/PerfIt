@@ -29,5 +29,26 @@ namespace PerfIt
         /// </summary>
         string CategoryName { get; set; }
 
+        /// <summary>
+        /// Whether publish windows performance counters
+        /// </summary>
+        bool PublishCounters { get; set; }
+
+        /// <summary>
+        /// Whether throw exceptions if publishing counters/events failed or only write to trace
+        /// </summary>
+        bool RaisePublishErrors { get; set; }
+
+        /// <summary>
+        /// Whether to publish ETW events
+        /// </summary>
+        bool PublishEvent { get; set; }
+
+        /// <summary>
+        /// A value between 0.0 and 1.0 as the proportion of calls to be sampled.
+        /// Useful if you are generating a lot of ETW events
+        /// </summary>
+        double SamplingRate { get; set; }
+
     }
 }
