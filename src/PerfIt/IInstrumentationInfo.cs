@@ -1,5 +1,9 @@
 ﻿namespace PerfIt
 {
+    // TODO: TBD: could potentially call IInstrumentInfo ICloneable, but will leave that alone for now
+    /// <summary>
+    /// Provides InstrumentationInfo to the project.
+    /// </summary>
     public interface IInstrumentationInfo
     {
         /// <summary>
@@ -44,6 +48,5 @@
         /// Useful if you are generating a lot of ETW events
         /// </summary>
         double SamplingRate { get; set; }
-
     }
 }

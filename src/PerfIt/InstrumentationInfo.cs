@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PerfIt
+﻿namespace PerfIt
 {
+    /// <summary>
+    /// Provides InstrumentationInfo to the project.
+    /// </summary>
     public class InstrumentationInfo : IInstrumentationInfo
     {
         public string InstanceName { get; set; }
@@ -36,5 +33,28 @@ namespace PerfIt
         /// Useful if you are generating a lot of ETW events
         /// </summary>
         public double SamplingRate { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public InstrumentationInfo()
+        {
+        }
+
+        /// <summary>
+        /// Copy Constructor
+        /// </summary>
+        /// <param name="other"></param>
+        public InstrumentationInfo(IInstrumentationInfo other)
+        {
+            CategoryName = other.CategoryName;
+            Counters = other.Counters;
+            Description = other.Description;
+            InstanceName = other.InstanceName;
+            PublishCounters = other.PublishCounters;
+            PublishEvent = other.PublishEvent;
+            RaisePublishErrors = other.RaisePublishErrors;
+            SamplingRate = other.SamplingRate;
+        }
     }
 }
