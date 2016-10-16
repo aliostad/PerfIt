@@ -1,15 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public interface IInstrumentor
+    /// <summary>
+    /// Instrumentor interface.
+    /// </summary>
+    public interface IInstrumentor : IDisposable
     {
-        void Instrument(Action aspect, string instrumentationContext = null, double samplingRate=1.0);
+        /// <summary>
+        /// Provides an Instrument entry point.
+        /// </summary>
+        /// <param name="aspect"></param>
+        /// <param name="instrumentationContext"></param>
+        /// <param name="samplingRate"></param>
+        /// <see cref="Constants.DefaultSamplingRate"/>
+        void Instrument(Action aspect, string instrumentationContext = null,
+            double samplingRate = Constants.DefaultSamplingRate);
 
-        Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, double samplingRate = 1.0);
+        /// <summary>
+        /// Provides an Asynchronous Instrument entry point.
+        /// </summary>
+        /// <param name="asyncAspect"></param>
+        /// <param name="instrumentationContext"></param>
+        /// <param name="samplingRate"></param>
+        /// <returns></returns>
+        /// <see cref="Constants.DefaultSamplingRate"/>
+        Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null,
+            double samplingRate = Constants.DefaultSamplingRate);
     }
 }
