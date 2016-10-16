@@ -1,57 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-
+﻿using System.Diagnostics;
 
 namespace PerfIt.Castle.Interception
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class PerfItAttribute : Attribute, IInstrumentationInfo
+    // TODO: TBD: could probably have the Attribute, IInstrumentationInfoHost pattern repeated throughout and capture the Discoverers as a common cross cutting concern... But for minor Mvc, WebApi, etc, differences.
+    public class PerfItAttribute : InstrumentationInfoAttributeBase
     {
-
-        public PerfItAttribute():this("")
+        public PerfItAttribute()
+            : this(string.Empty)
         {
-            Trace.TraceWarning("Performance Counter not specified at the Method level. Make sure you set it's at least set at the class level");
-       }
-
-        public PerfItAttribute(string categoryName)
-        {
-            Description = string.Empty;
-            CategoryName = categoryName;
-            PublishCounters = true;
-            RaisePublishErrors = false;
-            PublishEvent = true;
+            Trace.TraceWarning(
+                "Performance Counter not specified at the Method level. Make sure you set it's at least set at the class level");
         }
 
-        /// <summary>
-        /// Optional name of the counter. 
-        /// If not specified it will be [controller].[action] for each counter.
-        /// If it is provided, make sure it is UNIQUE within the project
-        /// </summary>
-        public string InstanceName { get; set; }
-
-        /// <summary>
-        /// Description of the counter. Will be published to counter metadata visible in Perfmon.
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Counter types. Each value as a string.
-        /// </summary>
-        public string[] Counters { get; set; }
-
-        public string CategoryName { get; set; }
-
-        public bool PublishCounters { get; set; }
-
-        public bool RaisePublishErrors { get; set; }
-
-        public bool PublishEvent { get; set; }
-
-        public double SamplingRate { get; set; }
-      
+        public PerfItAttribute(string categoryName, string description = null)
+            : base(categoryName, description)
+        {
+        }
     }
 }

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace PerfIt
+﻿namespace PerfIt
 {
+    // TODO: TBD: could potentially call IInstrumentInfo ICloneable, but will leave that alone for now
+    /// <summary>
+    /// Provides InstrumentationInfo to the project.
+    /// </summary>
     public interface IInstrumentationInfo
     {
         /// <summary>
@@ -45,10 +44,14 @@ namespace PerfIt
         bool PublishEvent { get; set; }
 
         /// <summary>
+        /// Gets whether RequiresInstrumentationContext.
+        /// </summary>
+        bool RequiresInstrumentationContext { get; }
+
+        /// <summary>
         /// A value between 0.0 and 1.0 as the proportion of calls to be sampled.
         /// Useful if you are generating a lot of ETW events
         /// </summary>
         double SamplingRate { get; set; }
-
     }
 }

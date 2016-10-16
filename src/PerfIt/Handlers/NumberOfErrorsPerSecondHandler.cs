@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
-namespace PerfIt.Handlers
+namespace PerfIt
 {
+    /// <summary>
+    /// Number of Errors Per Second Counter handler.
+    /// </summary>
     public class NumberOfErrorsPerSecondHandler : CounterHandlerBase
     {
         private Lazy<PerformanceCounter> _counter;
+
+        [Obsolete] // TODO: TBD: unnecessary?
         private const string TimeTakenTicksKey = "NumberOfOperationsPerErrorsHandler_#_StopWatch_#_";
 
-        public NumberOfErrorsPerSecondHandler
-            (
-            string categoryName,
-            string instanceName)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <param name="instanceName"></param>
+        public NumberOfErrorsPerSecondHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
            BuildCounters();
@@ -31,40 +36,31 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            if (contextBag.ContainsKey(Constants.PerfItContextHasErroredKey))
-            {
-                _counter.Value.Increment();
-            }
+            if (!contextBag.ContainsKey(Constants.PerfItContextHasErroredKey)) return;
+            _counter.Value.Increment();
         }
 
         protected override void BuildCounters(bool newInstanceName = false)
         {
-            _counter = new Lazy<PerformanceCounter>(() =>
+            _counter = new Lazy<PerformanceCounter>(() => new PerformanceCounter
             {
-                var counter = new PerformanceCounter()
-                {
-                    CategoryName = _categoryName,
-                    CounterName = Name,
-                    InstanceName = GetInstanceName(newInstanceName),
-                    ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
-                };
-                counter.RawValue = 0;
-                return counter;
+                CategoryName = CategoryName,
+                CounterName = Name,
+                InstanceName = GetInstanceName(newInstanceName),
+                ReadOnly = false,
+                InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                RawValue = 0
             });
         }
 
-        protected override CounterCreationData[] DoGetCreationData()
+        protected override IEnumerable<CounterCreationData> DoGetCreationData()
         {
-            var counterCreationDatas = new CounterCreationData[1];
-            counterCreationDatas[0] = new CounterCreationData()
+            yield return new CounterCreationData
             {
                 CounterType = PerformanceCounterType.RateOfCountsPerSecond32,
                 CounterName = Name,
                 CounterHelp = "# of error operations / sec"
             };
-
-            return counterCreationDatas;
         }
     }
 }

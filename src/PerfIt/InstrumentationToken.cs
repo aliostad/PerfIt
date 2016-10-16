@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-
-namespace PerfIt
+﻿namespace PerfIt
 {
+    /// <summary>
+    /// Provides a Token for Instrumentation.
+    /// </summary>
     public class InstrumentationToken
     {
-        public Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> Contexts { get; set; }
+        /// <summary>
+        /// Gets or sets the Context.
+        /// </summary>
+        public InstrumentationContext Context { get; set; }
 
-        public Stopwatch Kronometer { get; set; }
-
+        /// <summary>
+        /// Gets or sets the SamplingRate.
+        /// </summary>
         public double SamplingRate { get; set; }
     }
 }

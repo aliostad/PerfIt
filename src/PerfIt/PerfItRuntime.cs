@@ -4,38 +4,44 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using PerfIt.Handlers;
 
 namespace PerfIt
 {
+    // TODO: TBD: re-factor me!
+    /// <summary>
+    /// PerfIt Runtime nerve center.
+    /// </summary>
     public static class PerfItRuntime
     {
         static PerfItRuntime()
         {
-
-            HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
-
-            HandlerFactories.Add(CounterTypes.TotalNoOfOperations,
-                (categoryName, instanceName) => new TotalCountHandler(categoryName, instanceName));
-
-            HandlerFactories.Add(CounterTypes.AverageTimeTaken,
-                (categoryName, instanceName) => new AverageTimeHandler(categoryName, instanceName));
-
-            HandlerFactories.Add(CounterTypes.LastOperationExecutionTime,
-                (categoryName, instanceName) => new LastOperationExecutionTimeHandler(categoryName, instanceName));
-
-            HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
-                (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName));
-
-            HandlerFactories.Add(CounterTypes.CurrentConcurrentOperationsCount,
-                (categoryName, instanceName) => new CurrentConcurrentCountHandler(categoryName, instanceName));
-
-            HandlerFactories.Add(CounterTypes.NumberOfErrorsPerSecond,
-                (categoryName, instanceName) => new NumberOfErrorsPerSecondHandler(categoryName, instanceName));
-
+            HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>
+            {
+                {
+                    CounterTypes.TotalNoOfOperations,
+                    (categoryName, instanceName) => new TotalCountHandler(categoryName, instanceName)
+                },
+                {
+                    CounterTypes.AverageTimeTaken,
+                    (categoryName, instanceName) => new AverageTimeHandler(categoryName, instanceName)
+                },
+                {
+                    CounterTypes.LastOperationExecutionTime,
+                    (categoryName, instanceName) => new LastOperationExecutionTimeHandler(categoryName, instanceName)
+                },
+                {
+                    CounterTypes.NumberOfOperationsPerSecond,
+                    (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName)
+                },
+                {
+                    CounterTypes.CurrentConcurrentOperationsCount,
+                    (categoryName, instanceName) => new CurrentConcurrentCountHandler(categoryName, instanceName)
+                },
+                {
+                    CounterTypes.NumberOfErrorsPerSecond,
+                    (categoryName, instanceName) => new NumberOfErrorsPerSecondHandler(categoryName, instanceName)
+                }
+            };
         }
 
         /// <summary>
@@ -48,6 +54,7 @@ namespace PerfIt
         /// <summary>
         /// Uninstalls performance counters in the current assembly using PerfItFilterAttribute.
         /// </summary>
+        /// <param name="installerAssembly"></param>
         /// <param name="categoryName">if you have provided a categoryName for the installation, you must supply the same here</param>
         public static void Uninstall(Assembly installerAssembly, string categoryName = null)
         {
@@ -66,16 +73,13 @@ namespace PerfIt
             }
         }
 
-
         /// <summary>
         /// Installs performance counters in the assembly
         /// </summary>
         /// <param name="installerAssembly"></param>
         /// <param name="discoverer">object that can discover aspects inside and assembly</param>
         /// <param name="categoryName">category name for the metrics. If not provided, it will use the assembly name</param>
-        public static void Install(Assembly installerAssembly,
-            IInstrumentationDiscoverer discoverer,
-            string categoryName = null)
+        public static void Install(Assembly installerAssembly, IInstrumentationDiscoverer discoverer, string categoryName = null)
         {
             Uninstall(installerAssembly, discoverer, categoryName);
 
@@ -92,16 +96,12 @@ namespace PerfIt
             var counterCreationDataCollection = new CounterCreationDataCollection();
             Trace.TraceInformation("Number of filters: {0}", instrumentationInfos.Length);
 
-
             foreach (var group in instrumentationInfos.GroupBy(x => x.CategoryName))
             {
                 foreach (var instrumentationInfo in group)
                 {
 
                     Trace.TraceInformation("Setting up filters '{0}'", instrumentationInfo.Description);
-
-                    if (instrumentationInfo.Counters == null || instrumentationInfo.Counters.Length == 0)
-                        instrumentationInfo.Counters = CounterTypes.StandardCounters;
 
                     foreach (var counterType in instrumentationInfo.Counters)
                     {
@@ -117,7 +117,7 @@ namespace PerfIt
 
                         using (var counterHandler = HandlerFactories[counterType](categoryName, instrumentationInfo.InstanceName))
                         {
-                            counterCreationDataCollection.AddRange(counterHandler.BuildCreationData());
+                            counterCreationDataCollection.AddRange(counterHandler.BuildCreationData().ToArray());
                             Trace.TraceInformation("Added counter type '{0}'", counterType);
                         }
                     }
@@ -130,13 +130,9 @@ namespace PerfIt
             }
 
             Trace.TraceInformation("Built category '{0}' with {1} items", categoryName, counterCreationDataCollection.Count);
-
-
         }
 
-        public static void Uninstall(Assembly installerAssembly,
-        IInstrumentationDiscoverer discoverer,
-        string categoryName = null)
+        public static void Uninstall(Assembly installerAssembly, IInstrumentationDiscoverer discoverer, string categoryName = null)
         {
 
             if (string.IsNullOrEmpty(categoryName))
@@ -153,12 +149,10 @@ namespace PerfIt
             }
         }
 
-
         /// <summary>
         ///  installs 4 standard counters for the category provided
         /// </summary>
         /// <param name="categoryName"></param>
-
         public static void InstallStandardCounters(string categoryName)
         {
             if (PerformanceCounterCategory.Exists(categoryName))
@@ -231,6 +225,5 @@ namespace PerfIt
         {
             return IsFeatureEnabled(Constants.PerfItPublishEvent, catgeoryName, defaultValue);
         }
-
     }
 }

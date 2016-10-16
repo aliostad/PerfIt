@@ -45,9 +45,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeDiscoverer.cs" />
+    <Compile Include="InstrumentorRequiredEventArgs.cs" />
     <Compile Include="InstrumentationContextProvider.cs" />
     <Compile Include="IInstanceNameProvider.cs" />
     <Compile Include="IInstrumentationContextProvider.cs" />
+    <Compile Include="InterceptorExtensionMethods.cs" />
     <Compile Include="MethodNameInstanceNameProvider.cs" />
     <Compile Include="PerfItAttribute.cs" />
     <Compile Include="PerfItInterceptor.cs" />
@@ -63,7 +65,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
- <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
@@ -71,4 +73,3 @@
   </Target>
   -->
 </Project>
-

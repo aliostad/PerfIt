@@ -1,29 +1,78 @@
 ﻿using System;
-using System.Configuration;
 using System.Diagnostics;
-using System.Security.Principal;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
 namespace PerfIt.WebApi
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class PerfItFilterAttribute : InstrumentationContextProviderBaseAttribute, IInstrumentationInfo
+    public class PerfItFilterAttribute : InstrumentationContextProviderBaseAttribute
     {
+        public IInstrumentationInfo Info { get; private set; }
+
         private ITwoStageInstrumentor _instrumentor;
-        private IInstanceNameProvider _instanceNameProvider = null;
-        private IInstrumentationContextProvider _instrumentationContextProvider = null;
+        private IInstanceNameProvider _instanceNameProvider;
+        private IInstrumentationContextProvider _instrumentationContextProvider;
         private const string PerfItTwoStageKey = "__#_PerfItTwoStageKey_#__";
-        private bool _inited = false;
-        private object _lock = new object();
+        private bool _inited;
+        private readonly object _lock = new object();
 
         public PerfItFilterAttribute(string categoryName)
         {
-            Description = string.Empty;
-            PublishCounters = true;
-            RaisePublishErrors = false;
-            PublishEvent = true;
-            CategoryName = categoryName;
+            Info = new InstrumentationInfo {CategoryName = categoryName};
+        }
+
+        /// <summary>
+        /// Optional InstanceName of the Counter. If not specified it will be [Controller].[Action]
+        /// for each Counter. If it is provided, make sure it is Unique within the project
+        /// </summary>
+        public string InstanceName
+        {
+            get { return Info.InstanceName; }
+            set { Info.InstanceName = value; }
+        }
+
+        /// <summary>
+        /// Description of the counter. Will be published to counter metadata visible in Perfmon.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Counters. Each value as a string.
+        /// </summary>
+        public string[] Counters
+        {
+            get { return Info.Counters; }
+            set { Info.Counters = value; }
+        }
+
+        public bool PublishCounters
+        {
+            get { return Info.PublishCounters; }
+            set { Info.PublishCounters = value; }
+        }
+
+        public bool RaisePublishErrors
+        {
+            get { return Info.RaisePublishErrors; }
+            set { Info.RaisePublishErrors = value; }
+        }
+
+        public bool PublishEvent
+        {
+            get { return Info.PublishEvent; }
+            set { Info.PublishEvent = value; }
+        }
+
+        public string CategoryName
+        {
+            get { return Info.CategoryName; }
+            set { Info.CategoryName = value; }
+        }
+
+        public double SamplingRate
+        {
+            get { return Info.SamplingRate; }
+            set { Info.SamplingRate = value; }
         }
 
         private void Init(HttpActionContext actionContext)
@@ -32,75 +81,34 @@ namespace PerfIt.WebApi
             SetPublishCounterPolicy();
             SetErrorPolicy();
 
-            if (SamplingRate == default(double))
-            {
-                SamplingRate = Constants.DefaultSamplingRate;
-            }
-
             if (InstanceNameProviderType != null)
             {
-                _instanceNameProvider = (IInstanceNameProvider)Activator.CreateInstance(InstanceNameProviderType);
+                _instanceNameProvider = (IInstanceNameProvider) Activator.CreateInstance(
+                    InstanceNameProviderType);
             }
 
             if (InstrumentationContextProviderType != null)
             {
-                _instrumentationContextProvider = (IInstrumentationContextProvider)Activator.CreateInstance(InstrumentationContextProviderType);
-            }
-
-            if (Counters == null || Counters.Length == 0)
-            {
-                Counters = CounterTypes.StandardCounters;
+                _instrumentationContextProvider = (IInstrumentationContextProvider) Activator.CreateInstance(
+                    InstrumentationContextProviderType);
             }
 
             var instanceName = InstanceName;
+
             if (_instanceNameProvider != null)
-                instanceName = _instanceNameProvider.GetInstanceName(actionContext);
+            {
+                InstanceName = _instanceNameProvider.GetInstanceName(actionContext);
+            }
 
             if (instanceName == null)
-                instanceName =
-                    PerfItRuntime.GetCounterInstanceName(actionContext.ControllerContext.ControllerDescriptor.ControllerType,
-                        actionContext.ActionDescriptor.ActionName);
-
-            _instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Description = Description,
-                Counters = Counters,
-                InstanceName =  instanceName,
-                CategoryName = CategoryName,
-                SamplingRate = SamplingRate,
-                PublishCounters = PublishCounters,
-                PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors
-            });
+                InstanceName = PerfItRuntime.GetCounterInstanceName(
+                    actionContext.ControllerContext.ControllerDescriptor.ControllerType,
+                    actionContext.ActionDescriptor.ActionName);
+            }
 
+            _instrumentor = new SimpleInstrumentor(Info);
         }
-
-        /// <summary>
-        /// Optional name of the counter. 
-        /// If not specified it will be [controller].[action] for each counter.
-        /// If it is provided, make sure it is UNIQUE within the project
-        /// </summary>
-        public string InstanceName { get; set; }
-
-        /// <summary>
-        /// Description of the counter. Will be published to counter metadata visible in Perfmon.
-        /// </summary>
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Counter types. Each value as a string.
-        /// </summary>
-        public string[] Counters { get; set; }
-
-        public bool PublishCounters { get; set; }
-
-        public bool RaisePublishErrors { get; set; }
-
-        public bool PublishEvent { get; set; }
-
-        public string CategoryName { get; set; }
-
-        public double SamplingRate { get; set; }
 
         /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
@@ -116,23 +124,19 @@ namespace PerfIt.WebApi
         {
             base.OnActionExecuting(actionContext);
 
-            if (!_inited)
+            lock (_lock)
             {
-                lock (_lock)
+                if (!_inited)
                 {
-                    if (!_inited)
-                    {
-                        Init(actionContext);
-                        _inited = true;
-                    }
+                    Init(actionContext);
+                    _inited = true;
                 }
             }
 
-            if (PublishCounters || PublishEvent)
-            {
-                var token = _instrumentor.Start(SamplingRate);
-                actionContext.Request.Properties.Add(PerfItTwoStageKey, token);
-            }
+            if (!(PublishCounters || PublishEvent)) return;
+
+            var token = _instrumentor.Start(SamplingRate);
+            actionContext.Request.Properties.Add(PerfItTwoStageKey, token);
         }
 
         private void SetPublishCounterPolicy()
@@ -159,24 +163,25 @@ namespace PerfIt.WebApi
             {
                 var instrumentationContext = string.Format("{0}_{1}", actionExecutedContext.Request.Method,
                     actionExecutedContext.Request.RequestUri);
+
                 if (_instrumentationContextProvider != null)
                     instrumentationContext = _instrumentationContextProvider.GetContext(actionExecutedContext);
 
-                if (actionExecutedContext.Request.Properties.ContainsKey(PerfItTwoStageKey))
+                if (!actionExecutedContext.Request.Properties.ContainsKey(PerfItTwoStageKey)) return;
+
+                var token = actionExecutedContext.Request.Properties[PerfItTwoStageKey] as InstrumentationToken;
+
+                if (!(actionExecutedContext.Exception == null || token == null))
                 {
-                    var token = actionExecutedContext.Request.Properties[PerfItTwoStageKey] as InstrumentationToken;
-                    if (actionExecutedContext.Exception != null && token != null)
-                    {
-                        token.Contexts.Item2.SetContextToErrorState();
-                    }
-                    _instrumentor.Finish(token, instrumentationContext);
+                    token.Context.Data.SetContextToErrorState();
                 }
+
+                _instrumentor.Finish(token, instrumentationContext);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                Trace.TraceError(exception.ToString());
-                if (RaisePublishErrors)
-                    throw;
+                Trace.TraceError(ex.ToString());
+                if (RaisePublishErrors) throw;
             }
         }
 

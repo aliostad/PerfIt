@@ -1,32 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace PerfIt.Mvc
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class PerfItFilterAttribute : InstrumentationContextProviderBaseAttribute, IInstrumentationInfo
+    // TODO: TBD: ditto WebApi, but for subtle Mvc nuances...
+    public class PerfItFilterAttribute : InstrumentationContextProviderBaseAttribute
     {
+        public IInstrumentationInfo Info { get; private set; }
+
         private ITwoStageInstrumentor _instrumentor;
-        private IInstanceNameProvider _instanceNameProvider = null;
-        private IInstrumentationContextProvider _instrumentationContextProvider = null;
+        private IInstanceNameProvider _instanceNameProvider;
+        private IInstrumentationContextProvider _instrumentationContextProvider;
         private const string PerfItTwoStageKey = "__#_PerfItTwoStageKey_#__";
-        private bool _inited = false;
-        private object _lock = new object();
+        private bool _inited;
+        private readonly object _lock = new object();
 
         public PerfItFilterAttribute(string categoryName)
         {
-            Description = string.Empty;
-            PublishCounters = true;
-            RaisePublishErrors = false;
-            PublishEvent = true;
-            CategoryName = categoryName;
-            
+            Info = new InstrumentationInfo {CategoryName = categoryName};
         }
 
         private void Init(ActionExecutingContext actionContext)
@@ -34,11 +26,6 @@ namespace PerfIt.Mvc
             SetEventPolicy();
             SetPublishCounterPolicy();
             SetErrorPolicy();
-
-            if (SamplingRate == default(double))
-            {
-                SamplingRate = Constants.DefaultSamplingRate;
-            }
 
             if (InstanceNameProviderType != null)
             {
@@ -50,50 +37,68 @@ namespace PerfIt.Mvc
                 _instrumentationContextProvider = (IInstrumentationContextProvider)Activator.CreateInstance(InstrumentationContextProviderType);
             }
 
-            if (Counters == null || Counters.Length == 0)
-            {
-                Counters = CounterTypes.StandardCounters;
-            }
-
             var instanceName = InstanceName;
+
             if (_instanceNameProvider != null)
                 instanceName = _instanceNameProvider.GetInstanceName(actionContext);
 
             if (instanceName == null)
-                instanceName =
-                    PerfItRuntime.GetCounterInstanceName(actionContext.ActionDescriptor.ControllerDescriptor.ControllerType,
-                        actionContext.ActionDescriptor.ActionName);
-
-            _instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Description = Description,
-                Counters = Counters,
-                InstanceName =  instanceName,
-                CategoryName = CategoryName,
-                SamplingRate = SamplingRate,
-                PublishCounters = PublishCounters,
-                PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors
-            });
+                InstanceName = PerfItRuntime.GetCounterInstanceName(
+                    actionContext.ActionDescriptor.ControllerDescriptor.ControllerType,
+                    actionContext.ActionDescriptor.ActionName);
+            }
 
+            _instrumentor = new SimpleInstrumentor(Info);
         }
 
+        public string InstanceName
+        {
+            get { return Info.InstanceName; }
+            set { Info.InstanceName = value; }
+        }
 
-        public string InstanceName { get; set; }
+        public string Description
+        {
+            get { return Info.Description; }
+            set { Info.Description = value; }
+        }
 
-        public string Description { get; set; }
+        public string[] Counters
+        {
+            get { return Info.Counters; }
+            set { Info.Counters = value; }
+        }
 
-        public string[] Counters { get; set; }
+        public string CategoryName
+        {
+            get { return Info.CategoryName; }
+            set { Info.CategoryName = value; }
+        }
 
-        public string CategoryName { get; set; }
+        public bool PublishCounters
+        {
+            get { return Info.PublishCounters; }
+            set { Info.PublishCounters = value; }
+        }
 
-        public bool PublishCounters { get; set; }
+        public bool RaisePublishErrors
+        {
+            get { return Info.RaisePublishErrors; }
+            set { Info.RaisePublishErrors = value; }
+        }
 
-        public bool RaisePublishErrors { get; set; }
+        public bool PublishEvent
+        {
+            get { return Info.PublishEvent; }
+            set { Info.PublishEvent = value; }
+        }
 
-        public bool PublishEvent { get; set; }
-
-        public double SamplingRate { get; set; }
+        public double SamplingRate
+        {
+            get { return Info.SamplingRate; }
+            set { Info.SamplingRate = value; }
+        }
 
         /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
@@ -128,22 +133,24 @@ namespace PerfIt.Mvc
             {
                 var instrumentationContext = string.Format("{0}_{1}", actionExecutedContext.ActionDescriptor.ActionName,
                     actionExecutedContext.HttpContext.Request.Url);
+
                 if (_instrumentationContextProvider != null)
                     instrumentationContext = _instrumentationContextProvider.GetContext(actionExecutedContext);
 
-                if (actionExecutedContext.HttpContext.Items.Contains(PerfItTwoStageKey))
+                if (!actionExecutedContext.HttpContext.Items.Contains(PerfItTwoStageKey)) return;
+
+                var token = actionExecutedContext.HttpContext.Items[PerfItTwoStageKey] as InstrumentationToken;
+
+                if (!(actionExecutedContext.Exception == null || token == null))
                 {
-                    var token = actionExecutedContext.HttpContext.Items[PerfItTwoStageKey] as InstrumentationToken;
-                    if (actionExecutedContext.Exception != null && token != null)
-                    {
-                        token.Contexts.Item2.SetContextToErrorState();
-                    }
-                    _instrumentor.Finish(token, instrumentationContext);
+                    token.Context.Data.SetContextToErrorState();
                 }
+
+                _instrumentor.Finish(token, instrumentationContext);
             }
-            catch (Exception exception)
+            catch (Exception ex)
             {
-                Trace.TraceError(exception.ToString());
+                Trace.TraceError(ex.ToString());
                 if (RaisePublishErrors)
                     throw;
             }
@@ -153,23 +160,20 @@ namespace PerfIt.Mvc
         {
             base.OnActionExecuting(actionContext);
 
-            if (!_inited)
+            lock (_lock)
             {
-                lock (_lock)
+                if (!_inited)
                 {
-                    if (!_inited)
-                    {
-                        Init(actionContext);
-                        _inited = true;
-                    }
+                    Init(actionContext);
+                    _inited = true;
                 }
             }
 
-            if (PublishCounters || PublishEvent)
-            {
-                var token = _instrumentor.Start(SamplingRate);
-                actionContext.HttpContext.Items[PerfItTwoStageKey] = token;
-            }
+            if (!(PublishCounters || PublishEvent)) return;
+
+            var token = _instrumentor.Start(SamplingRate);
+
+            actionContext.HttpContext.Items[PerfItTwoStageKey] = token;
         }
 
         protected override string ProvideInstrumentationContext(ActionExecutedContext actionExecutedContext)

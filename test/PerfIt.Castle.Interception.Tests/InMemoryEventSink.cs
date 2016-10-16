@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 
 namespace PerfIt.Castle.Interception.Tests
 {
     public class InMemoryEventSink : IObserver<EventEntry>
     {
-        private ConcurrentQueue<EventEntry> _entries = new ConcurrentQueue<EventEntry>();
+        private readonly ConcurrentQueue<EventEntry> _entries = new ConcurrentQueue<EventEntry>();
 
         public ConcurrentQueue<EventEntry> Entries
         {
@@ -19,20 +15,16 @@ namespace PerfIt.Castle.Interception.Tests
 
         public void OnNext(EventEntry value)
         {
-            if (value != null)
-            {
-                _entries.Enqueue(value);
-            }
+            if (value == null) return;
+            _entries.Enqueue(value);
         }
 
         public void OnError(Exception error)
         {
-            
         }
 
         public void OnCompleted()
         {
-            
         }
     }
 
