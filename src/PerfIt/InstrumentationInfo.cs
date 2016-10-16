@@ -1,4 +1,7 @@
-﻿namespace PerfIt
+﻿using System;
+using System.Linq;
+
+namespace PerfIt
 {
     /// <summary>
     /// Provides InstrumentationInfo to the project.
@@ -28,17 +31,37 @@
         /// </summary>
         public bool PublishEvent { get; set; }
 
+        private double _sampleRate;
+
         /// <summary>
         /// A value between 0.0 and 1.0 as the proportion of calls to be sampled.
         /// Useful if you are generating a lot of ETW events
         /// </summary>
-        public double SamplingRate { get; set; }
+        public double SamplingRate
+        {
+            get { return _sampleRate; }
+            set { _sampleRate = Math.Max(0d, Math.Min(1d, value)); }
+        }
+
+        /// <summary>
+        /// Returns whether RequiresInstrumentationContext.
+        /// </summary>
+        public bool RequiresInstrumentationContext
+        {
+            get { return PublishEvent || PublishCounters || RaisePublishErrors; }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public InstrumentationInfo()
         {
+            Description = string.Empty;
+            Counters = CounterTypes.StandardCounters.ToArray();
+            SamplingRate = Constants.DefaultSamplingRate;
+            PublishCounters = true;
+            RaisePublishErrors = false;
+            PublishEvent = true;
         }
 
         /// <summary>
@@ -48,7 +71,7 @@
         public InstrumentationInfo(IInstrumentationInfo other)
         {
             CategoryName = other.CategoryName;
-            Counters = other.Counters;
+            Counters = other.Counters.ToArray();
             Description = other.Description;
             InstanceName = other.InstanceName;
             PublishCounters = other.PublishCounters;
