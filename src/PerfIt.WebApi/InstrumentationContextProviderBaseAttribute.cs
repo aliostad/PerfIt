@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http.Filters;
 
 namespace PerfIt.WebApi
 {
+    [AttributeUsage(AttributeTargets.Method)]
     public abstract class InstrumentationContextProviderBaseAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
