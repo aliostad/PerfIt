@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace PerfIt.Handlers
 {
@@ -11,10 +9,7 @@ namespace PerfIt.Handlers
         private Lazy<PerformanceCounter> _counter;
         private const string TimeTakenTicksKey = "NumberOfOperationsPerErrorsHandler_#_StopWatch_#_";
 
-        public NumberOfErrorsPerSecondHandler
-            (
-            string categoryName,
-            string instanceName)
+        public NumberOfErrorsPerSecondHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
            BuildCounters();
@@ -31,10 +26,8 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            if (contextBag.ContainsKey(Constants.PerfItContextHasErroredKey))
-            {
-                _counter.Value.Increment();
-            }
+            if (!contextBag.ContainsKey(Constants.PerfItContextHasErroredKey)) return;
+            _counter.Value.Increment();
         }
 
         protected override void BuildCounters(bool newInstanceName = false)
@@ -43,13 +36,13 @@ namespace PerfIt.Handlers
             {
                 var counter = new PerformanceCounter()
                 {
-                    CategoryName = _categoryName,
+                    CategoryName = CategoryName,
                     CounterName = Name,
                     InstanceName = GetInstanceName(newInstanceName),
                     ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                    RawValue = 0
                 };
-                counter.RawValue = 0;
                 return counter;
             });
         }
@@ -57,7 +50,7 @@ namespace PerfIt.Handlers
         protected override CounterCreationData[] DoGetCreationData()
         {
             var counterCreationDatas = new CounterCreationData[1];
-            counterCreationDatas[0] = new CounterCreationData()
+            counterCreationDatas[0] = new CounterCreationData
             {
                 CounterType = PerformanceCounterType.RateOfCountsPerSecond32,
                 CounterName = Name,

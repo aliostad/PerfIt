@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace PerfIt.Handlers
 {
@@ -11,13 +9,10 @@ namespace PerfIt.Handlers
         private Lazy<PerformanceCounter> _counter;
         private const string TimeTakenTicksKey = "NumberOfOperationsPerSecondHandler_#_StopWatch_#_";
 
-        public NumberOfOperationsPerSecondHandler
-            (
-            string categoryName,
-            string instanceName)
+        public NumberOfOperationsPerSecondHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
-           BuildCounters();
+            BuildCounters();
         }
 
         public override string CounterType
@@ -27,12 +22,12 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            context.Data.Add(TimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
+            context.Data.Add(TimeTakenTicksKey + InstanceName, Stopwatch.StartNew());
         }
 
         protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            var sw = (Stopwatch)context.Data[TimeTakenTicksKey + _instanceName];
+            var sw = (Stopwatch) context.Data[TimeTakenTicksKey + InstanceName];
             sw.Stop();
             _counter.Value.Increment();
         }
@@ -43,13 +38,13 @@ namespace PerfIt.Handlers
             {
                 var counter = new PerformanceCounter()
                 {
-                    CategoryName = _categoryName,
+                    CategoryName = CategoryName,
                     CounterName = Name,
                     InstanceName = GetInstanceName(newInstanceName),
                     ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                    RawValue = 0
                 };
-                counter.RawValue = 0;
                 return counter;
             });
         }

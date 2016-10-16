@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace PerfIt.Handlers
 {
     public class AverageTimeHandler : CounterHandlerBase
     {
-
         private const string AverageTimeTakenTicksKey = "AverageTimeHandler_#_StopWatch_#_";
         private Lazy<PerformanceCounter> _counter;
         private Lazy<PerformanceCounter> _baseCounter;
 
-
-        public AverageTimeHandler(
-            string categoryName,
-            string instanceName)
+        public AverageTimeHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
             BuildCounters();
@@ -29,12 +23,12 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            context.Data.Add(AverageTimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
+            context.Data.Add(AverageTimeTakenTicksKey + InstanceName, Stopwatch.StartNew());
         }
 
         protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            var sw = (Stopwatch)context.Data[AverageTimeTakenTicksKey + _instanceName];
+            var sw = (Stopwatch)context.Data[AverageTimeTakenTicksKey + InstanceName];
             sw.Stop();
             _counter.Value.IncrementBy(sw.ElapsedTicks);
             _baseCounter.Value.Increment();
@@ -46,13 +40,13 @@ namespace PerfIt.Handlers
             {
                 var counter = new PerformanceCounter()
                 {
-                    CategoryName = _categoryName,
+                    CategoryName = CategoryName,
                     CounterName = Name,
                     InstanceName = GetInstanceName(newInstanceName),
                     ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                    RawValue = 0
                 };
-                counter.RawValue = 0;
                 return counter;
             });
 
@@ -60,13 +54,13 @@ namespace PerfIt.Handlers
             {
                 var counter = new PerformanceCounter()
                 {
-                    CategoryName = _categoryName,
+                    CategoryName = CategoryName,
                     CounterName = GetBaseCounterName(),
                     InstanceName = GetInstanceName(newInstanceName),
                     ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                    RawValue = 0
                 };
-                counter.RawValue = 0;
                 return counter;
             });
         }

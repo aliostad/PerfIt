@@ -6,13 +6,9 @@ namespace PerfIt.Handlers
 {
     public class TotalCountHandler : CounterHandlerBase
     {
-
         private Lazy<PerformanceCounter> _counter;
 
-        public TotalCountHandler
-            (
-            string categoryName,
-            string instanceName)
+        public TotalCountHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {           
             BuildCounters();
@@ -37,31 +33,30 @@ namespace PerfIt.Handlers
         {
             _counter = new Lazy<PerformanceCounter>(() =>
             {
-                var counter = new PerformanceCounter()
+                var counter = new PerformanceCounter
                 {
-                    CategoryName = _categoryName,
+                    CategoryName = CategoryName,
                     CounterName = Name,
                     InstanceName = GetInstanceName(newInstanceName),
                     ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                    RawValue = 0
                 };
-                counter.RawValue = 0;
                 return counter;
-            }
-          );
+            });
         }
 
         protected override CounterCreationData[] DoGetCreationData()
         {
-            return new []
-                       {
-                           new CounterCreationData()
-                               {
-                                   CounterName = Name,
-                                   CounterType = PerformanceCounterType.NumberOfItems32,
-                                   CounterHelp = "Total # of operations"
-                               }
-                       };
+            return new[]
+            {
+                new CounterCreationData()
+                {
+                    CounterName = Name,
+                    CounterType = PerformanceCounterType.NumberOfItems32,
+                    CounterHelp = "Total # of operations"
+                }
+            };
         }
 
         public override void Dispose()
@@ -73,7 +68,5 @@ namespace PerfIt.Handlers
                 _counter.Value.Dispose(); 
             }
         }
-
-        
     }
 }

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace PerfIt.Handlers
 {
@@ -11,15 +9,11 @@ namespace PerfIt.Handlers
         private const string TimeTakenTicksKey = "LastOperationExecutionTimeHandler_#_StopWatch_#_";
         protected Lazy<PerformanceCounter> _counter;
         
-
-        public LastOperationExecutionTimeHandler(
-            string categoryName,
-            string instanceName)
+        public LastOperationExecutionTimeHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
             BuildCounters();
         }
-
        
         public override string CounterType
         {
@@ -28,12 +22,12 @@ namespace PerfIt.Handlers
 
         protected override void OnRequestStarting(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            context.Data.Add(TimeTakenTicksKey + _instanceName, Stopwatch.StartNew());
+            context.Data.Add(TimeTakenTicksKey + InstanceName, Stopwatch.StartNew());
         }
 
         protected override void OnRequestEnding(IDictionary<string, object> contextBag, PerfItContext context)
         {
-            var sw = (Stopwatch)context.Data[TimeTakenTicksKey + _instanceName];
+            var sw = (Stopwatch)context.Data[TimeTakenTicksKey + InstanceName];
             sw.Stop();
             _counter.Value.RawValue = sw.ElapsedMilliseconds;
         }
@@ -42,15 +36,15 @@ namespace PerfIt.Handlers
         {
             _counter = new Lazy<PerformanceCounter>(() =>
             {
-                var counter = new PerformanceCounter()
+                var counter = new PerformanceCounter
                 {
-                    CategoryName = _categoryName,
+                    CategoryName = CategoryName,
                     CounterName = Name,
                     InstanceName = GetInstanceName(newInstanceName),
                     ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process
+                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                    RawValue = 0
                 };
-                counter.RawValue = 0;
                 return counter;
             });
         }
