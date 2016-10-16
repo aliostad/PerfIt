@@ -2,18 +2,27 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor, IDisposable
+    /// <summary>
+    /// SimpleInstrumentor implementation.
+    /// </summary>
+    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor
     {
-        private IInstrumentationInfo _info;
+        private readonly IInstrumentationInfo _info;
 
-        private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
-          new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
-        private Random _random = new Random();
+        private readonly ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts
+            = new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
 
+        private readonly Random _random = new Random();
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="info"></param>
         public SimpleInstrumentor(IInstrumentationInfo info)
         {
             _info = info;
@@ -21,189 +30,185 @@ namespace PerfIt
             PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
         }
 
+        /// <summary>
+        /// Returns whether ShouldInstrument the invocation. <paramref name="samplingRate"/>
+        /// helps to throttle how frequent a report is made to the Performance Monitor.
+        /// </summary>
+        /// <param name="samplingRate">Throttles the rate of sampled counts.</param>
+        /// <returns></returns>
         private bool ShouldInstrument(double samplingRate)
         {
-            return _random.NextDouble() < samplingRate;
+            return _random.NextDouble() <= samplingRate;
         }
 
-        public void Instrument(Action aspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
+        /// <summary>
+        /// Instruments the <paramref name="aspect"/> given
+        /// <paramref name="instrumentationContext"/> and <paramref name="samplingRate"/>.
+        /// </summary>
+        /// <param name="aspect"></param>
+        /// <param name="instrumentationContext"></param>
+        /// <param name="samplingRate"></param>
+        /// <see cref="Constants.DefaultSamplingRate"/>
+        public void Instrument(Action aspect, string instrumentationContext = null,
+            double samplingRate = Constants.DefaultSamplingRate)
         {
-            Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
-
             try
             {
-                if (_info.PublishCounters)
-                    contexts = BuildContexts();
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.ToString());
-                if (_info.RaisePublishErrors)
-                    throw;
-            }
-
-            var stopwatch = Stopwatch.StartNew();
-            try
-            {
-                aspect();
-            }
-            catch (Exception)
-            {
-                SetErrorContexts(contexts);
-                throw;
-            }
-            finally
-            {
-                try
+                using (var context = GetInstrumentationContext())
                 {
-                    if (_info.PublishEvent && ShouldInstrument(samplingRate))
+                    try
                     {
-                        PublishInstrumentationCallback(_info.CategoryName,
-                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                        aspect();
                     }
-
-                    if (_info.PublishCounters)
-                        CompleteContexts(contexts);
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine(e.ToString());
-                    if (_info.RaisePublishErrors)
-                        throw;
-                }
-            }           
-          
-        }
-
-        public Action<string, string, long, string> PublishInstrumentationCallback { get; set; }
-
-        private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
-        {
-            if (contexts != null && contexts.Item2 != null)
-            {
-                contexts.Item2.SetContextToErrorState();
-            }
-        }
-
-        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
-        {
-            Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
-
-            try
-            {
-                if (_info.PublishCounters)
-                    contexts = BuildContexts();
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.ToString());
-                if (_info.RaisePublishErrors)
-                    throw;
-            }
-
-            var stopwatch = Stopwatch.StartNew();
-            try
-            {
-                await asyncAspect();
-            }
-            catch (Exception)
-            {
-                SetErrorContexts(contexts);
-                throw;
-            }
-            finally
-            {
-                try
-                {
-                    if (_info.PublishEvent && ShouldInstrument(samplingRate))
+                    catch (Exception)
                     {
-                        PublishInstrumentationCallback(_info.CategoryName,
-                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
-                    }
-
-                    if (_info.PublishCounters)
-                        CompleteContexts(contexts);
-                }
-                catch (Exception e)
-                {
-                    Trace.WriteLine(e.ToString());
-                    if (_info.RaisePublishErrors)
+                        context.Data.SetContextToErrorState();
                         throw;
+                    }
+                    finally
+                    {
+                        try
+                        {
+                            if (_info.PublishEvent && ShouldInstrument(samplingRate))
+                            {
+                                var elapsed = context.Stopwatch.Elapsed;
+                                PublishInstrumentationCallback(_info.CategoryName, _info.InstanceName,
+                                    elapsed.TotalMilliseconds, instrumentationContext);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Trace.WriteLine(ex.ToString());
+                            if (_info.RaisePublishErrors) throw;
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.ToString());
+                if (_info.RaisePublishErrors) throw;
             }
         }
 
-        private Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> BuildContexts()
+        /// <summary>
+        /// PublishInstrumentationCallback delegate instance.
+        /// </summary>
+        public PublishInstrumentationDelegate PublishInstrumentationCallback { get; set; }
+
+        /// <summary>
+        /// Instruments the <paramref name="asyncAspect"/> given
+        /// <paramref name="instrumentationContext"/> and <paramref name="samplingRate"/>.
+        /// </summary>
+        /// <param name="asyncAspect"></param>
+        /// <param name="instrumentationContext"></param>
+        /// <param name="samplingRate"></param>
+        /// <returns></returns>
+        /// <see cref="Constants.DefaultSamplingRate"/>
+        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null,
+            double samplingRate = Constants.DefaultSamplingRate)
         {
-            var contexts = new List<PerfitHandlerContext>();
-            Prepare(contexts);
-
-            var ctx = new Dictionary<string, object>();
-
-            ctx.Add(Constants.PerfItKey, new PerfItContext());
-            ctx.Add(Constants.PerfItPublishErrorsKey, _info.RaisePublishErrors);
-            foreach (var context in contexts)
+            using (var context = GetInstrumentationContext())
             {
                 try
                 {
-                    context.Handler.OnRequestStarting(ctx);
+                    asyncAspect().Wait();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Trace.TraceError(e.ToString());
-                    if (_info.RaisePublishErrors)
-                        throw;
+                    context.Data.SetContextToErrorState();
+                    throw;
+                }
+                finally
+                {
+                    try
+                    {
+                        if (_info.PublishEvent && ShouldInstrument(samplingRate))
+                        {
+                            var elapsed = context.Stopwatch.Elapsed;
+                            PublishInstrumentationCallback(_info.CategoryName, _info.InstanceName,
+                                elapsed.TotalMilliseconds, instrumentationContext);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex.ToString());
+                        if (_info.RaisePublishErrors) throw;
+                    }
                 }
             }
-
-            return new Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>>(contexts, ctx);
         }
 
-        private void CompleteContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
+        private InstrumentationContext GetInstrumentationContext()
         {
             try
             {
-                foreach (var counter in contexts.Item1)
+                var contexts = GetContexts().ToArray();
+
+                var data = new Dictionary<string, object>
                 {
-                    counter.Handler.OnRequestEnding(contexts.Item2);
+                    {Constants.PerfItKey, new PerfItContext()},
+                    {Constants.PerfItPublishErrorsKey, _info.RaisePublishErrors}
+                };
+
+                foreach (var context in contexts)
+                {
+                    try
+                    {
+                        context.Handler.OnRequestStarting(data);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError(ex.ToString());
+                        if (_info.RaisePublishErrors)
+                            throw;
+                    }
                 }
+
+                return new InstrumentationContext(data, contexts);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Trace.TraceError(e.ToString());
-                if (_info.RaisePublishErrors)
-                    throw;
+                Trace.WriteLine(ex.ToString());
+                if (_info.RaisePublishErrors) throw;
             }
+
+            return null;
         }
 
-        private void Prepare(List<PerfitHandlerContext> contexts)
+        private IEnumerable<PerfitHandlerContext> GetContexts()
         {
+            // TODO: TBD: runtime cross cutting concern... inject factories concern into instrumentor via ctor
             foreach (var handlerFactory in PerfItRuntime.HandlerFactories)
             {
-                var key = GetKey(handlerFactory.Key, _info.InstanceName);
+                var hf = handlerFactory;
+
+                var key = GetKey(hf.Key, _info.InstanceName);
+
                 var ctx = _counterContexts.GetOrAdd(key, k =>
-                    new Lazy<PerfitHandlerContext>(() => new PerfitHandlerContext()
+                    new Lazy<PerfitHandlerContext>(() => new PerfitHandlerContext
                     {
-                        Handler = handlerFactory.Value(_info.CategoryName, _info.InstanceName),
+                        Handler = hf.Value(_info.CategoryName, _info.InstanceName),
                         Name = _info.InstanceName
                     }));
-                contexts.Add(ctx.Value);
+
+                yield return ctx.Value;
             }
         }
 
-        private string GetKey(string counterName, string instanceName)
+        private static string GetKey(string counterName, string instanceName)
         {
             return string.Format("{0}_{1}", counterName, instanceName);
         }
 
         public void Dispose()
-        {          
+        {
             foreach (var context in _counterContexts.Values)
             {
                 context.Value.Handler.Dispose();
             }
 
-            _counterContexts.Clear(); 
+            _counterContexts.Clear();
         }
 
         /// <summary>
@@ -212,37 +217,42 @@ namespace PerfIt
         /// <returns>The token to be passed to Finish method when finished</returns>
         public object Start(double samplingRate = Constants.DefaultSamplingRate)
         {
-            return new InstrumentationToken()
+            return new InstrumentationToken
             {
-                Contexts = _info.PublishCounters ? BuildContexts() : null,
-                Kronometer = Stopwatch.StartNew(),
+                Context = _info.RequiresInstrumentationContext ? GetInstrumentationContext() : null,
                 SamplingRate = samplingRate
             };
         }
 
+        /// <summary>
+        /// Finishes the instrumentation.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="instrumentationContext"></param>
         public void Finish(object token, string instrumentationContext = null)
         {
-            if(token == null)
+            if (token == null)
                 return; // not meant to be instrumented prob due to sampling rate
 
             var itoken = ValidateToken(token);
 
             if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
             {
-                PublishInstrumentationCallback(_info.CategoryName,
-                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
+                PublishInstrumentationCallback(_info.CategoryName, _info.InstanceName,
+                    itoken.Context.Stopwatch.ElapsedMilliseconds, instrumentationContext);
             }
 
-            if (_info.PublishCounters)
-                CompleteContexts(itoken.Contexts);
+            if (_info.RequiresInstrumentationContext)
+                itoken.Context.Dispose();
         }
-        
+
         private static InstrumentationToken ValidateToken(object token)
         {
             var itoken = token as InstrumentationToken;
             if (itoken == null)
                 throw new ArgumentException(
-                    "This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
+                    "This is an invalid token. Please pass the token provided when you you called Start(). Remember?",
+                    "token");
             return itoken;
         }
     }

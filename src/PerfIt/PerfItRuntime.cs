@@ -103,9 +103,6 @@ namespace PerfIt
 
                     Trace.TraceInformation("Setting up filters '{0}'", instrumentationInfo.Description);
 
-                    if (instrumentationInfo.Counters == null || instrumentationInfo.Counters.Length == 0)
-                        instrumentationInfo.Counters = CounterTypes.StandardCounters;
-
                     foreach (var counterType in instrumentationInfo.Counters)
                     {
                         if (!HandlerFactories.ContainsKey(counterType))

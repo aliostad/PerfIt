@@ -58,9 +58,12 @@
     <Compile Include="Handlers\TotalCountHandler.cs" />
     <Compile Include="Handlers\ICounterHandler.cs" />
     <Compile Include="Handlers\LastOperationExecutionTimeHandler.cs" />
+    <Compile Include="InstrumentationContext.cs" />
+    <Compile Include="InstrumentationContextDictionary.cs" />
     <Compile Include="InstrumentationEventSource.cs" />
     <Compile Include="InstrumentationInfo.cs" />
     <Compile Include="IInstrumentor.cs" />
+    <Compile Include="InstrumentationInfoAttributeBase.cs" />
     <Compile Include="ITwoStageInstrumentor.cs" />
     <Compile Include="PerfItContext.cs" />
     <Compile Include="PerfitHandlerContext.cs" />
@@ -68,6 +71,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PerfItExtensions.cs" />
     <Compile Include="InstrumentationToken.cs" />
+    <Compile Include="PublishInstrumentationDelegate.cs" />
     <Compile Include="SimpleInstrumentor.cs" />
   </ItemGroup>
   <ItemGroup />
