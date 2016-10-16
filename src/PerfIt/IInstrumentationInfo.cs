@@ -44,6 +44,11 @@
         bool PublishEvent { get; set; }
 
         /// <summary>
+        /// Gets whether RequiresInstrumentationContext.
+        /// </summary>
+        bool RequiresInstrumentationContext { get; }
+
+        /// <summary>
         /// A value between 0.0 and 1.0 as the proportion of calls to be sampled.
         /// Useful if you are generating a lot of ETW events
         /// </summary>
