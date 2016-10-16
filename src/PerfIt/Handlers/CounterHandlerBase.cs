@@ -2,24 +2,44 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace PerfIt.Handlers
+namespace PerfIt
 {
+    /// <summary>
+    /// Counter Handler base clas.
+    /// </summary>
     public abstract class CounterHandlerBase : ICounterHandler
     {
+        /// <summary>
+        /// Gets the CategoryName.
+        /// </summary>
         protected string CategoryName { get; private set; }
 
+        /// <summary>
+        /// Gets the InstanceName.
+        /// </summary>
         protected string InstanceName { get; private set; }
 
-        protected readonly string _uniqueName;
+        /// <summary>
+        /// Gets the UniqueName.
+        /// </summary>
+        protected string UniqueName { get; private set; }
 
+        /// <summary>
+        /// Protected Constructor
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <param name="instanceName"></param>
         protected CounterHandlerBase(string categoryName, string instanceName)
         {
             CategoryName = categoryName;
             InstanceName = instanceName;
             Name = CounterType;
-            _uniqueName = PerfItRuntime.GetUniqueName(instanceName, Name);
+            UniqueName = PerfItRuntime.GetUniqueName(instanceName, Name);
         }
 
+        /// <summary>
+        /// Disposes the object.
+        /// </summary>
         public virtual void Dispose()
         {
         }
@@ -50,12 +70,11 @@ namespace PerfIt.Handlers
         /// <param name="newInstanceName"></param>
         protected abstract void BuildCounters(bool newInstanceName = false);
 
-
         /// <summary>
         /// Handler to return data for creating counters.
         /// </summary>
         /// <returns></returns>
-        protected abstract CounterCreationData[] DoGetCreationData();
+        protected abstract IEnumerable<CounterCreationData> DoGetCreationData();
 
         public void OnRequestStarting(IDictionary<string, object> contextBag)
         {
@@ -101,11 +120,16 @@ namespace PerfIt.Handlers
 
         public string Name { get; private set; }
 
-        public CounterCreationData[] BuildCreationData()
+        public IEnumerable<CounterCreationData> BuildCreationData()
         {
             return DoGetCreationData();
         }
 
+        /// <summary>
+        /// Returns the InstanceName given <paramref name="newName"/>.
+        /// </summary>
+        /// <param name="newName"></param>
+        /// <returns></returns>
         protected string GetInstanceName(bool newName = false)
         {
             var name = InstanceName + (newName ? "_" + Guid.NewGuid().ToString("N").Substring(6) : string.Empty);

@@ -2,13 +2,21 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace PerfIt.Handlers
+namespace PerfIt
 {
+    /// <summary>
+    /// Last Operation Execution Time Counter handler.
+    /// </summary>
     public class LastOperationExecutionTimeHandler : CounterHandlerBase
     {
         private const string TimeTakenTicksKey = "LastOperationExecutionTimeHandler_#_StopWatch_#_";
         protected Lazy<PerformanceCounter> _counter;
-        
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <param name="instanceName"></param>
         public LastOperationExecutionTimeHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
@@ -34,32 +42,25 @@ namespace PerfIt.Handlers
 
         protected override void BuildCounters(bool newInstanceName = false)
         {
-            _counter = new Lazy<PerformanceCounter>(() =>
+            _counter = new Lazy<PerformanceCounter>(() => new PerformanceCounter
             {
-                var counter = new PerformanceCounter
-                {
-                    CategoryName = CategoryName,
-                    CounterName = Name,
-                    InstanceName = GetInstanceName(newInstanceName),
-                    ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
-                    RawValue = 0
-                };
-                return counter;
+                CategoryName = CategoryName,
+                CounterName = Name,
+                InstanceName = GetInstanceName(newInstanceName),
+                ReadOnly = false,
+                InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                RawValue = 0
             });
         }
 
-        protected override CounterCreationData[] DoGetCreationData()
+        protected override IEnumerable<CounterCreationData> DoGetCreationData()
         {
-            var counterCreationDatas = new CounterCreationData[1];
-            counterCreationDatas[0] = new CounterCreationData()
+            yield return new CounterCreationData
             {
                 CounterType = PerformanceCounterType.NumberOfItems32,
                 CounterName = Name,
                 CounterHelp = "Time in ms to run last request"
             };
-
-            return counterCreationDatas;
         }
     }
 }

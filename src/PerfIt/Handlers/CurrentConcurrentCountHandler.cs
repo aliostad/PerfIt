@@ -3,17 +3,26 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace PerfIt.Handlers
+namespace PerfIt
 {
+    /// <summary>
+    /// Current Concurrent Count Counter handler.
+    /// </summary>
     public class CurrentConcurrentCountHandler : CounterHandlerBase
     {
         private Lazy<PerformanceCounterCategory> _category;
 
         private Lazy<PerformanceCounter> _counter;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="categoryName"></param>
+        /// <param name="instanceName"></param>
         public CurrentConcurrentCountHandler(string categoryName, string instanceName)
             : base(categoryName, instanceName)
         {
+            // TODO: TBD: consider better placement for this call; possibly as part of a context, test fixture, etc?
             BuildCategories();
             BuildCounters();
         }
@@ -52,46 +61,37 @@ namespace PerfIt.Handlers
 
         protected override void BuildCounters(bool newInstanceName = false)
         {
-            var categoryName = _category.Value.CategoryName;
-            _counter = new Lazy<PerformanceCounter>(() =>
+            _counter = new Lazy<PerformanceCounter>(() => new PerformanceCounter
             {
-                var instanceName = GetInstanceName(newInstanceName);
-
-                var counter = new PerformanceCounter
-                {
-                    CategoryName = categoryName,
-                    CounterName = Name,
-                    InstanceName = instanceName,
-                    ReadOnly = false,
-                    InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
-                    RawValue = 0
-                };
-
-                return counter;
+                CategoryName = _category.Value.CategoryName,
+                CounterName = Name,
+                InstanceName = GetInstanceName(newInstanceName),
+                ReadOnly = false,
+                InstanceLifetime = PerformanceCounterInstanceLifetime.Process,
+                RawValue = 0
             });
         }
 
-        protected override CounterCreationData[] DoGetCreationData()
+        protected override IEnumerable<CounterCreationData> DoGetCreationData()
         {
-            return new[]
+            yield return new CounterCreationData
             {
-                new CounterCreationData
-                {
-                    CounterName = Name,
-                    CounterType = PerformanceCounterType.NumberOfItems32,
-                    CounterHelp = "# of requests running concurrently"
-                }
+                CounterName = Name,
+                CounterType = PerformanceCounterType.NumberOfItems32,
+                CounterHelp = "# of requests running concurrently"
             };
         }
 
         public override void Dispose()
         {
             base.Dispose();
+            
             if (_counter != null && _counter.IsValueCreated)
             {
                 _counter.Value.RemoveInstance();
                 _counter.Value.Dispose();
             }
+
             if (_category != null && _category.IsValueCreated)
             {
                 PerformanceCounterCategory.Delete(_category.Value.CategoryName);
