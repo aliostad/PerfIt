@@ -71,6 +71,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InstanceNameLengthTests.cs" />
     <Compile Include="PerfItRuntimeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleInstrumenterTests.cs" />

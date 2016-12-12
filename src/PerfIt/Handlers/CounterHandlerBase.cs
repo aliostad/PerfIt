@@ -118,9 +118,18 @@ namespace PerfIt.Handlers
 
         protected string GetInstanceName(bool newName = false)
         {
+            const int SafeLength = 100;
+            var len = _instanceName.Length;
+            var instanceName = _instanceName;
+            if (instanceName.Length > SafeLength)
+            {
+                instanceName = instanceName.Substring(len - SafeLength);
+            }
+
             var name =
-                _instanceName +
-                (newName ? "_" + Guid.NewGuid().ToString("N").Substring(6) : string.Empty);
+                instanceName +
+                (newName ? "_" + Guid.NewGuid().ToString("N").Substring(12) : string.Empty);
+
 
             if(newName)
                 Trace.TraceInformation("GetInstanceName - New name => " + name);
