@@ -75,6 +75,7 @@
     <Compile Include="PerfItRuntimeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleInstrumenterTests.cs" />
+    <Compile Include="Stubs\CustomCounterStub.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

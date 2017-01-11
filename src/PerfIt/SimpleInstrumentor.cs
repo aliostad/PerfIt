@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PerfIt
@@ -178,7 +179,9 @@ namespace PerfIt
 
         private void Prepare(List<PerfitHandlerContext> contexts)
         {
-            foreach (var handlerFactory in PerfItRuntime.HandlerFactories)
+            var counters = _info.Counters==null || _info.Counters.Length == 0 ? CounterTypes.StandardCounters : _info.Counters;
+
+            foreach (var handlerFactory in PerfItRuntime.HandlerFactories.Where(c=> counters.Contains(c.Key)))
             {
                 var key = GetKey(handlerFactory.Key, _info.InstanceName);
                 var ctx = _counterContexts.GetOrAdd(key, k =>

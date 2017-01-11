@@ -9,6 +9,7 @@ using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Formatters;
 using Xunit;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks;
+using PerfIt.Tests.Stubs;
 
 namespace PerfIt.Tests
 {
@@ -167,6 +168,52 @@ namespace PerfIt.Tests
             Enumerable.Range(0, 1000).ToList().ForEach(x => ins.Finish(ins.Start(samplingRate)));
 
             Assert.InRange(numberOfTimesInstrumented, 1, 100);
+        }
+
+        [Fact]
+        public void InstrumentationShouldNotCallExcludedCounters()
+        {
+            if (!PerfItRuntime.HandlerFactories.ContainsKey("CustomCounterStub"))
+                PerfItRuntime.HandlerFactories.Add("CustomCounterStub", (s, s1) => new CustomCounterStub(s, s1));
+
+            CustomCounterStub.ClearCounters();
+
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = TestCategory,
+                PublishCounters = true,
+            });
+
+            ins.Instrument(() => { }, "test...");
+
+            Assert.Equal(0, CustomCounterStub.RequestStartCount);
+            Assert.Equal(0, CustomCounterStub.RequestEndCount);            
+        }
+
+        [Fact]
+        public void InstrumentationShouldCallIncludedCounters()
+        {
+            if (!PerfItRuntime.HandlerFactories.ContainsKey("CustomCounterStub"))
+                PerfItRuntime.HandlerFactories.Add("CustomCounterStub", (s, s1) => new CustomCounterStub(s, s1));
+
+            CustomCounterStub.ClearCounters();
+
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters.Union(new[] { "CustomCounterStub" }).ToArray(),
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = TestCategory,
+                PublishCounters = true,
+            });
+
+            ins.Instrument(() => { }, "test...");
+
+            Assert.Equal(1, CustomCounterStub.RequestStartCount);
+            Assert.Equal(1, CustomCounterStub.RequestEndCount);
         }
     }
 }
