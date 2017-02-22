@@ -14,11 +14,12 @@ namespace PerfIt
         private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
         private Random _random = new Random();
+        private string _correlationIdKey;
 
-        public SimpleInstrumentor(IInstrumentationInfo info)
+        public SimpleInstrumentor(IInstrumentationInfo info, string correlationIdKey = Correlation.CorrelationIdKey)
         {
+            _correlationIdKey = correlationIdKey;
             _info = info;
-
             PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
         }
 
@@ -30,7 +31,7 @@ namespace PerfIt
         public void Instrument(Action aspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
         {
             Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
-
+            var corrId = Correlation.GetId(_correlationIdKey);
             try
             {
                 if (_info.PublishCounters)
@@ -60,7 +61,7 @@ namespace PerfIt
                     if (_info.PublishEvent && ShouldInstrument(samplingRate))
                     {
                         PublishInstrumentationCallback(_info.CategoryName,
-                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext, corrId);
                     }
 
                     if (_info.PublishCounters)
@@ -76,7 +77,7 @@ namespace PerfIt
           
         }
 
-        public Action<string, string, long, string> PublishInstrumentationCallback { get; set; }
+        public Action<string, string, long, string, string> PublishInstrumentationCallback { get; set; }
 
         private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
         {
@@ -89,6 +90,7 @@ namespace PerfIt
         public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
         {
             Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
+            var corrId = Correlation.GetId(_correlationIdKey);
 
             try
             {
@@ -119,7 +121,7 @@ namespace PerfIt
                     if (_info.PublishEvent && ShouldInstrument(samplingRate))
                     {
                         PublishInstrumentationCallback(_info.CategoryName,
-                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext);
+                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext, corrId);
                     }
 
                     if (_info.PublishCounters)
@@ -219,7 +221,8 @@ namespace PerfIt
             {
                 Contexts = _info.PublishCounters ? BuildContexts() : null,
                 Kronometer = Stopwatch.StartNew(),
-                SamplingRate = samplingRate
+                SamplingRate = samplingRate,
+                CorrelationId = Correlation.GetId()
             };
         }
 
@@ -233,7 +236,7 @@ namespace PerfIt
             if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
             {
                 PublishInstrumentationCallback(_info.CategoryName,
-                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext);
+                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId);
             }
 
             if (_info.PublishCounters)

@@ -11,5 +11,7 @@ namespace PerfIt
         public Stopwatch Kronometer { get; set; }
 
         public double SamplingRate { get; set; }
+
+        public string CorrelationId { get; set; }
     }
 }

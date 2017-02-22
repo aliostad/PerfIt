@@ -99,6 +99,29 @@ namespace PerfIt.Tests
         }
 
         [Fact]
+        public void InstrumentorCreatesCorrIdIfNotExists()
+        {
+            var id = Correlation.GetId(setIfNotThere: false);
+            if(id != null)
+                Correlation.SetId(null);
+
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Counters = CounterTypes.StandardCounters,
+                Description = "test",
+                InstanceName = "Test instance",
+                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
+                PublishCounters = false,
+                PublishEvent = true,
+                RaisePublishErrors = true
+            });
+
+            ins.InstrumentAsync(() => Task.Delay(100), "test...").Wait();
+            var idAfter = Correlation.GetId(setIfNotThere: false);
+            Assert.NotNull(idAfter);
+        }
+
+        [Fact]
         public void InstrumentationSamplingRateLimitsForSync()
         {
             int numberOfTimesInstrumented = 0;
@@ -113,7 +136,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = false
             })
             {
-                PublishInstrumentationCallback = (a,b,c,d) => numberOfTimesInstrumented++
+                PublishInstrumentationCallback = (a,b,c,d, e) => numberOfTimesInstrumented++
             };
 
             double samplingRate = 0.01;
@@ -137,7 +160,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = false
             })
             {
-                PublishInstrumentationCallback = (a, b, c, d) => numberOfTimesInstrumented++
+                PublishInstrumentationCallback = (a, b, c, d, e) => numberOfTimesInstrumented++
             };
 
             double samplingRate = 0.01;
@@ -161,7 +184,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = false
             })
             {
-                PublishInstrumentationCallback = (a, b, c, d) => numberOfTimesInstrumented++
+                PublishInstrumentationCallback = (a, b, c, d, e) => numberOfTimesInstrumented++
             };
 
             double samplingRate = 0.01;

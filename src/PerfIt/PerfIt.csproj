@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Correlation.cs" />
+    <Compile Include="CounterInstaller.cs" />
     <Compile Include="Handlers\CurrentConcurrentCountHandler.cs" />
     <Compile Include="Handlers\NumberOfErrorsPerSecondHandler.cs" />
     <Compile Include="Handlers\NumberOfOperationsPerSecondHandler.cs" />
