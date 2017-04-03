@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 
 namespace PerfIt
@@ -13,7 +14,6 @@ namespace PerfIt
 
         private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
-        private Random _random = new Random();
         private string _correlationIdKey;
 
         public SimpleInstrumentor(IInstrumentationInfo info, string correlationIdKey = Correlation.CorrelationIdKey)
@@ -23,9 +23,16 @@ namespace PerfIt
             PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
         }
 
-        private bool ShouldInstrument(double samplingRate)
+        bool ShouldInstrument(double samplingRate)
         {
-            return _random.NextDouble() < samplingRate;
+            var corrId = Correlation.GetId(_correlationIdKey);
+            return ShouldInstrument(samplingRate, corrId);
+        }
+
+        internal static bool ShouldInstrument(double samplingRate, string corrId)
+        {
+            var d = Math.Abs(corrId.GetHashCode() * 1.0) / Math.Abs(int.MaxValue * 1.0);
+            return d < samplingRate;
         }
 
         public void Instrument(Action aspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)

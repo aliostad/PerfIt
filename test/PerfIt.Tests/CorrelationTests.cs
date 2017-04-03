@@ -27,5 +27,16 @@ namespace PerfIt.Tests
             Assert.Equal(id, idWithNoCheck);
         }
 
+        [Fact]
+        public void HashCodeIsReliableForSamplingPurposes()
+        {
+            int total = 10*1000;
+            double samplingRate = 0.3;
+            int totalSampled = Enumerable.Range(0, total).Select(i => SimpleInstrumentor.ShouldInstrument(samplingRate, Guid.NewGuid().ToString()))
+                .Count(x => x);
+            Console.WriteLine(totalSampled);
+            Assert.InRange(totalSampled, 2000, 4000);            
+        }
+
     }
 }
