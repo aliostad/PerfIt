@@ -50,5 +50,9 @@ namespace PerfIt
         /// </summary>
         double SamplingRate { get; set; }
 
+        /// <summary>
+        /// Correlation Id key in call context, useful to trace your request flow
+        /// </summary>
+        string CorrelationIdKey { get; set; }
     }
 }

@@ -52,6 +52,7 @@ namespace PerfIt.Castle.Interception
         public bool PublishEvent { get; set; }
 
         public double SamplingRate { get; set; }
-      
+
+        public string CorrelationIdKey { get; set; }
     }
 }

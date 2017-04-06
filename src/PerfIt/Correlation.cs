@@ -20,7 +20,7 @@ namespace PerfIt
                 SetId(corrId, key);
             }
 
-            return key;
+            return corrId;
         }
 
         public static void SetId(string id, string key = CorrelationIdKey)

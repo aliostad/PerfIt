@@ -95,6 +95,8 @@ namespace PerfIt.Mvc
 
         public double SamplingRate { get; set; }
 
+        public string CorrelationIdKey { get; set; }
+
         /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
         /// </summary>
