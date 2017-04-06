@@ -73,7 +73,8 @@ namespace PerfIt.Mvc
                 SamplingRate = SamplingRate,
                 PublishCounters = PublishCounters,
                 PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors
+                RaisePublishErrors = RaisePublishErrors,
+                CorrelationIdKey = CorrelationIdKey
             });
 
         }
