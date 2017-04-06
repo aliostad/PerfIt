@@ -33,3 +33,4 @@ nuget/
 packages/
 artifacts/
 script.sql
+_NCrunch_PerfIt/

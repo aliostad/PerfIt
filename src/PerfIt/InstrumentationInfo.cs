@@ -36,5 +36,7 @@ namespace PerfIt
         /// Useful if you are generating a lot of ETW events
         /// </summary>
         public double SamplingRate { get; set; }
+
+        public string CorrelationIdKey { get; set; }
     }
 }

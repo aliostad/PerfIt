@@ -18,12 +18,15 @@ namespace PerfIt
     {
 
         private string _categoryName;
+        private readonly string _correlationIdKey;
+
         private ConcurrentDictionary<string, SimpleInstrumentor>
             _instrumenters = new ConcurrentDictionary<string, SimpleInstrumentor>();
 
-        public PerfitClientDelegatingHandler(string categoryName)
+        public PerfitClientDelegatingHandler(string categoryName, string correlationIdKey = Correlation.CorrelationIdKey)
         {
             _categoryName = categoryName;
+            _correlationIdKey = correlationIdKey;
             PublishCounters = true;
             RaisePublishErrors = true;
             PublishEvent = true;
@@ -68,7 +71,8 @@ namespace PerfIt
                 SamplingRate = SamplingRate,
                 PublishCounters = PublishCounters,
                 PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors
+                RaisePublishErrors = RaisePublishErrors,
+                CorrelationIdKey = _correlationIdKey
             }));
 
             HttpResponseMessage response = null;
