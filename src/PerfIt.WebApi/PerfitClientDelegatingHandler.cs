@@ -17,7 +17,7 @@ namespace PerfIt
     public class PerfitClientDelegatingHandler : DelegatingHandler, IInstrumentationInfo
     {
 
-        public string CorrelationIdKey { get; }
+        public string CorrelationIdKey { set; get; }
 
         private ConcurrentDictionary<string, SimpleInstrumentor>
             _instrumenters = new ConcurrentDictionary<string, SimpleInstrumentor>();
