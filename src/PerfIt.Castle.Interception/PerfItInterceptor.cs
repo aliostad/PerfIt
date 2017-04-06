@@ -145,7 +145,7 @@ namespace PerfIt.Castle.Interception
                         (   (returnType == typeof(Task) || 
                             (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>)))))
                     {
-                        instrumentor.InstrumentAsync(async () => invocation.Proceed(), instrumentationContext: instrumentationContext, samplingRate: SamplingRate);
+                        instrumentor.InstrumentAsync(async () => invocation.Proceed(), instrumentationContext: instrumentationContext, samplingRate: SamplingRate).Wait();
                     }
                     else
                     {
