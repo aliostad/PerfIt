@@ -8,6 +8,9 @@ namespace PerfIt
 {
     public class InstrumentationInfo : IInstrumentationInfo
     {
+        private bool _publishCounters = true;
+        private bool _publishEvent = true;
+
         public string InstanceName { get; set; }
 
         public string Description { get; set; }
@@ -19,7 +22,17 @@ namespace PerfIt
         /// <summary>
         /// Whether publish windows performance counters
         /// </summary>
-        public bool PublishCounters { get; set; }
+        public bool PublishCounters
+        {
+            get
+            {
+                return _publishCounters;
+            }
+            set
+            {
+                _publishCounters = value;
+            }
+        }
 
         /// <summary>
         /// Whether throw exceptions if publishing counters/events failed or only write to trace
@@ -29,7 +42,17 @@ namespace PerfIt
         /// <summary>
         /// Whether to publish ETW events
         /// </summary>
-        public bool PublishEvent { get; set; }
+        public bool PublishEvent
+        {
+            get
+            {
+                return _publishEvent;
+            }
+            set
+            {
+                _publishEvent = value;
+            }
+        }
 
         /// <summary>
         /// A value between 0.0 and 1.0 as the proportion of calls to be sampled.
