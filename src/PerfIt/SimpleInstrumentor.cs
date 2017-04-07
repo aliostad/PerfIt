@@ -29,7 +29,7 @@ namespace PerfIt
         bool ShouldInstrument(double samplingRate)
         {
             var corrId = Correlation.GetId(_info.CorrelationIdKey);
-            return ShouldInstrument(samplingRate, corrId);
+            return ShouldInstrument(samplingRate, corrId.ToString());
         }
 
         internal static bool ShouldInstrument(double samplingRate, string corrId)
@@ -87,7 +87,7 @@ namespace PerfIt
           
         }
 
-        public Action<string, string, long, string, string> PublishInstrumentationCallback { get; set; }
+        public Action<string, string, long, string, object> PublishInstrumentationCallback { get; set; }
 
         private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
         {

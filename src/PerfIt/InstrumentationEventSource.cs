@@ -18,9 +18,10 @@ namespace PerfIt
         }
 
         [Event(1, Level = EventLevel.Informational)]
-        public void WriteInstrumentationEvent(string categoryName, string instanceName, long timeTakenMilli, string instrumentationContext = null, string correlationId = null)
+        public void WriteInstrumentationEvent(string categoryName, string instanceName, long timeTakenMilli, string instrumentationContext = null, object correlationId = null)
         {
-            this.WriteEvent(1, categoryName, instanceName, timeTakenMilli, instrumentationContext, correlationId);
+            this.WriteEvent(1, categoryName, instanceName, timeTakenMilli, instrumentationContext, 
+                correlationId == null ? string.Empty : correlationId.ToString());
         }
     }
 }

@@ -8,6 +8,13 @@ namespace PerfIt
 {
     public class InstrumentationInfo : IInstrumentationInfo
     {
+        public InstrumentationInfo()
+        {
+            PublishCounters = false;
+            PublishEvent = true;
+            RaisePublishErrors = false;
+        }
+
         public string InstanceName { get; set; }
 
         public string Description { get; set; }

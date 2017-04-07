@@ -11,19 +11,19 @@ namespace PerfIt
     {
         public const string CorrelationIdKey = "corr-id";
 
-        public static string GetId(string key = CorrelationIdKey, bool setIfNotThere = true)
+        public static object GetId(string key = CorrelationIdKey, bool setIfNotThere = true)
         {
-            var corrId = CallContext.LogicalGetData(key) as string;
+            var corrId = CallContext.LogicalGetData(key);
             if (corrId == null && setIfNotThere)
             {
-                corrId = Guid.NewGuid().ToString("N");
+                corrId = Guid.NewGuid();
                 SetId(corrId, key);
             }
 
             return corrId;
         }
 
-        public static void SetId(string id, string key = CorrelationIdKey)
+        public static void SetId(object id, string key = CorrelationIdKey)
         {
             CallContext.LogicalSetData(key, id);
         }

@@ -12,6 +12,6 @@ namespace PerfIt
 
         public double SamplingRate { get; set; }
 
-        public string CorrelationId { get; set; }
+        public object CorrelationId { get; set; }
     }
 }
