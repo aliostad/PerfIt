@@ -71,7 +71,7 @@ namespace PerfIt
                     if (_info.PublishEvent && ShouldInstrument(samplingRate))
                     {
                         PublishInstrumentationCallback(_info.CategoryName,
-                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext, corrId);
+                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext, corrId.ToString());
                     }
 
                     if (_info.PublishCounters)
@@ -87,7 +87,7 @@ namespace PerfIt
           
         }
 
-        public Action<string, string, long, string, object> PublishInstrumentationCallback { get; set; }
+        public Action<string, string, long, string, string> PublishInstrumentationCallback { get; set; }
 
         private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
         {
@@ -131,7 +131,7 @@ namespace PerfIt
                     if (_info.PublishEvent && ShouldInstrument(samplingRate))
                     {
                         PublishInstrumentationCallback(_info.CategoryName,
-                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext, corrId);
+                            _info.InstanceName, stopwatch.ElapsedMilliseconds, instrumentationContext, corrId.ToString());
                     }
 
                     if (_info.PublishCounters)
@@ -232,7 +232,7 @@ namespace PerfIt
                 Contexts = _info.PublishCounters ? BuildContexts() : null,
                 Kronometer = Stopwatch.StartNew(),
                 SamplingRate = samplingRate,
-                CorrelationId = Correlation.GetId()
+                CorrelationId = Correlation.GetId(_info.CorrelationIdKey)
             };
         }
 
@@ -246,7 +246,7 @@ namespace PerfIt
             if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
             {
                 PublishInstrumentationCallback(_info.CategoryName,
-                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId);
+                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString());
             }
 
             if (_info.PublishCounters)

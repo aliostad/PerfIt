@@ -99,13 +99,10 @@ namespace PerfIt.Tests
             Assert.IsType<NotImplementedException>(ex.InnerExceptions[0]);
         }
 
-        [Fact(Skip = "Leaving failures to Ali")]
-        public void InstrumentorCreatesCorrIdIfNotExists()
-        {
-            var id = Correlation.GetId(setIfNotThere: false);
-            if(id != null)
-                Correlation.SetId(null);
-
+        // http://blog.stephencleary.com/2013/04/implicit-async-context-asynclocal.html Thanks to Kristian Hellang
+        [Fact(Skip = "Bear in mind!! This is the side effect!!! If the cor-id gets set in an async, it does not get flowed??!!")]
+        public async Task InstrumentorCreatesCorrIdIfNotExists()
+        { 
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
                 Counters = CounterTypes.StandardCounters,
@@ -117,7 +114,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = true
             });
 
-            ins.InstrumentAsync(() => Task.Delay(100), "test...").Wait();
+            await ins.InstrumentAsync(() => Task.Delay(100), "test...");
             var idAfter = Correlation.GetId(setIfNotThere: false);
             Assert.NotNull(idAfter);
         }
@@ -229,7 +226,7 @@ namespace PerfIt.Tests
             Assert.Equal(0, CustomCounterStub.RequestEndCount);            
         }
 
-        [Fact(Skip = "Leaving failures to Ali")]
+        [Fact]
         public void InstrumentationShouldCallIncludedCounters()
         {
             if (!PerfItRuntime.HandlerFactories.ContainsKey("CustomCounterStub"))

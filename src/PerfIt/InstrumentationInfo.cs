@@ -13,6 +13,8 @@ namespace PerfIt
             PublishCounters = false;
             PublishEvent = true;
             RaisePublishErrors = false;
+            SamplingRate = 1.0d;
+            CorrelationIdKey = Correlation.CorrelationIdKey;
         }
 
         public string InstanceName { get; set; }
