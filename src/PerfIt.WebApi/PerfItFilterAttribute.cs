@@ -31,6 +31,7 @@ namespace PerfIt.WebApi
             SetEventPolicy();
             SetPublishCounterPolicy();
             SetErrorPolicy();
+            SetSamplingRate();
 
             if (SamplingRate == default(double))
             {
@@ -150,6 +151,11 @@ namespace PerfIt.WebApi
         protected void SetEventPolicy()
         {
             PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
+        }
+
+        protected void SetSamplingRate()
+        {
+            SamplingRate = PerfItRuntime.GetSamplingRate(CategoryName, SamplingRate);
         }
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)

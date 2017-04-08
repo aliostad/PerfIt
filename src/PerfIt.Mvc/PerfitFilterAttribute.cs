@@ -34,6 +34,7 @@ namespace PerfIt.Mvc
             SetEventPolicy();
             SetPublishCounterPolicy();
             SetErrorPolicy();
+            SetSamplingRate();
 
             if (SamplingRate == default(double))
             {
@@ -121,6 +122,11 @@ namespace PerfIt.Mvc
         protected void SetEventPolicy()
         {
             PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
+        }
+
+        protected void SetSamplingRate()
+        {
+            SamplingRate = PerfItRuntime.GetSamplingRate(CategoryName, SamplingRate);
         }
 
         public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)

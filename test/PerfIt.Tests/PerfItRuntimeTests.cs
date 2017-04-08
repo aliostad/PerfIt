@@ -19,15 +19,33 @@ namespace PerfIt.Tests
         [Fact]
         public void SettingCategoryPublishErrorsInConfigWorks()
         {
+            Assert.Equal(true, PerfItRuntime.IsPublishErrorsEnabled("any", false));
+        }
+
+        [Fact]
+        public void SettingCategoryPublishErrorsInConfigForCategoryOverridesGlobal()
+        {
             Assert.Equal(false, PerfItRuntime.IsPublishErrorsEnabled("a", true));
             Assert.Equal(true, PerfItRuntime.IsPublishErrorsEnabled("b", false));
         }
-
 
         [Fact]
         public void SettingCategoryPublishEventsInConfigWorks()
         {
             Assert.Equal(false, PerfItRuntime.IsPublishEventsEnabled("c", true));
         }
+
+        [Fact]
+        public void SettingSamplingRateInConfigWorks()
+        {
+            Assert.Equal(0.2, PerfItRuntime.GetSamplingRate("any", 2));
+        }
+
+        [Fact]
+        public void SettingSamplingRateInConfigForCategoryOverridesGlobal()
+        {
+            Assert.Equal(0.1, PerfItRuntime.GetSamplingRate("c", 2));
+        }
+
     }
 }

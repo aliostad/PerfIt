@@ -35,6 +35,8 @@ namespace PerfIt
             SetErrorPolicy();
             SetPublish();
             SetEventPolicy();
+            SetSamplingRate();
+
             Counters = PerfItRuntime.HandlerFactories.Keys.ToArray();
 
             InstanceNameProvider = request =>
@@ -91,20 +93,22 @@ namespace PerfIt
 
         private void SetPublish()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishCounters] ?? "true";
-            PublishCounters = Convert.ToBoolean(value);
+            PublishCounters = PerfItRuntime.IsPublishCounterEnabled(CategoryName, PublishCounters);
         }
 
         protected void SetErrorPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishErrors] ?? RaisePublishErrors.ToString();
-            RaisePublishErrors = Convert.ToBoolean(value);
+            RaisePublishErrors = PerfItRuntime.IsPublishErrorsEnabled(CategoryName, RaisePublishErrors);
         }
 
         protected void SetEventPolicy()
         {
-            var value = ConfigurationManager.AppSettings[Constants.PerfItPublishEvent] ?? PublishEvent.ToString();
-            PublishEvent = Convert.ToBoolean(value);
+            PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
+        }
+
+        protected void SetSamplingRate()
+        {
+            SamplingRate = PerfItRuntime.GetSamplingRate(CategoryName, SamplingRate);
         }
 
         protected override void Dispose(bool disposing)

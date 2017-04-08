@@ -112,20 +112,39 @@ namespace PerfIt
 
         internal static bool IsFeatureEnabled(string featureName, string categoryName, bool defaultValue)
         {
-            var value = ConfigurationManager.AppSettings[featureName];
-            if (!string.IsNullOrEmpty(value))
-            {
-                return bool.Parse(value);
-            }
-
             var categoryValue = ConfigurationManager.AppSettings[string.Format("{0}:{1}", featureName, categoryName)];
             if (!string.IsNullOrEmpty(categoryValue))
             {
                 return bool.Parse(categoryValue);
             }
 
+            var value = ConfigurationManager.AppSettings[featureName];
+            if (!string.IsNullOrEmpty(value))
+            {
+                return bool.Parse(value);
+            }
+
             return defaultValue;
         }
+
+        public static double GetSamplingRate(string categoryName, double defaultValue)
+        {
+            var categoryValue = ConfigurationManager.AppSettings[string.Format("{0}:{1}", Constants.PerfItSamplingRate, categoryName)];
+            if (!string.IsNullOrEmpty(categoryValue))
+            {
+                return double.Parse(categoryValue);
+            }
+
+            var value = ConfigurationManager.AppSettings[Constants.PerfItSamplingRate];
+            if (!string.IsNullOrEmpty(value))
+            {
+                return double.Parse(value);
+            }
+
+            return defaultValue;
+        }
+
+        
 
         public static bool IsPublishCounterEnabled(string catgeoryName, bool defaultValue)
         {
