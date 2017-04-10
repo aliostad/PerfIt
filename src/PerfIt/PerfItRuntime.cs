@@ -112,13 +112,25 @@ namespace PerfIt
 
         internal static bool IsFeatureEnabled(string featureName, string categoryName, bool defaultValue)
         {
-            var categoryValue = ConfigurationManager.AppSettings[string.Format("{0}:{1}", featureName, categoryName)];
+            var categoryValue = GetConfigurationValue(featureName, ":", categoryName);
             if (!string.IsNullOrEmpty(categoryValue))
             {
                 return bool.Parse(categoryValue);
             }
 
-            var value = ConfigurationManager.AppSettings[featureName];
+            categoryValue = GetConfigurationValue(featureName, "#", categoryName);
+            if (!string.IsNullOrEmpty(categoryValue))
+            {
+                return bool.Parse(categoryValue);
+            }
+
+            var value = GetConfigurationValue(featureName, "#");
+            if (!string.IsNullOrEmpty(value))
+            {
+                return bool.Parse(value);
+            }
+
+            value = GetConfigurationValue(featureName, ":");
             if (!string.IsNullOrEmpty(value))
             {
                 return bool.Parse(value);
@@ -127,15 +139,37 @@ namespace PerfIt
             return defaultValue;
         }
 
+        private static string GetConfigurationValue(string key, string delimiter, string categoryName = null)
+        {
+            if (categoryName == null)
+                return ConfigurationManager.AppSettings[string.Format("{0}{1}{2}", 
+                    Constants.PerfItConfigurationPrefix, delimiter, key)];
+            else
+                return ConfigurationManager.AppSettings[string.Format("{0}{1}{2}{1}{3}", 
+                    Constants.PerfItConfigurationPrefix, delimiter, key, categoryName)];
+        }
+
         public static double GetSamplingRate(string categoryName, double defaultValue)
         {
-            var categoryValue = ConfigurationManager.AppSettings[string.Format("{0}:{1}", Constants.PerfItSamplingRate, categoryName)];
+            var categoryValue = GetConfigurationValue(Constants.PerfItSamplingRate, ":", categoryName);
             if (!string.IsNullOrEmpty(categoryValue))
             {
                 return double.Parse(categoryValue);
             }
 
-            var value = ConfigurationManager.AppSettings[Constants.PerfItSamplingRate];
+            categoryValue = GetConfigurationValue(Constants.PerfItSamplingRate, "#", categoryName);
+            if (!string.IsNullOrEmpty(categoryValue))
+            {
+                return double.Parse(categoryValue);
+            }
+
+            var value = GetConfigurationValue(Constants.PerfItSamplingRate, "#");
+            if (!string.IsNullOrEmpty(value))
+            {
+                return double.Parse(value);
+            }
+
+            value = GetConfigurationValue(Constants.PerfItSamplingRate, ":");
             if (!string.IsNullOrEmpty(value))
             {
                 return double.Parse(value);

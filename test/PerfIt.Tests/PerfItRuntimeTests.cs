@@ -47,5 +47,11 @@ namespace PerfIt.Tests
             Assert.Equal(0.1, PerfItRuntime.GetSamplingRate("c", 2));
         }
 
+        [Fact]
+        public void SettingSamplingRateInConfigForCategoryOverridesGlobalIfSpecifiedWithHash()
+        {
+            Assert.Equal(0.3, PerfItRuntime.GetSamplingRate("cc", 2));
+        }
+
     }
 }
