@@ -44,8 +44,20 @@ Example:
 ``` XML
 <add key="perfit:publishCounters" value="true"/>
 <add key="perfit:publishErrors:a" value="false"/>
+<add key="perfit:samplingRate:dd" value="0.02"/>
+
 ```
-In this case, `publishCounters` is globally on and `publishErrors` for category `a` is off.
+In this case, `publishCounters` is globally on and `publishErrors` for category `a` is off. Also sampling rate is set to 2% for category `dd`.
+
+If you need define these for an Azure application, Azure configuration schema does not allow you to use colon (:) in the name of the configuration. In this case, use pound sign (#) as the delimiter:
+
+
+``` XML
+<add key="perfit#publishCounters" value="true"/>
+<add key="perfit#publishErrors#a" value="false"/>
+<add key="perfit#samplingRate#dd" value="0.02"/>
+
+```
 
 Getting Started (Measuring any part of your code)
 ==
@@ -165,14 +177,7 @@ As of version 2.1, there is option to turn on and off by CategoryName - see abov
 
 ### Not to throw publishing errors
 
-By default, publishing performance counters are regarded as having the same importance as the application's business logic and all publishing errors are thrown. If you would like to change this behaviour, you can do so both in code or in config:
-
-```
-PerfItRuntime.ThrowPublishingErrors = false;
-
-```
-
-Or by configuration:
+By default, publishing performance counters are regarded as having the same importance as the application's business logic and all publishing errors are thrown. If you would like to change this behaviour, you can do so in config:
 
 ``` XML
   <appSettings>
@@ -183,7 +188,7 @@ Or by configuration:
 
 ```
 
-If you need to turn on or off publishErrors, publishCounters or publishEvents by category, please see examples above.
+If you need to turn on or off `publishErrors`, `publishCounters` or `publishEvents` by category, please see examples above.
 
 ### FileNotFoundException when registering the DLL using InstallUtil.exe
 
