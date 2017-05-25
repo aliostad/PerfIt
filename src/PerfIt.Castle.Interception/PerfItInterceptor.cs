@@ -148,7 +148,7 @@ namespace PerfIt.Castle.Interception
                         instrumentor.InstrumentAsync(() =>
                         {
                             invocation.Proceed();
-                            return Task.FromResult(false);
+                            return (Task)invocation.ReturnValue;
                         }, instrumentationContext: instrumentationContext, samplingRate: SamplingRate);
                     }
                     else
