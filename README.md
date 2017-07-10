@@ -3,6 +3,8 @@
 PerfIt!
 ======
 
+[![Join the chat at https://gitter.im/perfIt-dotnet/Lobby](https://badges.gitter.im/perfIt-dotnet/Lobby.svg)](https://gitter.im/perfIt-dotnet/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Windows performance monitoring and Event Tracing for Windows (ETW) instrumentation for .NET (including ASP.NET Web API)
 
 FAQ
