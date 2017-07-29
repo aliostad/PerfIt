@@ -13,5 +13,7 @@ namespace PerfIt
         public double SamplingRate { get; set; }
 
         public object CorrelationId { get; set; }
+
+        public Dictionary<string, object> TracerContexts { get; set; }
     }
 }

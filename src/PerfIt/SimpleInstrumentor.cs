@@ -15,6 +15,8 @@ namespace PerfIt
         private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
           new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
 
+        private readonly Dictionary<string, ITwoStageTracer> _tracers = new Dictionary<string, ITwoStageTracer>();
+
         public SimpleInstrumentor(IInstrumentationInfo info)
         {
             _info = info;
@@ -38,6 +40,16 @@ namespace PerfIt
             return d < samplingRate;
         }
 
+        /// <summary>
+        /// Not thread-safe. It should be populated only at the time of initialisation
+        /// </summary>
+        public IDictionary<string, ITwoStageTracer> Tracers
+        {
+            get
+            {
+                return _tracers;
+            }
+        }
         public void Instrument(Action aspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
         {
             Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts = null;
@@ -227,13 +239,21 @@ namespace PerfIt
         /// <returns>The token to be passed to Finish method when finished</returns>
         public object Start(double samplingRate = Constants.DefaultSamplingRate)
         {
-            return new InstrumentationToken()
+            var token = new InstrumentationToken()
             {
                 Contexts = _info.PublishCounters ? BuildContexts() : null,
                 Kronometer = Stopwatch.StartNew(),
                 SamplingRate = samplingRate,
-                CorrelationId = Correlation.GetId(_info.CorrelationIdKey)
+                CorrelationId = Correlation.GetId(_info.CorrelationIdKey),
+                TracerContexts = new Dictionary<string, object>()
             };
+
+            foreach (var kv in _tracers)
+            {
+                token.TracerContexts.Add(kv.Key, kv.Value.Start(_info));
+            }
+
+            return token;
         }
 
         public void Finish(object token, string instrumentationContext = null)
@@ -251,6 +271,11 @@ namespace PerfIt
 
             if (_info.PublishCounters)
                 CompleteContexts(itoken.Contexts);
+
+            foreach (var kv in _tracers)
+            {
+                kv.Value.Finish(itoken.TracerContexts[kv.Key], instrumentationContext);
+            }
         }
         
         private static InstrumentationToken ValidateToken(object token)

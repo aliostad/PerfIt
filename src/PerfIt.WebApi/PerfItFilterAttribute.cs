@@ -62,7 +62,7 @@ namespace PerfIt.WebApi
                     PerfItRuntime.GetCounterInstanceName(actionContext.ControllerContext.ControllerDescriptor.ControllerType,
                         actionContext.ActionDescriptor.ActionName);
 
-            _instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
+            var inst = new SimpleInstrumentor(new InstrumentationInfo()
             {
                 Description = Description,
                 Counters = Counters,
@@ -74,6 +74,15 @@ namespace PerfIt.WebApi
                 RaisePublishErrors = RaisePublishErrors
             });
 
+            _instrumentor = inst;
+
+            if (TracerTypes!=null)
+            {
+                foreach (var tt in TracerTypes)
+                {
+                    inst.Tracers.Add(tt.Name, (ITwoStageTracer)Activator.CreateInstance(tt));
+                }
+            }
         }
 
         /// <summary>
@@ -102,6 +111,11 @@ namespace PerfIt.WebApi
         public string CategoryName { get; set; }
 
         public double SamplingRate { get; set; }
+
+        /// <summary>
+        /// Implementations of ITwoStageTracer interface. Optional.
+        /// </summary>
+        public Type[] TracerTypes { get; set; }
 
         public string CorrelationIdKey { get; set; }
 

@@ -65,19 +65,27 @@ namespace PerfIt.Mvc
                     PerfItRuntime.GetCounterInstanceName(actionContext.ActionDescriptor.ControllerDescriptor.ControllerType,
                         actionContext.ActionDescriptor.ActionName);
 
-            _instrumentor = new SimpleInstrumentor(new InstrumentationInfo()
+            var inst = new SimpleInstrumentor(new InstrumentationInfo()
             {
                 Description = Description,
                 Counters = Counters,
-                InstanceName =  instanceName,
+                InstanceName = instanceName,
                 CategoryName = CategoryName,
                 SamplingRate = SamplingRate,
                 PublishCounters = PublishCounters,
                 PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors,
-                CorrelationIdKey = CorrelationIdKey
+                RaisePublishErrors = RaisePublishErrors
             });
 
+            _instrumentor = inst;
+
+            if (TracerTypes != null)
+            {
+                foreach (var tt in TracerTypes)
+                {
+                    inst.Tracers.Add(tt.Name, (ITwoStageTracer)Activator.CreateInstance(tt));
+                }
+            }
         }
 
 
@@ -98,6 +106,11 @@ namespace PerfIt.Mvc
         public double SamplingRate { get; set; }
 
         public string CorrelationIdKey { get; set; }
+
+        /// <summary>
+        /// Implementations of ITwoStageTracer interface. Optional.
+        /// </summary>
+        public Type[] TracerTypes { get; set; }
 
         /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.

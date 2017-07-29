@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PerfIt")]
-[assembly: AssemblyDescription("Performance Instrumentation Library")]
+[assembly: AssemblyTitle("PerfIt.Zipkin.Tests")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Ali Kheyrollahi")]
-[assembly: AssemblyProduct("PerfIt")]
-[assembly: AssemblyCopyright("Copyright Ali Kheyrollahi 2013-2017")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("PerfIt.Zipkin.Tests")]
+[assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b3b26334-052e-4409-952e-66b23260a36f")]
+[assembly: Guid("79ab586e-e301-4918-99cd-3e196261471d")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,8 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("3.7.0.0")]
-[assembly: AssemblyFileVersion("3.7.0.0")]
-[assembly: AssemblyInformationalVersion("3.7.0")]
-[assembly: InternalsVisibleTo("PerfIt.Tests")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
