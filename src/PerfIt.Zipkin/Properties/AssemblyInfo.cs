@@ -6,14 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("PerfIt.Zipkin")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Ali Kheyrollahi")]
-[assembly: AssemblyProduct("PerfIt.Zipkin")]
-[assembly: AssemblyCopyright("Copyright © Ali Kheyrollahi 2017")]
-[assembly: AssemblyTrademark("Ali Kheyrollahi")]
-[assembly: AssemblyCulture("")]
-
+[assembly: AssemblyDescription("Zipkin Tracer library for PerfIt")]
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
 // COM, set the ComVisible attribute to true on that type.
@@ -31,7 +24,4 @@ using System.Runtime.InteropServices;
 //
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0")]
 [assembly: InternalsVisibleTo("PerfIt.Zipkin.Tests")]
