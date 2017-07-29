@@ -37,6 +37,8 @@
     <Exec WorkingDirectory="%(NugetExeDir.FullPath)" Command="nuget.exe pack ..\src\PerfIt.WebApi\PerfIt.WebApi.csproj -Build -OutputDirectory ..\artifacts\packages" />
     <Exec WorkingDirectory="%(NugetExeDir.FullPath)" Command="nuget.exe pack ..\src\PerfIt.Castle.Interception\PerfIt.Castle.Interception.csproj -Build -OutputDirectory ..\artifacts\packages" />	
     <Exec WorkingDirectory="%(NugetExeDir.FullPath)" Command="nuget.exe pack ..\src\PerfIt.Mvc\PerfIt.Mvc.csproj -Build -OutputDirectory ..\artifacts\packages" />	
+    <Exec WorkingDirectory="%(NugetExeDir.FullPath)" Command="nuget.exe pack ..\src\PerfIt.Zipkin\PerfIt.Zipkin.csproj -Build -OutputDirectory ..\artifacts\packages" />	
+    <Exec WorkingDirectory="%(NugetExeDir.FullPath)" Command="nuget.exe pack ..\src\PerfIt.Zipkin.EventHub\PerfIt.Zipkin.EventHub.csproj -Build -OutputDirectory ..\artifacts\packages" />	
   </Target>
   <Target Name="Publish">
     <Exec WorkingDirectory="%(ScriptsDir.FullPath)" Command="powershell -file .\publish.ps1" />

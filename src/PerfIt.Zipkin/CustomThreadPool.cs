@@ -15,7 +15,7 @@ namespace System.Threading
         private List<Thread> _threadPool = new List<Thread>();
         private int _total;
         private Stopwatch _stopwatch = new Stopwatch();
-        public bool IsWorking { get; private set; } = false;
+        public bool IsWorking { get; private set; }
         private int _executing = 0;
 
         public CustomThreadPool(IWorkFactory workFactory, int size = 100)
