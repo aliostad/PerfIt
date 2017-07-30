@@ -71,7 +71,7 @@ namespace PerfIt
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
 
-            if (!PublishCounters)
+            if (!PublishCounters && !PublishEvent)
                 return await base.SendAsync(request, cancellationToken);
 
             var instanceName = InstanceName ?? InstanceNameProvider(request);
@@ -99,8 +99,6 @@ namespace PerfIt
                     return inst;
                 }
             );
-
-            
 
             HttpResponseMessage response = null;
 

@@ -51,7 +51,6 @@ namespace PerfIt.Zipkin
                 _threadPool = new CustomThreadPool(this, 10);
                 _threadPool.Start();
             }
-
         }
 
         public void Dispose()
@@ -87,7 +86,6 @@ namespace PerfIt.Zipkin
             }
 
             _timeInterval.Reset();
-            // var spanss = spans.Select(ThriftSpanSerializer.ConvertToThrift).ToArray();
 
             return async () =>
             {
