@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
@@ -22,7 +23,9 @@ namespace PerfIt
         private ConcurrentDictionary<string, SimpleInstrumentor>
             _instrumenters = new ConcurrentDictionary<string, SimpleInstrumentor>();
 
-        public PerfitClientDelegatingHandler(string categoryName)
+        private ITwoStageTracer[] _tracers;
+
+        public PerfitClientDelegatingHandler(string categoryName, IEnumerable<ITwoStageTracer> tracers = null)
         {
             CategoryName = categoryName;
             CorrelationIdKey = Correlation.CorrelationIdKey;
@@ -39,8 +42,11 @@ namespace PerfIt
 
             Counters = PerfItRuntime.HandlerFactories.Keys.ToArray();
 
+            if (tracers != null)
+                _tracers = tracers.ToArray();
+
             InstanceNameProvider = request =>
-                string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());
+                string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());            
         }
 
         public string InstanceName { get; set; }
@@ -69,18 +75,32 @@ namespace PerfIt
                 return await base.SendAsync(request, cancellationToken);
 
             var instanceName = InstanceName ?? InstanceNameProvider(request);
-            var instrumenter =_instrumenters.GetOrAdd(instanceName, (insName) => new SimpleInstrumentor(new InstrumentationInfo()
-            {
-                Counters = Counters,
-                Description = "Counter for " + insName,
-                InstanceName = insName,
-                CategoryName = CategoryName,
-                SamplingRate = SamplingRate,
-                PublishCounters = PublishCounters,
-                PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors,
-                CorrelationIdKey = CorrelationIdKey
-            }));
+            var instrumenter =_instrumenters.GetOrAdd(instanceName, 
+                (insName) =>
+                {
+                    var inst = new SimpleInstrumentor(new InstrumentationInfo()
+                    {
+                        Counters = Counters,
+                        Description = "Counter for " + insName,
+                        InstanceName = insName,
+                        CategoryName = CategoryName,
+                        SamplingRate = SamplingRate,
+                        PublishCounters = PublishCounters,
+                        PublishEvent = PublishEvent,
+                        RaisePublishErrors = RaisePublishErrors,
+                        CorrelationIdKey = CorrelationIdKey
+                    });
+
+                    foreach (var tracer in _tracers)
+                    {
+                        inst.Tracers.Add(tracer.GetType().FullName, tracer);
+                    }
+
+                    return inst;
+                }
+            );
+
+            
 
             HttpResponseMessage response = null;
 

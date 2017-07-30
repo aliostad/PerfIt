@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace PerfIt
 {
+    /// <summary>
+    /// A An abstraction for the typical instrumentor
+    /// </summary>
     public interface ITwoStageInstrumentor
     {
         object Start(double samplingRate = Constants.DefaultSamplingRate);

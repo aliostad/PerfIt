@@ -83,7 +83,7 @@ namespace PerfIt.Mvc
             {
                 foreach (var tt in TracerTypes)
                 {
-                    inst.Tracers.Add(tt.Name, (ITwoStageTracer)Activator.CreateInstance(tt));
+                    inst.Tracers.Add(tt.FullName, (ITwoStageTracer)Activator.CreateInstance(tt));
                 }
             }
         }
