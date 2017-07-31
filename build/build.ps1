@@ -4,4 +4,4 @@ param(
     $buildTarget = "/t:Default"
 )
 
-& "$(get-content env:windir)\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe" $buildFile $buildParams $buildTarget
+.\MSBuild.exe $buildFile $buildParams $buildTarget

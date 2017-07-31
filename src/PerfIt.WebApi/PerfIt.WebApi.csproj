@@ -55,6 +55,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="FilterDiscoverer.cs" />
     <Compile Include="IInstanceNameProvider.cs" />
     <Compile Include="IInstrumentationContextProvider.cs" />

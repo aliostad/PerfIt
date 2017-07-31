@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$-alpha</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <projectUrl>https://github.com/aliostad/PerfIt</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright 2017</copyright>
+    <tags>performance monitor monitoring perfmon counter EventSource Instrumentation zipkin eventhub emitter</tags>
+	<dependencies>	  
+      <dependency id="PerfIt.Zipkin" version="$version$-alpha" />		  
+      <dependency id="Criteo.Profiling.Tracing" version="0.4.1" />	
+      <dependency id="WindowsAzure.ServiceBus" version="4.1.3" />		  
+    </dependencies>
+  </metadata>
+</package>

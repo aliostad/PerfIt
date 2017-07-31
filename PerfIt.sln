@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt", "src\PerfIt\PerfIt.csproj", "{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB}"
 EndProject
@@ -20,8 +20,17 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.WebApi.Tests", "test\PerfIt.WebApi.Tests\PerfIt.WebApi.Tests.csproj", "{C1BE7276-6ADA-4BB7-9E0B-64123FA15D40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{0AF64064-0911-4D53-9200-817ED7216654}"
+	ProjectSection(SolutionItems) = preProject
+		src\Common\CommonAssemblyInfo.cs = src\Common\CommonAssemblyInfo.cs
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Castle.Interception.Tests", "test\PerfIt.Castle.Interception.Tests\PerfIt.Castle.Interception.Tests.csproj", "{1B0EBAA9-D9F7-426E-AA2A-549C38C912A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Zipkin", "src\PerfIt.Zipkin\PerfIt.Zipkin.csproj", "{503C3313-727F-4669-828B-152138853F6F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Zipkin.Tests", "test\PerfIt.Zipkin.Tests\PerfIt.Zipkin.Tests.csproj", "{79AB586E-E301-4918-99CD-3E196261471D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Zipkin.EventHub", "src\PerfIt.Zipkin.EventHub\PerfIt.Zipkin.EventHub.csproj", "{CD7DF62B-EBB8-45AC-87F1-42D1A187DBDB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +66,18 @@ Global
 		{1B0EBAA9-D9F7-426E-AA2A-549C38C912A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B0EBAA9-D9F7-426E-AA2A-549C38C912A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B0EBAA9-D9F7-426E-AA2A-549C38C912A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{503C3313-727F-4669-828B-152138853F6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{503C3313-727F-4669-828B-152138853F6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{503C3313-727F-4669-828B-152138853F6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{503C3313-727F-4669-828B-152138853F6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79AB586E-E301-4918-99CD-3E196261471D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79AB586E-E301-4918-99CD-3E196261471D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79AB586E-E301-4918-99CD-3E196261471D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79AB586E-E301-4918-99CD-3E196261471D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD7DF62B-EBB8-45AC-87F1-42D1A187DBDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD7DF62B-EBB8-45AC-87F1-42D1A187DBDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD7DF62B-EBB8-45AC-87F1-42D1A187DBDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD7DF62B-EBB8-45AC-87F1-42D1A187DBDB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,5 +90,8 @@ Global
 		{650B1B1A-ACAB-4341-9F57-5D8C8667F0A9} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
 		{C1BE7276-6ADA-4BB7-9E0B-64123FA15D40} = {20A37C8B-4ECF-445A-99A4-AD9E2E6B513C}
 		{1B0EBAA9-D9F7-426E-AA2A-549C38C912A0} = {20A37C8B-4ECF-445A-99A4-AD9E2E6B513C}
+		{503C3313-727F-4669-828B-152138853F6F} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
+		{79AB586E-E301-4918-99CD-3E196261471D} = {20A37C8B-4ECF-445A-99A4-AD9E2E6B513C}
+		{CD7DF62B-EBB8-45AC-87F1-42D1A187DBDB} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
 	EndGlobalSection
 EndGlobal
