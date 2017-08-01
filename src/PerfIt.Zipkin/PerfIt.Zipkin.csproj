@@ -71,12 +71,12 @@
     <Compile Include="ConsoleDispatcher.cs" />
     <Compile Include="CustomThreadPool.cs" />
     <Compile Include="IDispatcher.cs" />
-    <Compile Include="ISpanEmitHub.cs" />
+    <Compile Include="ISpanEmitter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpanEmitHub.cs" />
     <Compile Include="TraceDispatcher.cs" />
     <Compile Include="ZipkinEventSource.cs" />
-    <Compile Include="DefaultTracer.cs" />
+    <Compile Include="Tracers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PerfIt\PerfIt.csproj">

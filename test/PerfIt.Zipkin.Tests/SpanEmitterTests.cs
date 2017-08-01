@@ -16,13 +16,13 @@ namespace PerfIt.Zipkin.Tests
         [Fact]
         public void UsingItWillNotPreventAppShuttingDown()
         {
-            SpanEmitHub.Instance.RegisterEmitter(new ConsoleDispatcher());
+            SpanEmitHub.Instance.RegisterDispatcher(new ConsoleDispatcher());
         }
 
         [Fact]
         public void EmittingDoesNotThrow()
         {
-            SpanEmitHub.Instance.ClearEmitters();
+            SpanEmitHub.Instance.ClearDispatchers();
             SpanEmitHub.Instance.Emit(new Span(Trace.Create().CurrentSpan, DateTime.Now));
         }
 
@@ -34,7 +34,7 @@ namespace PerfIt.Zipkin.Tests
             mock.Setup(x => x.EmitBatchAsync(It.Is<IEnumerable<Span>>(y => y.First() == span)))
                 .Returns(Task.FromResult(false));
             
-            SpanEmitHub.Instance.RegisterEmitter(mock.Object);
+            SpanEmitHub.Instance.RegisterDispatcher(mock.Object);
             SpanEmitHub.Instance.Emit(span);
 
             Thread.Sleep(500);           
@@ -46,7 +46,7 @@ namespace PerfIt.Zipkin.Tests
         public void EmittingToTraceDoesNotThrow()
         {
             var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);
-            SpanEmitHub.Instance.RegisterEmitter(new TraceDispatcher());
+            SpanEmitHub.Instance.RegisterDispatcher(new TraceDispatcher());
             SpanEmitHub.Instance.Emit(span);
 
             Thread.Sleep(1000);
@@ -58,7 +58,7 @@ namespace PerfIt.Zipkin.Tests
         public void EmittingToConsoleDoesNotThrow()
         {
             var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);
-            SpanEmitHub.Instance.RegisterEmitter(new ConsoleDispatcher());
+            SpanEmitHub.Instance.RegisterDispatcher(new ConsoleDispatcher());
             SpanEmitHub.Instance.Emit(span);
 
             Thread.Sleep(1000);

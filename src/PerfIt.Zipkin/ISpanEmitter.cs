@@ -10,7 +10,7 @@ namespace PerfIt.Zipkin
     /// <summary>
     /// Central hub for all tracers to send their spans to
     /// </summary>
-    public interface ISpanEmitHub
+    public interface ISpanEmitter
     {
         /// <summary>
         /// Thread-safe. It enqueues for emission.
@@ -22,6 +22,6 @@ namespace PerfIt.Zipkin
         /// Currently not thread-safe. Must be called at the startup of the application
         /// </summary>
         /// <param name="dispatcher"></param>
-        void RegisterEmitter(IDispatcher dispatcher);
+        void RegisterDispatcher(IDispatcher dispatcher);
     }
 }

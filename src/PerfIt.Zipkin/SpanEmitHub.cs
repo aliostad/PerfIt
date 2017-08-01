@@ -9,14 +9,14 @@ using Criteo.Profiling.Tracing.Tracers.Zipkin;
 
 namespace PerfIt.Zipkin
 {
-    public class SpanEmitHub : IDisposable, IWorkFactory
+    public class SpanEmitHub : IDisposable, IWorkFactory, ISpanEmitter
     {
         private const int DefaultMaxBatchSize = 100;
 
         public static readonly SpanEmitHub Instance = new SpanEmitHub();
 
         private readonly ConcurrentQueue<Span> _queue = new ConcurrentQueue<Span>();
-        private readonly List<IDispatcher> _emitters = new List<IDispatcher>();
+        private readonly List<IDispatcher> _dispatchers = new List<IDispatcher>();
         private CustomThreadPool _threadPool;
         private DoublyIncreasingTimeInterval _timeInterval = new DoublyIncreasingTimeInterval(
             TimeSpan.FromMilliseconds(10), TimeSpan.FromMilliseconds(500), 4);
@@ -44,12 +44,12 @@ namespace PerfIt.Zipkin
         }
 
         /// <summary>
-        /// Registers an emitter. NOTE: If you register an emitter, please make sure you call Close/Dispose at the end of your application
+        /// Registers a dispatcher. NOTE: If you register a dispatcher, please make sure you call Close/Dispose at the end of your application
         /// </summary>
         /// <param name="dispatcher"></param>
-        public void RegisterEmitter(IDispatcher dispatcher)
+        public void RegisterDispatcher(IDispatcher dispatcher)
         {
-            _emitters.Add(dispatcher);
+            _dispatchers.Add(dispatcher);
 
             if (_threadPool == null)
             {
@@ -61,7 +61,7 @@ namespace PerfIt.Zipkin
         public void Dispose()
         {
             _threadPool?.Dispose();
-            foreach (var emitter in _emitters)
+            foreach (var emitter in _dispatchers)
             {
                 try
                 {
@@ -79,9 +79,9 @@ namespace PerfIt.Zipkin
             Dispose();
         }
 
-        public void ClearEmitters()
+        public void ClearDispatchers()
         {
-            _emitters.Clear();    
+            _dispatchers.Clear();    
         }
 
         public Func<Task> GetWork()
@@ -108,12 +108,12 @@ namespace PerfIt.Zipkin
                 // this approach is simplistic if there are more than one IO-bound emitter
                 // but for now it is OK. In case of multiple IO-bound emitters, then we
                 // must have a separate queue for each batch per emitter
-                foreach (var emitter in _emitters)
+                foreach (var emitter in _dispatchers)
                 {
                     await emitter.EmitBatchAsync(spans);
                 }
             };
-        }        
+        }
 
         private class DoublyIncreasingTimeInterval : IntervalBase<TimeSpan>
         {
