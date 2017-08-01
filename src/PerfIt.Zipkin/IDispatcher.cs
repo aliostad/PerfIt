@@ -10,7 +10,7 @@ namespace PerfIt.Zipkin
     /// <summary>
     /// Emits a batch of spans to a destination (media/queue/storage)
     /// </summary>
-    public interface IEmitter
+    public interface IDispatcher : IDisposable
     {
         Task EmitBatchAsync(IEnumerable<Span> spans);
     }

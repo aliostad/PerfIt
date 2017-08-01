@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace PerfIt.Zipkin
         public static readonly SpanEmitHub Instance = new SpanEmitHub();
 
         private readonly ConcurrentQueue<Span> _queue = new ConcurrentQueue<Span>();
-        private readonly List<IEmitter> _emitters = new List<IEmitter>();
+        private readonly List<IDispatcher> _emitters = new List<IDispatcher>();
         private CustomThreadPool _threadPool;
         private DoublyIncreasingTimeInterval _timeInterval = new DoublyIncreasingTimeInterval(
             TimeSpan.FromMilliseconds(10), TimeSpan.FromMilliseconds(500), 4);
@@ -45,10 +46,10 @@ namespace PerfIt.Zipkin
         /// <summary>
         /// Registers an emitter. NOTE: If you register an emitter, please make sure you call Close/Dispose at the end of your application
         /// </summary>
-        /// <param name="emitter"></param>
-        public void RegisterEmitter(IEmitter emitter)
+        /// <param name="dispatcher"></param>
+        public void RegisterEmitter(IDispatcher dispatcher)
         {
-            _emitters.Add(emitter);
+            _emitters.Add(dispatcher);
 
             if (_threadPool == null)
             {
@@ -60,6 +61,17 @@ namespace PerfIt.Zipkin
         public void Dispose()
         {
             _threadPool?.Dispose();
+            foreach (var emitter in _emitters)
+            {
+                try
+                {
+                    emitter.Dispose();
+                }
+                catch (Exception e)
+                {
+                    Trace.WriteLine(e);
+                }
+            }
         }
 
         public void Close()
@@ -90,9 +102,12 @@ namespace PerfIt.Zipkin
             }
 
             _timeInterval.Reset();
-
+           
             return async () =>
             {
+                // this approach is simplistic if there are more than one IO-bound emitter
+                // but for now it is OK. In case of multiple IO-bound emitters, then we
+                // must have a separate queue for each batch per emitter
                 foreach (var emitter in _emitters)
                 {
                     await emitter.EmitBatchAsync(spans);

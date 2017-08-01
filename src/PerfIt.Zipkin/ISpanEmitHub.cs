@@ -21,7 +21,7 @@ namespace PerfIt.Zipkin
         /// <summary>
         /// Currently not thread-safe. Must be called at the startup of the application
         /// </summary>
-        /// <param name="emitter"></param>
-        void RegisterEmitter(IEmitter emitter);
+        /// <param name="dispatcher"></param>
+        void RegisterEmitter(IDispatcher dispatcher);
     }
 }

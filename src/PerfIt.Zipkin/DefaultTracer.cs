@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Criteo.Profiling.Tracing;
 using Criteo.Profiling.Tracing.Tracers.Zipkin;
 using Trace = Criteo.Profiling.Tracing.Trace;
 
@@ -17,7 +18,7 @@ namespace PerfIt.Zipkin
             if(token == null)
                 throw new ArgumentNullException(nameof(token));
             var tpl = (Tuple<IInstrumentationInfo, Span, Stopwatch>) token;
-            tpl.Item2.SetAsComplete(DateTime.Now);
+            tpl.Item2.SetAsComplete(DateTime.UtcNow);
             ZipkinEventSource.Instance.WriteSpan(
                 tpl.Item2, null, instrumentationContext);
             OnFinishing(tpl.Item2);
@@ -30,7 +31,7 @@ namespace PerfIt.Zipkin
             var trace = Trace.Current;
             var newTrace = trace == null ? Trace.Create() : trace.Child();
             Trace.Current = newTrace;
-            var span = new Span(newTrace.CurrentSpan, DateTime.Now)
+            var span = new Span(newTrace.CurrentSpan, DateTime.UtcNow)
             {
                 ServiceName = info.CategoryName,
                 Name = info.InstanceName
@@ -58,13 +59,13 @@ namespace PerfIt.Zipkin
         protected override void OnStarting(Span span)
         {
             base.OnStarting(span);
-            span.Annotations.Add(new ZipkinAnnotation(DateTime.Now, "sr"));
+            span.Annotations.Add(new ZipkinAnnotation(DateTime.UtcNow, "sr"));
         }
 
         protected override void OnFinishing(Span span)
         {
             base.OnFinishing(span);
-            span.Annotations.Add(new ZipkinAnnotation(DateTime.Now, "ss"));
+            span.Annotations.Add(new ZipkinAnnotation(DateTime.UtcNow, "ss"));
         }
     }
 
@@ -73,13 +74,13 @@ namespace PerfIt.Zipkin
         protected override void OnStarting(Span span)
         {
             base.OnStarting(span);
-            span.Annotations.Add(new ZipkinAnnotation(DateTime.Now, "cs"));
+            span.Annotations.Add(new ZipkinAnnotation(DateTime.UtcNow, "cs"));
         }
 
         protected override void OnFinishing(Span span)
         {
             base.OnFinishing(span);
-            span.Annotations.Add(new ZipkinAnnotation(DateTime.Now, "cr"));
+            span.Annotations.Add(new ZipkinAnnotation(DateTime.UtcNow, "cr"));
         }
     }
 

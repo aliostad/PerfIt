@@ -16,7 +16,7 @@ namespace PerfIt.Zipkin.Tests
         [Fact]
         public void UsingItWillNotPreventAppShuttingDown()
         {
-            SpanEmitHub.Instance.RegisterEmitter(new ConsoleEmitter());
+            SpanEmitHub.Instance.RegisterEmitter(new ConsoleDispatcher());
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace PerfIt.Zipkin.Tests
         [Fact]
         public void EmittingGetsFinallyEmitted()
         {
-            var mock = new Mock<IEmitter>();
+            var mock = new Mock<IDispatcher>();
             var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);
             mock.Setup(x => x.EmitBatchAsync(It.Is<IEnumerable<Span>>(y => y.First() == span)))
                 .Returns(Task.FromResult(false));
@@ -46,7 +46,7 @@ namespace PerfIt.Zipkin.Tests
         public void EmittingToTraceDoesNotThrow()
         {
             var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);
-            SpanEmitHub.Instance.RegisterEmitter(new TraceEmitter());
+            SpanEmitHub.Instance.RegisterEmitter(new TraceDispatcher());
             SpanEmitHub.Instance.Emit(span);
 
             Thread.Sleep(1000);
@@ -58,7 +58,7 @@ namespace PerfIt.Zipkin.Tests
         public void EmittingToConsoleDoesNotThrow()
         {
             var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);
-            SpanEmitHub.Instance.RegisterEmitter(new ConsoleEmitter());
+            SpanEmitHub.Instance.RegisterEmitter(new ConsoleDispatcher());
             SpanEmitHub.Instance.Emit(span);
 
             Thread.Sleep(1000);
