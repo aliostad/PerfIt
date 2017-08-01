@@ -42,6 +42,10 @@ namespace PerfIt.Zipkin
                 _queue.Enqueue(span);
         }
 
+        /// <summary>
+        /// Registers an emitter. NOTE: If you register an emitter, please make sure you call Close/Dispose at the end of your application
+        /// </summary>
+        /// <param name="emitter"></param>
         public void RegisterEmitter(IEmitter emitter)
         {
             _emitters.Add(emitter);
