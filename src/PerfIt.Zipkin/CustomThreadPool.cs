@@ -17,14 +17,23 @@ namespace System.Threading
         private Stopwatch _stopwatch = new Stopwatch();
         public bool IsWorking { get; private set; }
         private int _executing = 0;
+        private string _name;
 
-        public CustomThreadPool(IWorkFactory workFactory, int size = 100)
+        public CustomThreadPool(IWorkFactory workFactory, int size = 100, string name = null)
         {
+            _name = name;
             _workFactory = workFactory;
+
+            if (_name == null)
+                _name = Guid.NewGuid().ToString("N");
 
             for (int i = 0; i < size; i++)
             {
-                var thread = new Thread(() => LoopAsync().Wait());
+                var thread = new Thread(() => LoopAsync().Wait())
+                {
+                    IsBackground = true,
+                    Name = $"CustomThreadPool {_name} - Thread {i+1}"
+                };
                 _threadPool.Add(thread);
             }
         }
@@ -95,6 +104,11 @@ namespace System.Threading
             {
                 // ignore
             }
+        }
+
+        ~CustomThreadPool()
+        {
+            Stop();
         }
     }
 }

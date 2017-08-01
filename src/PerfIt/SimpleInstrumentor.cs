@@ -167,21 +167,32 @@ namespace PerfIt
         /// <returns>The token to be passed to Finish method when finished</returns>
         public object Start(double samplingRate = Constants.DefaultSamplingRate)
         {
-            var token = new InstrumentationToken()
+            try
             {
-                Contexts = _info.PublishCounters ? BuildContexts() : null,
-                Kronometer = Stopwatch.StartNew(),
-                SamplingRate = samplingRate,
-                CorrelationId = Correlation.GetId(_info.CorrelationIdKey),
-                TracerContexts = new Dictionary<string, object>()
-            };
+                var token = new InstrumentationToken()
+                {
+                    Contexts = _info.PublishCounters ? BuildContexts() : null,
+                    Kronometer = Stopwatch.StartNew(),
+                    SamplingRate = samplingRate,
+                    CorrelationId = Correlation.GetId(_info.CorrelationIdKey),
+                    TracerContexts = new Dictionary<string, object>()
+                };
 
-            foreach (var kv in _tracers)
+                foreach (var kv in _tracers)
+                {
+                    token.TracerContexts.Add(kv.Key, kv.Value.Start(_info));
+                }
+
+                return token;
+            }
+            catch (Exception e)
             {
-                token.TracerContexts.Add(kv.Key, kv.Value.Start(_info));
+                Trace.WriteLine(e);
+                if(_info.RaisePublishErrors)
+                    throw;
             }
 
-            return token;
+            return null;
         }
 
         public void Finish(object token, string instrumentationContext = null)
@@ -189,20 +200,29 @@ namespace PerfIt
             if(token == null)
                 return; // not meant to be instrumented prob due to sampling rate
 
-            var itoken = ValidateToken(token);
-
-            if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
+            try
             {
-                PublishInstrumentationCallback(_info.CategoryName,
-                   _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString());
+                var itoken = ValidateToken(token);
+
+                if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
+                {
+                    PublishInstrumentationCallback(_info.CategoryName,
+                       _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString());
+                }
+
+                if (_info.PublishCounters)
+                    CompleteContexts(itoken.Contexts);
+
+                foreach (var kv in _tracers)
+                {
+                    kv.Value.Finish(itoken.TracerContexts[kv.Key], instrumentationContext);
+                }
             }
-
-            if (_info.PublishCounters)
-                CompleteContexts(itoken.Contexts);
-
-            foreach (var kv in _tracers)
+            catch (Exception e)
             {
-                kv.Value.Finish(itoken.TracerContexts[kv.Key], instrumentationContext);
+                Console.WriteLine(e);
+                if(_info.RaisePublishErrors)
+                    throw;
             }
         }
         
