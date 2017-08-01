@@ -73,7 +73,6 @@ namespace PerfIt.Zipkin.EventHub
 
             try
             {
-                Console.WriteLine($"Attempting to dispatch {list.Count} messages - EventHubDispatcher");
                 return _eventHubClient.SendBatchAsync(list.Select(x => x.Data));
             }
             catch (Exception e)
