@@ -215,7 +215,9 @@ namespace PerfIt
 
                 foreach (var kv in _tracers)
                 {
-                    kv.Value.Finish(itoken.TracerContexts[kv.Key], instrumentationContext);
+                    kv.Value.Finish(itoken.TracerContexts[kv.Key], 
+                        itoken.CorrelationId?.ToString(), 
+                        instrumentationContext);
                 }
             }
             catch (Exception e)

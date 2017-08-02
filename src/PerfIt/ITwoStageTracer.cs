@@ -13,6 +13,6 @@ namespace PerfIt
     {
         object Start(IInstrumentationInfo info);
 
-        void Finish(object token, string instrumentationContext = null);
+        void Finish(object token, string correlationId = null, string instrumentationContext = null);
     }
 }

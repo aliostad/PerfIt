@@ -13,14 +13,14 @@ namespace PerfIt.Zipkin
 {
     public class DefaultTracer : ITwoStageTracer
     {
-        public void Finish(object token, string instrumentationContext = null)
+        public void Finish(object token, string correlationId = null, string instrumentationContext = null)
         {
             if(token == null)
                 throw new ArgumentNullException(nameof(token));
             var tpl = (Tuple<IInstrumentationInfo, Span, Stopwatch>) token;
             tpl.Item2.SetAsComplete(DateTime.UtcNow);
             ZipkinEventSource.Instance.WriteSpan(
-                tpl.Item2, null, instrumentationContext);
+                tpl.Item2, correlationId, instrumentationContext);
             OnFinishing(tpl.Item2);
             
             SpanEmitHub.Instance.Emit(tpl.Item2);         
