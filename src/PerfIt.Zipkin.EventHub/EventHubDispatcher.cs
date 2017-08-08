@@ -18,7 +18,6 @@ namespace PerfIt.Zipkin.EventHub
         private ConcurrentQueue<Message>
             _internalQueue = new ConcurrentQueue<Message>();
 
-        private static readonly TimeSpan Expiry = TimeSpan.FromMinutes(1);
         private int _minBatchSize;
         private int _maxBatchSize;
         private int _messageExpirySeconds;
@@ -48,13 +47,13 @@ namespace PerfIt.Zipkin.EventHub
 
         public Task EmitBatchAsync(IEnumerable<Span> spans)
         {
-            var s = new MemoryStream();
             foreach (var span in spans)
             {
+                var s = new MemoryStream();
                 _spanSerializer.SerializeTo(s, span);
+                _internalQueue.Enqueue(new Message(new EventData(s.ToArray())));
             }
 
-            _internalQueue.Enqueue(new Message(new EventData(s.ToArray())));
             return DoEmitAsync(_minBatchSize);
         }
 
@@ -118,7 +117,10 @@ namespace PerfIt.Zipkin.EventHub
 
             public bool IsExpired(int expirySeconds)
             {
-                return DateTimeOffset.Now.Subtract(Time).TotalSeconds >= expirySeconds;
+                var expired = DateTimeOffset.Now.Subtract(Time).TotalSeconds >= expirySeconds;
+                if(expired)
+                    Console.WriteLine("Expired!!");
+                return expired;
             }
         }
     }
