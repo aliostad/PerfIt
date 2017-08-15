@@ -70,6 +70,8 @@
     </Compile>
     <Compile Include="ConsoleDispatcher.cs" />
     <Compile Include="CustomThreadPool.cs" />
+    <Compile Include="Http\ClientTraceHandler.cs" />
+    <Compile Include="Http\ServerTraceHandler.cs" />
     <Compile Include="IDispatcher.cs" />
     <Compile Include="ISpanEmitter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
