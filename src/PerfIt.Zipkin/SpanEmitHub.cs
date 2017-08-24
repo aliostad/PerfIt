@@ -15,11 +15,10 @@ namespace PerfIt.Zipkin
 
         public static readonly SpanEmitHub Instance = new SpanEmitHub();
 
+        private readonly ManualResetEvent _sync = new ManualResetEvent(false);
         private readonly ConcurrentQueue<Span> _queue = new ConcurrentQueue<Span>();
         private readonly List<IDispatcher> _dispatchers = new List<IDispatcher>();
         private CustomThreadPool _threadPool;
-        private DoublyIncreasingTimeInterval _timeInterval = new DoublyIncreasingTimeInterval(
-            TimeSpan.FromMilliseconds(10), TimeSpan.FromMilliseconds(500), 4);
 
         private DoublyIncreasingIntInterval _batchSizeInterval = new DoublyIncreasingIntInterval(
             10, DefaultMaxBatchSize, 4);
@@ -37,10 +36,18 @@ namespace PerfIt.Zipkin
 
         public int MaxBatchSize { get; set; }
 
+        public int QueueCount
+        {
+            get { return _queue.Count; }
+        }
+
         public void Emit(Span span)
         {
-            if(_accepting)
+            if (_accepting)
+            {
                 _queue.Enqueue(span);
+                _sync.Set();
+            }
         }
 
         /// <summary>
@@ -98,10 +105,13 @@ namespace PerfIt.Zipkin
             if (spans.Count == 0)
             {
                 _batchSizeInterval.Reset();
-                return () => Task.Delay(_timeInterval.Next());
+                return () =>
+                {
+                    _sync.Reset();
+                    _sync.WaitOne();
+                    return Task.FromResult(false);
+                };
             }
-
-            _timeInterval.Reset();
            
             return async () =>
             {

@@ -63,5 +63,38 @@ namespace PerfIt.Zipkin.Tests
 
             Thread.Sleep(1000);
         }
+        
+        [Fact]
+        public void ItNeverStaysFullGievnTime()
+        {
+            var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);
+            SpanEmitHub.Instance.RegisterDispatcher(new DevNullDispatcher());
+
+            for (int i = 0; i < 100; i++)
+            {
+                for (int j = 0; j < 1000; j++)
+                {
+                    SpanEmitHub.Instance.Emit(span);
+                }    
+                
+                Console.WriteLine(i);
+                Thread.Sleep(100);
+                
+                Assert.Equal(0, SpanEmitHub.Instance.QueueCount);
+            }            
+        }
+
+        class DevNullDispatcher : IDispatcher 
+        {
+            public void Dispose()
+            {
+                
+            }
+
+            public Task EmitBatchAsync(IEnumerable<Span> spans)
+            {
+                return Task.FromResult(1);
+            }
+        }
     }
 }
