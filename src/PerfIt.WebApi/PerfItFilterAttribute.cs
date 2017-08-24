@@ -21,7 +21,7 @@ namespace PerfIt.WebApi
         {
             Description = string.Empty;
             PublishCounters = true;
-            RaisePublishErrors = false;
+            RaisePublishErrors = true;
             PublishEvent = true;
             CategoryName = categoryName;
         }
