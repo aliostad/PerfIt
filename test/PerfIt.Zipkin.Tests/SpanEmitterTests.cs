@@ -64,7 +64,7 @@ namespace PerfIt.Zipkin.Tests
             Thread.Sleep(1000);
         }
         
-        [Fact]
+        [Fact(Skip = "Long running")]
         public void ItNeverStaysFullGievnTime()
         {
             var span = new Span(Trace.Create().CurrentSpan, DateTime.Now);

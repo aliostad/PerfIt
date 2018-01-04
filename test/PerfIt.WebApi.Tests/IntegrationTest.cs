@@ -62,7 +62,7 @@ namespace PerfIt.WebApi.Tests
 
         }
 
-        [Fact]
+        [Fact(Skip = "Requires admin")]
         public void InstallWillInstallTheCategoryAndUseCatProvidedForTheNullOne()
         {
             PerfItRuntime.Install(Assembly.GetExecutingAssembly(), new FilterDiscoverer(), "Woohooo");
