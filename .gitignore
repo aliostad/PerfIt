@@ -35,3 +35,4 @@ artifacts/
 script.sql
 _NCrunch_PerfIt/
 .idea/
+.vs/

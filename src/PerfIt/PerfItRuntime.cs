@@ -36,6 +36,7 @@ namespace PerfIt
             HandlerFactories.Add(CounterTypes.NumberOfErrorsPerSecond,
                 (categoryName, instanceName) => new NumberOfErrorsPerSecondHandler(categoryName, instanceName));
 
+            ConfigurationProvider = (s) => ConfigurationManager.AppSettings[s];
         }
 
         /// <summary>
@@ -142,11 +143,11 @@ namespace PerfIt
         private static string GetConfigurationValue(string key, string delimiter, string categoryName = null)
         {
             if (categoryName == null)
-                return ConfigurationManager.AppSettings[string.Format("{0}{1}{2}", 
-                    Constants.PerfItConfigurationPrefix, delimiter, key)];
+                return ConfigurationProvider(string.Format("{0}{1}{2}", 
+                    Constants.PerfItConfigurationPrefix, delimiter, key));
             else
-                return ConfigurationManager.AppSettings[string.Format("{0}{1}{2}{1}{3}", 
-                    Constants.PerfItConfigurationPrefix, delimiter, key, categoryName)];
+                return ConfigurationProvider(string.Format("{0}{1}{2}{1}{3}", 
+                    Constants.PerfItConfigurationPrefix, delimiter, key, categoryName));
         }
 
         public static double GetSamplingRate(string categoryName, double defaultValue)
@@ -178,7 +179,10 @@ namespace PerfIt
             return defaultValue;
         }
 
-        
+        /// <summary>
+        /// By default uses appSettings. Set it to your own if you need to change it.
+        /// </summary>
+        public static Func<string, string> ConfigurationProvider { get; set; }
 
         public static bool IsPublishCounterEnabled(string catgeoryName, bool defaultValue)
         {
