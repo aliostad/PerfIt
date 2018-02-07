@@ -50,9 +50,10 @@ namespace PerfIt
                 return _tracers;
             }
         }
-        public void Instrument(Action aspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
+        public void Instrument(Action aspect, string instrumentationContext = null, 
+            double? samplingRate = null)
         {
-            var token = Start(samplingRate);
+            var token = Start(samplingRate ?? _info.SamplingRate);
             try
             {
                 aspect();
@@ -73,9 +74,10 @@ namespace PerfIt
             }
         }
 
-        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, double samplingRate = Constants.DefaultSamplingRate)
+        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, 
+            double? samplingRate = null)
         {
-            var token = Start(samplingRate);
+            var token = Start(samplingRate ?? _info.SamplingRate);
             try
             {
                 await asyncAspect();
