@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CorrelationTests.cs" />
+    <Compile Include="EtwTests.cs" />
     <Compile Include="InstanceNameLengthTests.cs" />
     <Compile Include="PerfItRuntimeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
