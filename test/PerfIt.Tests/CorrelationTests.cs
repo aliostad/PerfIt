@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+#if NET452
+using System.Runtime.Remoting.Messaging;
+#endif
+
 
 namespace PerfIt.Tests
 {
@@ -67,7 +70,6 @@ namespace PerfIt.Tests
             id = Correlation.GetId(setIfNotThere: false);
             var inst = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 CategoryName = "cat",
                 InstanceName = "ins",
                 PublishCounters = false,

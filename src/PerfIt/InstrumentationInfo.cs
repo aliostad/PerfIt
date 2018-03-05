@@ -21,8 +21,6 @@ namespace PerfIt
 
         public string Description { get; set; }
 
-        public string[] Counters { get; set; }
-
         public string CategoryName { get; set; }
 
         /// <summary>

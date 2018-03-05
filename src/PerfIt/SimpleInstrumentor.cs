@@ -3,17 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor, IDisposable
+    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor
     {
         private IInstrumentationInfo _info;
-
-        private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
-          new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
 
         private readonly Dictionary<string, ITwoStageTracer> _tracers = new Dictionary<string, ITwoStageTracer>();
 
@@ -65,11 +61,11 @@ namespace PerfIt
 
         public Action<string, string, long, string, string> PublishInstrumentationCallback { get; set; }
 
-        private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
+        private void SetErrorContexts(Dictionary<string, object> context)
         {
-            if (contexts != null && contexts.Item2 != null)
+            if (context != null)
             {
-                contexts.Item2.SetContextToErrorState();
+                context.SetContextToErrorState();
             }
         }
 
@@ -86,79 +82,17 @@ namespace PerfIt
             }
         }
 
-        private Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> BuildContexts()
+        private Dictionary<string, object> BuildContexts()
         {
-            var contexts = new List<PerfitHandlerContext>();
-            Prepare(contexts);
-
             var ctx = new Dictionary<string, object>();
-
             ctx.Add(Constants.PerfItKey, new PerfItContext());
             ctx.Add(Constants.PerfItPublishErrorsKey, _info.RaisePublishErrors);
-            foreach (var context in contexts)
-            {
-                try
-                {
-                    context.Handler.OnRequestStarting(ctx);
-                }
-                catch (Exception e)
-                {
-                    Trace.TraceError(e.ToString());
-                    if (_info.RaisePublishErrors)
-                        throw;
-                }
-            }
-
-            return new Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>>(contexts, ctx);
-        }
-
-        private void CompleteContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
-        {
-            try
-            {
-                foreach (var counter in contexts.Item1)
-                {
-                    counter.Handler.OnRequestEnding(contexts.Item2);
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.ToString());
-                if (_info.RaisePublishErrors)
-                    throw;
-            }
-        }
-
-        private void Prepare(List<PerfitHandlerContext> contexts)
-        {
-            var counters = _info.Counters==null || _info.Counters.Length == 0 ? CounterTypes.StandardCounters : _info.Counters;
-
-            foreach (var handlerFactory in PerfItRuntime.HandlerFactories.Where(c=> counters.Contains(c.Key)))
-            {
-                var key = GetKey(handlerFactory.Key, _info.InstanceName);
-                var ctx = _counterContexts.GetOrAdd(key, k =>
-                    new Lazy<PerfitHandlerContext>(() => new PerfitHandlerContext()
-                    {
-                        Handler = handlerFactory.Value(_info.CategoryName, _info.InstanceName),
-                        Name = _info.InstanceName
-                    }));
-                contexts.Add(ctx.Value);
-            }
+            return ctx;
         }
 
         private string GetKey(string counterName, string instanceName)
         {
             return string.Format("{0}_{1}", counterName, instanceName);
-        }
-
-        public void Dispose()
-        {          
-            foreach (var context in _counterContexts.Values)
-            {
-                context.Value.Handler.Dispose();
-            }
-
-            _counterContexts.Clear(); 
         }
 
         /// <summary>
@@ -209,9 +143,6 @@ namespace PerfIt
                     PublishInstrumentationCallback(_info.CategoryName,
                        _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString());
                 }
-
-                if (_info.PublishCounters)
-                    CompleteContexts(itoken.Contexts);
 
                 foreach (var kv in _tracers)
                 {

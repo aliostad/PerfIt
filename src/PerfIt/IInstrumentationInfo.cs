@@ -20,11 +20,6 @@ namespace PerfIt
         string Description { get; set; }
 
         /// <summary>
-        /// Counter types. Each value as a string.
-        /// </summary>
-        string[] Counters { get; set; }
-
-        /// <summary>
         /// The categoryName of the stuff
         /// </summary>
         string CategoryName { get; set; }

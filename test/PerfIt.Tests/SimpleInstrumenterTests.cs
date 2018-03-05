@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
+#if NET452
 using System.Runtime.Remoting.Messaging;
+#endif
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
-using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Formatters;
 using Xunit;
-using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks;
-using PerfIt.Tests.Stubs;
 
 namespace PerfIt.Tests
 {
@@ -18,31 +16,25 @@ namespace PerfIt.Tests
     {
         private const string TestCategory = "PerfItTests";
 
-        public SimpleInstrumenterTests()
-        {
-            PerfItRuntime.InstallStandardCounters(TestCategory);
-        }
-
         [Fact]
         public void CanPublishAspect()
         {
 
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = TestCategory
             });
 
-            var listener = ConsoleLog.CreateListener();
-            listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
-                Keywords.All);
+            //var listener = ConsoleLog.CreateListener();
+            //listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
+            //    Keywords.All);
             
             ins.Instrument(() => Thread.Sleep(100), "test...");
      
-            listener.DisableEvents(InstrumentationEventSource.Instance);
-            listener.Dispose();
+            //listener.DisableEvents(InstrumentationEventSource.Instance);
+            //listener.Dispose();
         }
 
         [Fact]
@@ -50,7 +42,6 @@ namespace PerfIt.Tests
         {
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = TestCategory
@@ -64,7 +55,6 @@ namespace PerfIt.Tests
         {
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
@@ -81,7 +71,6 @@ namespace PerfIt.Tests
         {
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
@@ -105,7 +94,6 @@ namespace PerfIt.Tests
         { 
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
@@ -125,7 +113,6 @@ namespace PerfIt.Tests
             int numberOfTimesInstrumented = 0;
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
@@ -153,7 +140,6 @@ namespace PerfIt.Tests
             int numberOfTimesInstrumented = 0;
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
@@ -181,7 +167,6 @@ namespace PerfIt.Tests
             int numberOfTimesInstrumented = 0;
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
@@ -201,52 +186,6 @@ namespace PerfIt.Tests
             });
 
             Assert.InRange(numberOfTimesInstrumented, 1, 100);
-        }
-
-        [Fact]
-        public void InstrumentationShouldNotCallExcludedCounters()
-        {
-            if (!PerfItRuntime.HandlerFactories.ContainsKey("CustomCounterStub"))
-                PerfItRuntime.HandlerFactories.Add("CustomCounterStub", (s, s1) => new CustomCounterStub(s, s1));
-
-            CustomCounterStub.ClearCounters();
-
-            var ins = new SimpleInstrumentor(new InstrumentationInfo()
-            {
-                Counters = CounterTypes.StandardCounters,
-                Description = "test",
-                InstanceName = "Test instance",
-                CategoryName = TestCategory,
-                PublishCounters = true,
-            });
-
-            ins.Instrument(() => { }, "test...");
-
-            Assert.Equal(0, CustomCounterStub.RequestStartCount);
-            Assert.Equal(0, CustomCounterStub.RequestEndCount);            
-        }
-
-        [Fact]
-        public void InstrumentationShouldCallIncludedCounters()
-        {
-            if (!PerfItRuntime.HandlerFactories.ContainsKey("CustomCounterStub"))
-                PerfItRuntime.HandlerFactories.Add("CustomCounterStub", (s, s1) => new CustomCounterStub(s, s1));
-
-            CustomCounterStub.ClearCounters();
-
-            var ins = new SimpleInstrumentor(new InstrumentationInfo()
-            {
-                Counters = CounterTypes.StandardCounters.Union(new[] { "CustomCounterStub" }).ToArray(),
-                Description = "test",
-                InstanceName = "Test instance",
-                CategoryName = TestCategory,
-                PublishCounters = true,
-            });
-
-            ins.Instrument(() => { }, "test...");
-
-            Assert.Equal(1, CustomCounterStub.RequestStartCount);
-            Assert.Equal(1, CustomCounterStub.RequestEndCount);
         }
     }
 }

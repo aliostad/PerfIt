@@ -6,7 +6,7 @@ namespace PerfIt
 {
     public class InstrumentationToken
     {
-        public Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> Contexts { get; set; }
+        public Dictionary<string, object> Contexts { get; set; }
 
         public Stopwatch Kronometer { get; set; }
 
