@@ -17,16 +17,19 @@ namespace PerfIt
 {
     public static class PerfItRuntime
     {
-
-#if NETSTANDARD2_0
         static PerfItRuntime()
         {
-            Configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection().Build();
+#if NET452
+             ConfigurationProvider = (s) => ConfigurationManager.AppSettings[s];
+#else
+            ConfigurationProvider = (s) => new ConfigurationBuilder()
+                .AddInMemoryCollection().Build()[s];
+#endif
+           
         }
 
-        public static IConfiguration Configuration { get; set; }
-#endif
+
+
         public static string GetUniqueName(string instanceName, string counterType)
         {
             return string.Format("{0}.{1}", instanceName, counterType);
@@ -69,20 +72,11 @@ namespace PerfIt
         private static string GetConfigurationValue(string key, string delimiter, string categoryName = null)
         {
             if (categoryName == null)
-                return ReadConfig(string.Format("{0}{1}{2}",
+                return ConfigurationProvider(string.Format("{0}{1}{2}", 
                     Constants.PerfItConfigurationPrefix, delimiter, key));
             else
-                return ReadConfig(string.Format("{0}{1}{2}{1}{3}",
+                return ConfigurationProvider(string.Format("{0}{1}{2}{1}{3}", 
                     Constants.PerfItConfigurationPrefix, delimiter, key, categoryName));
-        }
-
-        private static string ReadConfig(string key)
-        {
-#if NET452
-            return System.Configuration.ConfigurationManager.AppSettings[key];
-#else
-            return Configuration[key];
-#endif
         }
 
         public static double GetSamplingRate(string categoryName, double defaultValue)
@@ -113,7 +107,13 @@ namespace PerfIt
 
             return defaultValue;
         }
-        
+
+
+        /// <summary>
+        /// By default uses appSettings. Set it to your own if you need to change it.
+        /// </summary>
+        public static Func<string, string> ConfigurationProvider { get; set; }
+
 
         public static bool IsPublishCounterEnabled(string catgeoryName, bool defaultValue)
         {

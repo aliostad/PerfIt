@@ -71,7 +71,8 @@ namespace PerfIt.WebApi
                 SamplingRate = SamplingRate,
                 PublishCounters = PublishCounters,
                 PublishEvent = PublishEvent,
-                RaisePublishErrors = RaisePublishErrors
+                RaisePublishErrors = RaisePublishErrors,
+                CorrelationIdKey = CorrelationIdKey
             });
 
             _instrumentor = inst;

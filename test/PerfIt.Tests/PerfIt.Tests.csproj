@@ -35,6 +35,4 @@
 		<Reference Include="Microsoft.CSharp" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" version="2.0.0" />
 	</ItemGroup>
-
-	
 </Project>

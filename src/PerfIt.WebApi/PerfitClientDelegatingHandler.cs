@@ -23,7 +23,7 @@ namespace PerfIt
         private ConcurrentDictionary<string, SimpleInstrumentor>
             _instrumenters = new ConcurrentDictionary<string, SimpleInstrumentor>();
 
-        private ITwoStageTracer[] _tracers;
+        private ITwoStageTracer[] _tracers = new ITwoStageTracer[0];
 
         public PerfitClientDelegatingHandler(string categoryName, IEnumerable<ITwoStageTracer> tracers = null)
         {
