@@ -28,5 +28,13 @@
 		<Reference Include="System" />
 		<Reference Include="Microsoft.CSharp" />
 		<Reference Include="System.Runtime.Serialization" />
-	</ItemGroup>	
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+		<Reference Include="System" />
+		<Reference Include="Microsoft.CSharp" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" version="2.0.0" />
+	</ItemGroup>
+
+	
 </Project>
