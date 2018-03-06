@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{0AF640
 		src\Common\CommonAssemblyInfo.cs = src\Common\CommonAssemblyInfo.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Tests", "test\PerfIt.Tests\PerfIt.Tests.csproj", "{061A498A-632C-4B45-9557-7AC321794AA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfIt.Tests", "test\PerfIt.Tests\PerfIt.Tests.csproj", "{388E7A75-23D4-484B-8F5B-CA44195C9A0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,16 +26,17 @@ Global
 		{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{061A498A-632C-4B45-9557-7AC321794AA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{061A498A-632C-4B45-9557-7AC321794AA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{061A498A-632C-4B45-9557-7AC321794AA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{061A498A-632C-4B45-9557-7AC321794AA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{388E7A75-23D4-484B-8F5B-CA44195C9A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{388E7A75-23D4-484B-8F5B-CA44195C9A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{388E7A75-23D4-484B-8F5B-CA44195C9A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{388E7A75-23D4-484B-8F5B-CA44195C9A0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
+		{388E7A75-23D4-484B-8F5B-CA44195C9A0F} = {20A37C8B-4ECF-445A-99A4-AD9E2E6B513C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {309852F6-0DE5-40CB-8AD7-0290AD52D2C6}
