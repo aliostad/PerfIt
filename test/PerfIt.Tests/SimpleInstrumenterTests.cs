@@ -26,15 +26,9 @@ namespace PerfIt.Tests
                 InstanceName = "Test instance",
                 CategoryName = TestCategory
             });
-
-            //var listener = ConsoleLog.CreateListener();
-            //listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
-            //    Keywords.All);
             
             ins.Instrument(() => Thread.Sleep(100), "test...");
      
-            //listener.DisableEvents(InstrumentationEventSource.Instance);
-            //listener.Dispose();
         }
 
         [Fact]
