@@ -13,6 +13,6 @@ namespace PerfIt
     {
         object Start(double samplingRate = Constants.DefaultSamplingRate);
         
-        void Finish(object token, string instrumentationContext = null);
+        void Finish(object token, string instrumentationContext = null, ExtraContext extraContext = null);
     }
 }

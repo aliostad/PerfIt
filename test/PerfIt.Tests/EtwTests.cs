@@ -12,7 +12,7 @@ namespace PerfIt.Tests
         [Fact]
         public void CanCreateEventEvenIfPassedAllNulls()
         {
-            InstrumentationEventSource.Instance.WriteInstrumentationEvent(null, null, 1, null, null);
+            InstrumentationEventSource.Instance.WriteInstrumentationEvent(null, null, 1, null, null, null);
         }
     }
 }

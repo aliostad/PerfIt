@@ -60,7 +60,7 @@ namespace PerfIt
             }                    
         }
 
-        public Action<string, string, long, string, string> PublishInstrumentationCallback { get; set; }
+        public Action<string, string, long, string, string, ExtraContext> PublishInstrumentationCallback { get; set; }
 
         private void SetErrorContexts(Dictionary<string, object> context)
         {
@@ -131,7 +131,7 @@ namespace PerfIt
             return null;
         }
 
-        public void Finish(object token, string instrumentationContext = null)
+        public void Finish(object token, string instrumentationContext = null, ExtraContext extraContext = null)
         {
             if(token == null)
                 return; // not meant to be instrumented prob due to sampling rate
@@ -143,12 +143,12 @@ namespace PerfIt
                 if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
                 {
                     PublishInstrumentationCallback(_info.CategoryName,
-                       _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString());
+                       _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString(), extraContext);
                 }
 
                 foreach (var kv in _tracers)
                 {
-                    kv.Value.Finish(itoken.TracerContexts[kv.Key], 
+                    kv.Value.Finish(itoken.TracerContexts[kv.Key], itoken.Kronometer.ElapsedMilliseconds,
                         itoken.CorrelationId?.ToString(), 
                         instrumentationContext);
                 }

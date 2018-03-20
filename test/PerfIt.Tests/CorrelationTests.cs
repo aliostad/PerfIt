@@ -57,7 +57,7 @@ namespace PerfIt.Tests
         {
             var id = Correlation.GetId();
             await Task.Delay(100);
-            InstrumentationEventSource.Instance.WriteInstrumentationEvent("blah", "ff", 12,"gfg", id.ToString());
+            InstrumentationEventSource.Instance.WriteInstrumentationEvent("blah", "ff", 12,"gfg", id.ToString(), null);
             var id2 = Correlation.GetId(setIfNotThere: false);
 
             Assert.Equal(id, id2);

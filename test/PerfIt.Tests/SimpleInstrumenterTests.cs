@@ -115,7 +115,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = false
             })
             {
-                PublishInstrumentationCallback = (a,b,c,d, e) => numberOfTimesInstrumented++
+                PublishInstrumentationCallback = (a,b,c,d, e, f) => numberOfTimesInstrumented++
             };
 
             double samplingRate = 0.01;
@@ -142,7 +142,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = false
             })
             {
-                PublishInstrumentationCallback = (a, b, c, d, e) => numberOfTimesInstrumented++
+                PublishInstrumentationCallback = (a, b, c, d, e, f) => numberOfTimesInstrumented++
             };
 
             double samplingRate = 0.01;
@@ -169,7 +169,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = false
             })
             {
-                PublishInstrumentationCallback = (a, b, c, d, e) => numberOfTimesInstrumented++
+                PublishInstrumentationCallback = (a, b, c, d, e, f) => numberOfTimesInstrumented++
             };
 
             double samplingRate = 0.01;
