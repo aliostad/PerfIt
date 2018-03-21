@@ -45,22 +45,6 @@ namespace PerfIt.Tests
         }
 
         [Fact]
-        public void CanTurnOffPublishingCounters()
-        {
-            var ins = new SimpleInstrumentor(new InstrumentationInfo()
-            {
-                Description = "test",
-                InstanceName = "Test instance",
-                CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
-                PublishCounters = false,
-                PublishEvent = true,
-                RaisePublishErrors = true
-            });
-
-            ins.InstrumentAsync(() => Task.Delay(100), "test...").Wait();
-        }
-
-        [Fact]
         public void DontRaiseErrorsDoesNotHideOriginalError()
         {
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
@@ -68,8 +52,6 @@ namespace PerfIt.Tests
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
-                PublishCounters = true,
-                PublishEvent = true,
                 RaisePublishErrors = false
             });
 
@@ -91,8 +73,6 @@ namespace PerfIt.Tests
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
-                PublishCounters = false,
-                PublishEvent = true,
                 RaisePublishErrors = true
             });
 
@@ -110,8 +90,6 @@ namespace PerfIt.Tests
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
-                PublishCounters = true,
-                PublishEvent = true,
                 RaisePublishErrors = false
             })
             {
@@ -137,8 +115,6 @@ namespace PerfIt.Tests
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
-                PublishCounters = false,
-                PublishEvent = true,
                 RaisePublishErrors = false
             })
             {
@@ -164,8 +140,6 @@ namespace PerfIt.Tests
                 Description = "test",
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
-                PublishCounters = false,
-                PublishEvent = true,
                 RaisePublishErrors = false
             })
             {

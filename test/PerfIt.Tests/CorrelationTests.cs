@@ -72,8 +72,6 @@ namespace PerfIt.Tests
             {
                 CategoryName = "cat",
                 InstanceName = "ins",
-                PublishCounters = false,
-                PublishEvent = true,
                 RaisePublishErrors = true
             });
 

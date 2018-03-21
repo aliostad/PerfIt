@@ -107,7 +107,7 @@ namespace PerfIt
             {
                 var token = new InstrumentationToken()
                 {
-                    Contexts = _info.PublishCounters ? BuildContexts() : null,
+                    Contexts = BuildContexts(),
                     Kronometer = Stopwatch.StartNew(),
                     SamplingRate = samplingRate,
                     CorrelationId = Correlation.GetId(_info.CorrelationIdKey),
@@ -140,7 +140,7 @@ namespace PerfIt
             {
                 var itoken = ValidateToken(token);
 
-                if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
+                if (ShouldInstrument(itoken.SamplingRate))
                 {
                     PublishInstrumentationCallback(_info.CategoryName,
                        _info.InstanceName, 
