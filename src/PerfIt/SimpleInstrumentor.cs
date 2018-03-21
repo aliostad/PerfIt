@@ -47,7 +47,7 @@ namespace PerfIt
             }
         }
         public void Instrument(Action aspect, string instrumentationContext = null, 
-            double? samplingRate = null)
+            double? samplingRate = null, ExtraContext extraContext = null)
         {
             var token = Start(samplingRate ?? _info.SamplingRate);
             try
@@ -56,7 +56,7 @@ namespace PerfIt
             }            
             finally
             {
-                Finish(token, instrumentationContext);
+                Finish(token, instrumentationContext, extraContext);
             }                    
         }
 
@@ -71,7 +71,7 @@ namespace PerfIt
         }
 
         public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, 
-            double? samplingRate = null)
+            double? samplingRate = null, ExtraContext extraContext = null)
         {
             var token = Start(samplingRate ?? _info.SamplingRate);
             try
@@ -80,7 +80,7 @@ namespace PerfIt
             }
             finally
             {
-                Finish(token, instrumentationContext);
+                Finish(token, instrumentationContext, extraContext);
             }
         }
 
@@ -143,14 +143,20 @@ namespace PerfIt
                 if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
                 {
                     PublishInstrumentationCallback(_info.CategoryName,
-                       _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString(), extraContext);
-                }
+                       _info.InstanceName, 
+                       itoken.Kronometer.ElapsedMilliseconds, 
+                       instrumentationContext, 
+                       itoken.CorrelationId.ToString(), 
+                       extraContext);
 
-                foreach (var kv in _tracers)
-                {
-                    kv.Value.Finish(itoken.TracerContexts[kv.Key], itoken.Kronometer.ElapsedMilliseconds,
-                        itoken.CorrelationId?.ToString(), 
-                        instrumentationContext);
+                    foreach (var kv in _tracers)
+                    {
+                        kv.Value.Finish(itoken.TracerContexts[kv.Key], itoken.Kronometer.ElapsedMilliseconds,
+                            itoken.CorrelationId?.ToString(),
+                            instrumentationContext,
+                            extraContext);
+                    }
+
                 }
             }
             catch (Exception e)

@@ -4,7 +4,7 @@
 		<Summary>PerfIt Instrumentation Library for .NET</Summary>
 		<Description>Primitives for instrumenting the code and publishing traces to various sources including ETW and Zipkin</Description>
 		<VersionPrefix>5.0.0</VersionPrefix>
-		<VersionSuffix>alpha2</VersionSuffix>        
+		<VersionSuffix>alpha3</VersionSuffix>        
 		<Authors>Ali Kheyrollahi</Authors>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>PerfIt</AssemblyName>

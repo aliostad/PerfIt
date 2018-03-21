@@ -12,9 +12,13 @@ namespace PerfIt.Tracers.EventHub
     /// </summary>
     public class EventHubTracer : ITwoStageTracer
     {
-        private readonly BufferingEventDispatcher _dispatcher;
+        private readonly IEventDispatcher _dispatcher;
 
-        public EventHubTracer(BufferingEventDispatcher dispatcher)
+        /// <summary>
+        /// .ctor
+        /// </summary>
+        /// <param name="dispatcher">an event dispatcher</param>
+        public EventHubTracer(IEventDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
         }
