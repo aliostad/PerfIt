@@ -13,7 +13,7 @@
 		<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="psyfon" Version="0.3.2" />
+		<PackageReference Include="psyfon" Version="0.4.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
 	</ItemGroup>
 	<ItemGroup>
