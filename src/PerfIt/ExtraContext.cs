@@ -7,7 +7,7 @@ namespace PerfIt
     /// <summary>
     /// Extra information for the context
     /// </summary>
-    public class ExtraContext
+    public class InstrumentationContext
     {
         public string Text1 { get; set; }
 

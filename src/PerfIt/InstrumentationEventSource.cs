@@ -21,20 +21,19 @@ namespace PerfIt
         public void WriteInstrumentationEvent(string categoryName, 
             string instanceName,
             long timeTakenMilli, 
-            string instrumentationContext = null, 
             string correlationId = null,
             string text1 = null,
             string text2 = null,
             int numeric = 0,
             decimal decima1 = 0)
         {
-            this.WriteEvent(1, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli, instrumentationContext ?? string.Empty, 
+            this.WriteEvent(1, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli,  
                 correlationId == null ? string.Empty : correlationId, text1 ?? string.Empty, text2 ?? string.Empty, numeric, decima1);
         }
 
-        public void WriteInstrumentationEvent(string categoryName, string instanceName, long timeTakenMilli, string instrumentationContext = null, string correlationId = null, ExtraContext extraContext = null)
+        public void WriteInstrumentationEvent(string categoryName, string instanceName, long timeTakenMilli, string correlationId = null, InstrumentationContext extraContext = null)
         {
-            this.WriteEvent(1, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli, instrumentationContext ?? string.Empty,
+            this.WriteEvent(1, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli, 
                 correlationId == null ? string.Empty : correlationId, extraContext?.Text1, extraContext?.Text2, extraContext?.Numeric, extraContext?.Decimal);
         }
 

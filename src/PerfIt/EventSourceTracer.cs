@@ -9,14 +9,12 @@ namespace PerfIt
         public void Finish(object token, 
             long timeTakenMilli, 
             string correlationId = null, 
-            string instrumentationContext = null, 
-            ExtraContext extraContext = null)
+            InstrumentationContext extraContext = null)
         {
             var info = (IInstrumentationInfo) token;
             InstrumentationEventSource.Instance.WriteInstrumentationEvent(info.CategoryName,
                 info.InstanceName,
                 timeTakenMilli,
-                instrumentationContext,
                 correlationId,
                 extraContext);
         }

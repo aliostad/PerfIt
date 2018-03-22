@@ -42,8 +42,8 @@ namespace PerfIt
                 return _tracers;
             }
         }
-        public void Instrument(Action aspect, string instrumentationContext = null, 
-            double? samplingRate = null, ExtraContext extraContext = null)
+        public void Instrument(Action aspect,
+            double? samplingRate = null, InstrumentationContext extraContext = null)
         {
             var token = Start(samplingRate ?? _info.SamplingRate);
             try
@@ -52,7 +52,7 @@ namespace PerfIt
             }            
             finally
             {
-                Finish(token, instrumentationContext, extraContext);
+                Finish(token, extraContext);
             }                    
         }
 
@@ -64,8 +64,8 @@ namespace PerfIt
             }
         }
 
-        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, 
-            double? samplingRate = null, ExtraContext extraContext = null)
+        public async Task InstrumentAsync(Func<Task> asyncAspect, 
+            double? samplingRate = null, InstrumentationContext extraContext = null)
         {
             var token = Start(samplingRate ?? _info.SamplingRate);
             try
@@ -74,7 +74,7 @@ namespace PerfIt
             }
             finally
             {
-                Finish(token, instrumentationContext, extraContext);
+                Finish(token, extraContext);
             }
         }
 
@@ -125,7 +125,7 @@ namespace PerfIt
             return null;
         }
 
-        public void Finish(object token, string instrumentationContext = null, ExtraContext extraContext = null)
+        public void Finish(object token, InstrumentationContext extraContext = null)
         {
             if(token == null)
                 return; // not meant to be instrumented prob due to sampling rate
@@ -140,7 +140,6 @@ namespace PerfIt
                     {
                         kv.Value.Finish(itoken.TracerContexts[kv.Key], itoken.Kronometer.ElapsedMilliseconds,
                             itoken.CorrelationId?.ToString(),
-                            instrumentationContext,
                             extraContext);
                     }
 

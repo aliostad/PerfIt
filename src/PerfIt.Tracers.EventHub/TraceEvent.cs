@@ -29,6 +29,5 @@ namespace PerfIt.Tracers.EventHub
 
         public string CorrelationId { get; set; }
 
-        public string InstrumentationContext { get; set; }
     }
 }

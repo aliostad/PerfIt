@@ -77,7 +77,7 @@ namespace PerfIt.Tests
 
             //InstrumentationEventSource.Instance.WriteInstrumentationEvent("blah", "ff", 12, "gfg", id.ToString());
 
-            await inst.InstrumentAsync(() => Task.Delay(100), "not to worry");
+            await inst.InstrumentAsync(() => Task.Delay(100));
             var id2 = Correlation.GetId(setIfNotThere: false);
 
             Assert.Equal(id, id2);

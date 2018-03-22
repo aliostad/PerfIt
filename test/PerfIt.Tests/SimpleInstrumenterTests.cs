@@ -28,8 +28,7 @@ namespace PerfIt.Tests
             public void Finish(object token, 
                 long timeTakenMilli, 
                 string correlationId = null, 
-                string instrumentationContext = null, 
-                ExtraContext extraContext = null)
+                InstrumentationContext extraContext = null)
             {
                 TheAction();
             }
@@ -51,7 +50,7 @@ namespace PerfIt.Tests
                 CategoryName = TestCategory
             });
             
-            ins.Instrument(() => Thread.Sleep(100), "test...");
+            ins.Instrument(() => Thread.Sleep(100));
      
         }
 
@@ -65,7 +64,7 @@ namespace PerfIt.Tests
                 CategoryName = TestCategory
             });
 
-            ins.InstrumentAsync( () => Task.Delay(100), "test...").Wait();
+            ins.InstrumentAsync( () => Task.Delay(100)).Wait();
         }
 
         [Fact]
@@ -82,8 +81,7 @@ namespace PerfIt.Tests
             var ex = Assert.Throws<AggregateException>(() => ins.InstrumentAsync(() => 
             {
                 throw new NotImplementedException();
-            }
-                , "test...").Wait());
+            }).Wait());
 
             Assert.IsType<NotImplementedException>(ex.InnerExceptions[0]);
         }
@@ -100,7 +98,7 @@ namespace PerfIt.Tests
                 RaisePublishErrors = true
             });
 
-            await ins.InstrumentAsync(() => Task.Delay(100), "test...");
+            await ins.InstrumentAsync(() => Task.Delay(100));
             var idAfter = Correlation.GetId(setIfNotThere: false);
             Assert.NotNull(idAfter);
         }

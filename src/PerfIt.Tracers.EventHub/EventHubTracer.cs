@@ -24,7 +24,7 @@ namespace PerfIt.Tracers.EventHub
         }
 
         public void Finish(object token, long timeTakenMilli, string correlationId = null, 
-            string instrumentationContext = null, ExtraContext extraContext = null)
+            InstrumentationContext extraContext = null)
         {
             var info = (IInstrumentationInfo) token;
             var so = JsonConvert.SerializeObject(new TraceEvent()
@@ -32,7 +32,6 @@ namespace PerfIt.Tracers.EventHub
                 CategoryName = info.CategoryName,
                 InstanceName = info.InstanceName,
                 CorrelationId = correlationId,
-                InstrumentationContext = instrumentationContext,
                 Text1 = extraContext?.Text1,
                 Text2 = extraContext?.Text2,
                 Numeric = extraContext?.Numeric ?? 0,
