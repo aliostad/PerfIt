@@ -4,7 +4,7 @@
 		<Summary>A High-Performance Azure EventHubs Sink for PerfIt events</Summary>
 		<Description>A High-Performance Azure EventHubs Sink for PerfIt events</Description>
 		<VersionPrefix>5.0.0</VersionPrefix>
-		<VersionSuffix>beta</VersionSuffix>
+		<VersionSuffix>beta2</VersionSuffix>
 		<Authors>Ali Kheyrollahi</Authors>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>PerfIt.Tracers.EventHub</AssemblyName>

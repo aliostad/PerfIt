@@ -16,12 +16,8 @@ namespace PerfIt
         public SimpleInstrumentor(IInstrumentationInfo info)
         {
             _info = info;
-            if (info.CorrelationIdKey == null)
-            {
-                _info.CorrelationIdKey = Correlation.CorrelationIdKey;
-            }
-
-            PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
+            _info.CorrelationIdKey = _info.CorrelationIdKey ?? Correlation.CorrelationIdKey;
+            _tracers.Add("EventSourceTracer", new EventSourceTracer());
         }
 
         bool ShouldInstrument(double samplingRate)
@@ -59,8 +55,6 @@ namespace PerfIt
                 Finish(token, instrumentationContext, extraContext);
             }                    
         }
-
-        public Action<string, string, long, string, string, ExtraContext> PublishInstrumentationCallback { get; set; }
 
         private void SetErrorContexts(Dictionary<string, object> context)
         {
@@ -142,13 +136,6 @@ namespace PerfIt
 
                 if (ShouldInstrument(itoken.SamplingRate))
                 {
-                    PublishInstrumentationCallback(_info.CategoryName,
-                       _info.InstanceName, 
-                       itoken.Kronometer.ElapsedMilliseconds, 
-                       instrumentationContext, 
-                       itoken.CorrelationId.ToString(), 
-                       extraContext);
-
                     foreach (var kv in _tracers)
                     {
                         kv.Value.Finish(itoken.TracerContexts[kv.Key], itoken.Kronometer.ElapsedMilliseconds,

@@ -16,6 +16,30 @@ namespace PerfIt.Tests
     {
         private const string TestCategory = "PerfItTests";
 
+        private class ActionTracer : ITwoStageTracer
+        {
+            public ActionTracer(Action action)
+            {
+                TheAction = action;
+            }
+
+            public Action TheAction { get; }
+
+            public void Finish(object token, 
+                long timeTakenMilli, 
+                string correlationId = null, 
+                string instrumentationContext = null, 
+                ExtraContext extraContext = null)
+            {
+                TheAction();
+            }
+
+            public object Start(IInstrumentationInfo info)
+            {
+                return info;
+            }
+        }
+
         [Fact]
         public void CanPublishAspect()
         {
@@ -91,10 +115,9 @@ namespace PerfIt.Tests
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
                 RaisePublishErrors = false
-            })
-            {
-                PublishInstrumentationCallback = (a,b,c,d, e, f) => numberOfTimesInstrumented++
-            };
+            });
+
+            ins.Tracers.Add("a", new ActionTracer(() => numberOfTimesInstrumented++));
 
             double samplingRate = 0.01;
             Enumerable.Range(0, 1000).ToList().ForEach(x =>
@@ -116,10 +139,9 @@ namespace PerfIt.Tests
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
                 RaisePublishErrors = false
-            })
-            {
-                PublishInstrumentationCallback = (a, b, c, d, e, f) => numberOfTimesInstrumented++
-            };
+            });
+
+            ins.Tracers.Add("a", new ActionTracer(() => numberOfTimesInstrumented++));
 
             double samplingRate = 0.01;
             Enumerable.Range(0, 1000).ToList().ForEach(x =>
@@ -141,10 +163,9 @@ namespace PerfIt.Tests
                 InstanceName = "Test instance",
                 CategoryName = "DOESNOTEXISTDONTLOOKFORIT",
                 RaisePublishErrors = false
-            })
-            {
-                PublishInstrumentationCallback = (a, b, c, d, e, f) => numberOfTimesInstrumented++
-            };
+            });
+
+            ins.Tracers.Add("a", new ActionTracer(() => numberOfTimesInstrumented++));
 
             double samplingRate = 0.01;
             Enumerable.Range(0, 1000).ToList().ForEach(x =>
