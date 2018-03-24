@@ -13,6 +13,20 @@ using Xunit;
 
 namespace PerfIt.Tests
 {
+#if NET452
+    public class PerfCounterIgnoreFactAttribute : FactAttribute
+    {
+        public PerfCounterIgnoreFactAttribute(string categoryName)
+        {            
+            if (PerformanceCounterCategory.GetCategories().Any(x => x.CategoryName == categoryName))
+            {
+                Skip = $"Please install {categoryName} Performance Counter category to run.";
+            }
+        }
+    }
+#endif
+
+
     public class SimpleInstrumenterTests
     {
         private const string TestCategory = "PerfItTests";
@@ -75,7 +89,7 @@ namespace PerfIt.Tests
 
 
  #if NET452
-        [Fact]
+        [PerfCounterIgnoreFactAttribute("test")]
         public void WorksWithEnabledCounters()
         {
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
