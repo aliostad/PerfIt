@@ -33,5 +33,13 @@ namespace PerfIt
         public double SamplingRate { get; set; }
 
         public string CorrelationIdKey { get; set; }
+#if NET452
+        public string[] Counters { get; set; }
+
+        /// <summary>
+        /// Whether publish windows performance counters
+        /// </summary>
+        public bool PublishCounters { get; set; }
+#endif    
     }
 }

@@ -39,5 +39,17 @@ namespace PerfIt
         /// Correlation Id key in call context, useful to trace your request flow
         /// </summary>
         string CorrelationIdKey { get; set; }
+
+#if NET452
+        /// <summary>
+        /// Counter types. Each value as a string.
+        /// </summary>
+        string[] Counters { get; set; }
+
+        /// <summary>
+        /// Whether publish windows performance counters
+        /// </summary>
+        bool PublishCounters { get; set; }
+#endif
     }
 }

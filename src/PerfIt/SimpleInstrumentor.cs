@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PerfIt
 {
-    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor
+    public class SimpleInstrumentor : IInstrumentor, ITwoStageInstrumentor, IDisposable
     {
         private IInstrumentationInfo _info;
 
@@ -18,6 +18,12 @@ namespace PerfIt
             _info = info;
             _info.CorrelationIdKey = _info.CorrelationIdKey ?? Correlation.CorrelationIdKey;
             _tracers.Add("EventSourceTracer", new EventSourceTracer());
+#if NET452
+            if (_info.PublishCounters)
+            {
+                _tracers.Add("PerformanceCounterTracer", new PerformanceCounterTracer(info));
+            }
+#endif
         }
 
         bool ShouldInstrument(double samplingRate)
@@ -42,6 +48,7 @@ namespace PerfIt
                 return _tracers;
             }
         }
+
         public void Instrument(Action aspect,
             double? samplingRate = null, InstrumentationContext extraContext = null)
         {
@@ -54,14 +61,6 @@ namespace PerfIt
             {
                 Finish(token, extraContext);
             }                    
-        }
-
-        private void SetErrorContexts(Dictionary<string, object> context)
-        {
-            if (context != null)
-            {
-                context.SetContextToErrorState();
-            }
         }
 
         public async Task InstrumentAsync(Func<Task> asyncAspect, 
@@ -84,11 +83,6 @@ namespace PerfIt
             ctx.Add(Constants.PerfItKey, new PerfItContext());
             ctx.Add(Constants.PerfItPublishErrorsKey, _info.RaisePublishErrors);
             return ctx;
-        }
-
-        private string GetKey(string counterName, string instanceName)
-        {
-            return string.Format("{0}_{1}", counterName, instanceName);
         }
 
         /// <summary>
@@ -142,7 +136,6 @@ namespace PerfIt
                             itoken.CorrelationId?.ToString(),
                             extraContext);
                     }
-
                 }
             }
             catch (Exception e)
@@ -160,6 +153,14 @@ namespace PerfIt
                 throw new ArgumentException(
                     "This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
             return itoken;
+        }
+
+        public void Dispose()
+        {
+            foreach (var tracer in _tracers.Values)
+            {
+                tracer.Dispose();
+            }
         }
     }
 }

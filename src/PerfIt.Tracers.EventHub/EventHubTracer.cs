@@ -23,6 +23,11 @@ namespace PerfIt.Tracers.EventHub
             _dispatcher = dispatcher;
         }
 
+        public void Dispose()
+        {
+            // DO NOT DISPOSE dispather BECAUSE YOU DID NOT CREATE IT!!!!
+        }
+
         public void Finish(object token, long timeTakenMilli, string correlationId = null, 
             InstrumentationContext extraContext = null)
         {

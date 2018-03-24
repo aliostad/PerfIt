@@ -9,7 +9,7 @@ namespace PerfIt
     /// <summary>
     /// Tracers (such as zipkin tracer) hook into the instrumentation process and emit traces
     /// </summary>
-    public interface ITwoStageTracer
+    public interface ITwoStageTracer : IDisposable
     {
         object Start(IInstrumentationInfo info);
 

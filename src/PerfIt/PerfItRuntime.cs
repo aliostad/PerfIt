@@ -9,7 +9,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-#if NETSTANDARD2_0
+#if NET452
+using PerfIt.Handlers;
+#else
 using Microsoft.Extensions.Configuration;
 #endif
 
@@ -20,7 +22,27 @@ namespace PerfIt
         static PerfItRuntime()
         {
 #if NET452
-             ConfigurationProvider = (s) => ConfigurationManager.AppSettings[s];
+            ConfigurationProvider = (s) => ConfigurationManager.AppSettings[s];
+            HandlerFactories = new Dictionary<string, Func<string, string, ICounterHandler>>();
+
+            HandlerFactories.Add(CounterTypes.TotalNoOfOperations,
+                (categoryName, instanceName) => new TotalCountHandler(categoryName, instanceName));
+
+            HandlerFactories.Add(CounterTypes.AverageTimeTaken,
+                (categoryName, instanceName) => new AverageTimeHandler(categoryName, instanceName));
+
+            HandlerFactories.Add(CounterTypes.LastOperationExecutionTime,
+                (categoryName, instanceName) => new LastOperationExecutionTimeHandler(categoryName, instanceName));
+
+            HandlerFactories.Add(CounterTypes.NumberOfOperationsPerSecond,
+                (categoryName, instanceName) => new NumberOfOperationsPerSecondHandler(categoryName, instanceName));
+
+            HandlerFactories.Add(CounterTypes.CurrentConcurrentOperationsCount,
+                (categoryName, instanceName) => new CurrentConcurrentCountHandler(categoryName, instanceName));
+
+            HandlerFactories.Add(CounterTypes.NumberOfErrorsPerSecond,
+                (categoryName, instanceName) => new NumberOfErrorsPerSecondHandler(categoryName, instanceName));
+
 #else
             ConfigurationProvider = (s) => new ConfigurationBuilder()
                 .AddInMemoryCollection().Build()[s];
@@ -28,7 +50,14 @@ namespace PerfIt
            
         }
 
-
+#if NET452
+        /// <summary>
+        /// Counter handler factories with counter type as the key.
+        /// Factory's first param is applicationName and second is the filter
+        /// Use it to register your own counters or replace built-in implementations
+        /// </summary>
+        public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }
+#endif
 
         public static string GetUniqueName(string instanceName, string counterType)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Linq;
 #if NET452
@@ -24,6 +25,11 @@ namespace PerfIt.Tests
             }
 
             public Action TheAction { get; }
+
+            public void Dispose()
+            {
+
+            }
 
             public void Finish(object token, 
                 long timeTakenMilli, 
@@ -60,13 +66,32 @@ namespace PerfIt.Tests
             var ins = new SimpleInstrumentor(new InstrumentationInfo()
             {
                 Description = "test",
-                InstanceName = "Test instance",
+                InstanceName = "Testinstance",
                 CategoryName = TestCategory
             });
 
             ins.InstrumentAsync( () => Task.Delay(100)).Wait();
         }
 
+
+ #if NET452
+        [Fact]
+        public void WorksWithEnabledCounters()
+        {
+            var ins = new SimpleInstrumentor(new InstrumentationInfo()
+            {
+                Description = "test",
+                InstanceName = "Testinstance",
+                CategoryName = TestCategory,
+                PublishCounters = true,
+                RaisePublishErrors = true
+            });
+            for (int i = 0; i < 100; i++)
+            {
+                ins.InstrumentAsync(() => Task.Delay(100)).Wait();
+            }
+        }
+#endif
         [Fact]
         public void DontRaiseErrorsDoesNotHideOriginalError()
         {
