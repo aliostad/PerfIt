@@ -18,7 +18,7 @@ namespace PerfIt.Tests
     {
         public PerfCounterIgnoreFactAttribute(string categoryName)
         {            
-            if (PerformanceCounterCategory.GetCategories().Any(x => x.CategoryName == categoryName))
+            if (!PerformanceCounterCategory.GetCategories().Any(x => x.CategoryName == categoryName))
             {
                 Skip = $"Please install {categoryName} Performance Counter category to run.";
             }
