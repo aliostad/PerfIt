@@ -11,6 +11,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\PerfIt\PerfIt.csproj" />
 		<ProjectReference Include="..\..\src\PerfIt.WebApi\PerfIt.WebApi.csproj" />
+		<ProjectReference Include="..\..\src\PerfIt.Http\PerfIt.Http.csproj" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.SelfHost" version="5.2.4" />
 		<PackageReference Include="Newtonsoft.Json" version="11.0.1" />
 		<PackageReference Include="xunit" version="2.3.1" />

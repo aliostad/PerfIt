@@ -24,6 +24,7 @@ namespace PerfIt
                 _tracers.Add("PerformanceCounterTracer", new PerformanceCounterTracer(info));
             }
 #endif
+            PerfItRuntime.OnInstrumentorCreated(new InstrumentorCreatedArgs(this, info));
         }
 
         bool ShouldInstrument(double samplingRate)

@@ -17,8 +17,27 @@ using Microsoft.Extensions.Configuration;
 
 namespace PerfIt
 {
+    public class InstrumentorCreatedArgs : EventArgs
+    {
+        public InstrumentorCreatedArgs(IInstrumentor instrumentor, IInstrumentationInfo info)
+        {
+            Info = info;
+            Instrumentor = instrumentor;
+        }
+
+        public IInstrumentor Instrumentor { get; }
+
+        public IInstrumentationInfo Info { get; }
+    }
+
     public static class PerfItRuntime
     {
+        /// <summary>
+        /// Gets called when an instrumentor is created, e.g. SimpleInstrumentor.
+        /// Useful for modifying instrumentors created by attributes.
+        /// </summary>
+        public static event EventHandler<InstrumentorCreatedArgs> InstrumentorCreated;
+
         static PerfItRuntime()
         {
 #if NET452
@@ -58,6 +77,12 @@ namespace PerfIt
         /// </summary>
         public static Dictionary<string, Func<string, string, ICounterHandler>> HandlerFactories { get; private set; }
 #endif
+
+        internal static void OnInstrumentorCreated(InstrumentorCreatedArgs args)
+        {
+            if (InstrumentorCreated != null)
+                InstrumentorCreated(args.Instrumentor, args);
+        }
 
         public static string GetUniqueName(string instanceName, string counterType)
         {

@@ -11,6 +11,7 @@ using System.Web.Http.SelfHost;
 using Xunit;
 using System.Diagnostics.Tracing;
 using System.Reflection;
+using PerfIt.Http;
 
 namespace PerfIt.WebApi.Tests
 {
@@ -64,8 +65,6 @@ namespace PerfIt.WebApi.Tests
         }
 
     }
-
-
 
     public class TestController : ApiController
     {

@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace PerfIt
+namespace PerfIt.Http
 {
 
     /// <summary>
@@ -29,19 +29,24 @@ namespace PerfIt
         {
             CategoryName = categoryName;
             CorrelationIdKey = Correlation.CorrelationIdKey;
+#if NET452
             PublishCounters = true;
+#endif
             RaisePublishErrors = true;
             PublishEvent = true;
             SamplingRate = Constants.DefaultSamplingRate;
             InstanceName = null;
 
             SetErrorPolicy();
+#if NET452
             SetPublish();
+#endif
             SetEventPolicy();
             SetSamplingRate();
 
+#if NET452
             Counters = PerfItRuntime.HandlerFactories.Keys.ToArray();
-
+#endif
             if (tracers != null)
                 _tracers = tracers.ToArray();
 
@@ -53,8 +58,10 @@ namespace PerfIt
         public string Description { get; set; }
         public string[] Counters { get; set; }
         public string CategoryName { get; set; }
-        public bool PublishCounters { get; set; }
 
+#if NET452
+        public bool PublishCounters { get; set; }
+#endif
         public bool RaisePublishErrors { get; set; }
 
         public bool PublishEvent { get; set; }
@@ -70,22 +77,20 @@ namespace PerfIt
 
         protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-
-            if (!PublishCounters && !PublishEvent)
-                return await base.SendAsync(request, cancellationToken);
-
             var instanceName = InstanceName ?? InstanceNameProvider(request);
             var instrumenter =_instrumenters.GetOrAdd(instanceName, 
                 (insName) =>
                 {
                     var inst = new SimpleInstrumentor(new InstrumentationInfo()
                     {
-                        Counters = Counters,
                         Description = "Counter for " + insName,
+#if NET452
+                        Counters = Counters,
+                        PublishCounters = PublishCounters,
+#endif
                         InstanceName = insName,
                         CategoryName = CategoryName,
                         SamplingRate = SamplingRate,
-                        PublishCounters = PublishCounters,
                         RaisePublishErrors = RaisePublishErrors,
                         CorrelationIdKey = CorrelationIdKey
                     });
@@ -108,12 +113,12 @@ namespace PerfIt
             return response;
         }
 
-
+#if NET452
         private void SetPublish()
         {
             PublishCounters = PerfItRuntime.IsPublishCounterEnabled(CategoryName, PublishCounters);
         }
-
+#endif
         protected void SetErrorPolicy()
         {
             RaisePublishErrors = PerfItRuntime.IsPublishErrorsEnabled(CategoryName, RaisePublishErrors);

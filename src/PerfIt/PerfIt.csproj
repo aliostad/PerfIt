@@ -4,7 +4,7 @@
 		<Summary>PerfIt Instrumentation Library for .NET</Summary>
 		<Description>PerfIt is an instrumentation library for .NET</Description>
 		<VersionPrefix>5.0.0</VersionPrefix>
-		<VersionSuffix>beta5</VersionSuffix>        
+		<VersionSuffix>beta6</VersionSuffix>        
 		<Authors>Ali Kheyrollahi</Authors>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>PerfIt</AssemblyName>
