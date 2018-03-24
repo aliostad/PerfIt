@@ -1,87 +1,27 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D5C2F6DB-26E7-415C-89E9-97B4C83E09AB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PerfIt</RootNamespace>
-    <AssemblyName>PerfIt</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\PerfIt.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\PerfIt.XML</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\Common\CommonAssemblyInfo.cs">
-      <Link>Properties\CommonAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="Correlation.cs" />
-    <Compile Include="CounterInstaller.cs" />
-    <Compile Include="Handlers\CurrentConcurrentCountHandler.cs" />
-    <Compile Include="Handlers\NumberOfErrorsPerSecondHandler.cs" />
-    <Compile Include="Handlers\NumberOfOperationsPerSecondHandler.cs" />
-    <Compile Include="IInstrumentationDiscoverer.cs" />
-    <Compile Include="IInstrumentationInfo.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="CounterTypes.cs" />
-    <Compile Include="Handlers\AverageTimeHandler.cs" />
-    <Compile Include="Handlers\CounterHandlerBase.cs" />
-    <Compile Include="Handlers\TotalCountHandler.cs" />
-    <Compile Include="Handlers\ICounterHandler.cs" />
-    <Compile Include="Handlers\LastOperationExecutionTimeHandler.cs" />
-    <Compile Include="InstrumentationEventSource.cs" />
-    <Compile Include="InstrumentationInfo.cs" />
-    <Compile Include="IInstrumentor.cs" />
-    <Compile Include="ITwoStageInstrumentor.cs" />
-    <Compile Include="ITwoStageTracer.cs" />
-    <Compile Include="PerfItContext.cs" />
-    <Compile Include="PerfitHandlerContext.cs" />
-    <Compile Include="PerfItRuntime.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PerfItExtensions.cs" />
-    <Compile Include="InstrumentationToken.cs" />
-    <Compile Include="SimpleInstrumentor.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+		<Summary>PerfIt Instrumentation Library for .NET</Summary>
+		<Description>Primitives for instrumenting the code and publishing traces to various sources including ETW and Zipkin</Description>
+		<VersionPrefix>5.0.0</VersionPrefix>
+		<VersionSuffix>beta5</VersionSuffix>        
+		<Authors>Ali Kheyrollahi</Authors>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>PerfIt</AssemblyName>
+		<PackageId>PerfIt</PackageId>
+		<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
+		<Reference Include="System" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="System.Runtime.Serialization" />
+		<Reference Include="System.Configuration" />
+	</ItemGroup>	
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+		<PackageReference Include="Microsoft.Extensions.Configuration" version="2.0.0" />		
+	</ItemGroup>		
 </Project>

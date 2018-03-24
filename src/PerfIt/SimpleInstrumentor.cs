@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Threading.Tasks;
 
 namespace PerfIt
@@ -12,20 +11,19 @@ namespace PerfIt
     {
         private IInstrumentationInfo _info;
 
-        private ConcurrentDictionary<string, Lazy<PerfitHandlerContext>> _counterContexts =
-          new ConcurrentDictionary<string, Lazy<PerfitHandlerContext>>();
-
         private readonly Dictionary<string, ITwoStageTracer> _tracers = new Dictionary<string, ITwoStageTracer>();
 
         public SimpleInstrumentor(IInstrumentationInfo info)
         {
             _info = info;
-            if (info.CorrelationIdKey == null)
+            _info.CorrelationIdKey = _info.CorrelationIdKey ?? Correlation.CorrelationIdKey;
+            _tracers.Add("EventSourceTracer", new EventSourceTracer());
+#if NET452
+            if (_info.PublishCounters)
             {
-                _info.CorrelationIdKey = Correlation.CorrelationIdKey;
+                _tracers.Add("PerformanceCounterTracer", new PerformanceCounterTracer(info));
             }
-
-            PublishInstrumentationCallback = InstrumentationEventSource.Instance.WriteInstrumentationEvent;
+#endif
         }
 
         bool ShouldInstrument(double samplingRate)
@@ -50,8 +48,9 @@ namespace PerfIt
                 return _tracers;
             }
         }
-        public void Instrument(Action aspect, string instrumentationContext = null, 
-            double? samplingRate = null)
+
+        public void Instrument(Action aspect,
+            double? samplingRate = null, InstrumentationContext extraContext = null)
         {
             var token = Start(samplingRate ?? _info.SamplingRate);
             try
@@ -60,22 +59,12 @@ namespace PerfIt
             }            
             finally
             {
-                Finish(token, instrumentationContext);
+                Finish(token, extraContext);
             }                    
         }
 
-        public Action<string, string, long, string, string> PublishInstrumentationCallback { get; set; }
-
-        private void SetErrorContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
-        {
-            if (contexts != null && contexts.Item2 != null)
-            {
-                contexts.Item2.SetContextToErrorState();
-            }
-        }
-
-        public async Task InstrumentAsync(Func<Task> asyncAspect, string instrumentationContext = null, 
-            double? samplingRate = null)
+        public async Task InstrumentAsync(Func<Task> asyncAspect, 
+            double? samplingRate = null, InstrumentationContext extraContext = null)
         {
             var token = Start(samplingRate ?? _info.SamplingRate);
             try
@@ -84,83 +73,16 @@ namespace PerfIt
             }
             finally
             {
-                Finish(token, instrumentationContext);
+                Finish(token, extraContext);
             }
         }
 
-        private Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> BuildContexts()
+        private Dictionary<string, object> BuildContexts()
         {
-            var contexts = new List<PerfitHandlerContext>();
-            Prepare(contexts);
-
             var ctx = new Dictionary<string, object>();
-
             ctx.Add(Constants.PerfItKey, new PerfItContext());
             ctx.Add(Constants.PerfItPublishErrorsKey, _info.RaisePublishErrors);
-            foreach (var context in contexts)
-            {
-                try
-                {
-                    context.Handler.OnRequestStarting(ctx);
-                }
-                catch (Exception e)
-                {
-                    Trace.TraceError(e.ToString());
-                    if (_info.RaisePublishErrors)
-                        throw;
-                }
-            }
-
-            return new Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>>(contexts, ctx);
-        }
-
-        private void CompleteContexts(Tuple<IEnumerable<PerfitHandlerContext>, Dictionary<string, object>> contexts)
-        {
-            try
-            {
-                foreach (var counter in contexts.Item1)
-                {
-                    counter.Handler.OnRequestEnding(contexts.Item2);
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceError(e.ToString());
-                if (_info.RaisePublishErrors)
-                    throw;
-            }
-        }
-
-        private void Prepare(List<PerfitHandlerContext> contexts)
-        {
-            var counters = _info.Counters==null || _info.Counters.Length == 0 ? CounterTypes.StandardCounters : _info.Counters;
-
-            foreach (var handlerFactory in PerfItRuntime.HandlerFactories.Where(c=> counters.Contains(c.Key)))
-            {
-                var key = GetKey(handlerFactory.Key, _info.InstanceName);
-                var ctx = _counterContexts.GetOrAdd(key, k =>
-                    new Lazy<PerfitHandlerContext>(() => new PerfitHandlerContext()
-                    {
-                        Handler = handlerFactory.Value(_info.CategoryName, _info.InstanceName),
-                        Name = _info.InstanceName
-                    }));
-                contexts.Add(ctx.Value);
-            }
-        }
-
-        private string GetKey(string counterName, string instanceName)
-        {
-            return string.Format("{0}_{1}", counterName, instanceName);
-        }
-
-        public void Dispose()
-        {          
-            foreach (var context in _counterContexts.Values)
-            {
-                context.Value.Handler.Dispose();
-            }
-
-            _counterContexts.Clear(); 
+            return ctx;
         }
 
         /// <summary>
@@ -173,7 +95,7 @@ namespace PerfIt
             {
                 var token = new InstrumentationToken()
                 {
-                    Contexts = _info.PublishCounters ? BuildContexts() : null,
+                    Contexts = BuildContexts(),
                     Kronometer = Stopwatch.StartNew(),
                     SamplingRate = samplingRate,
                     CorrelationId = Correlation.GetId(_info.CorrelationIdKey),
@@ -197,7 +119,7 @@ namespace PerfIt
             return null;
         }
 
-        public void Finish(object token, string instrumentationContext = null)
+        public void Finish(object token, InstrumentationContext extraContext = null)
         {
             if(token == null)
                 return; // not meant to be instrumented prob due to sampling rate
@@ -206,20 +128,14 @@ namespace PerfIt
             {
                 var itoken = ValidateToken(token);
 
-                if (_info.PublishEvent && ShouldInstrument(itoken.SamplingRate))
+                if (ShouldInstrument(itoken.SamplingRate))
                 {
-                    PublishInstrumentationCallback(_info.CategoryName,
-                       _info.InstanceName, itoken.Kronometer.ElapsedMilliseconds, instrumentationContext, itoken.CorrelationId.ToString());
-                }
-
-                if (_info.PublishCounters)
-                    CompleteContexts(itoken.Contexts);
-
-                foreach (var kv in _tracers)
-                {
-                    kv.Value.Finish(itoken.TracerContexts[kv.Key], 
-                        itoken.CorrelationId?.ToString(), 
-                        instrumentationContext);
+                    foreach (var kv in _tracers)
+                    {
+                        kv.Value.Finish(itoken.TracerContexts[kv.Key], itoken.Kronometer.ElapsedMilliseconds,
+                            itoken.CorrelationId?.ToString(),
+                            extraContext);
+                    }
                 }
             }
             catch (Exception e)
@@ -237,6 +153,14 @@ namespace PerfIt
                 throw new ArgumentException(
                     "This is an invalid token. Please pass the token provided when you you called Start(). Remember?", "token");
             return itoken;
+        }
+
+        public void Dispose()
+        {
+            foreach (var tracer in _tracers.Values)
+            {
+                tracer.Dispose();
+            }
         }
     }
 }

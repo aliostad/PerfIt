@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+#if NET452
+using System.Runtime.Remoting.Messaging;
+#endif
+
 
 namespace PerfIt.Tests
 {
@@ -54,7 +57,7 @@ namespace PerfIt.Tests
         {
             var id = Correlation.GetId();
             await Task.Delay(100);
-            InstrumentationEventSource.Instance.WriteInstrumentationEvent("blah", "ff", 12,"gfg", id.ToString());
+            InstrumentationEventSource.Instance.WriteInstrumentationEvent("blah", "ff", 12,"gfg", id.ToString(), null);
             var id2 = Correlation.GetId(setIfNotThere: false);
 
             Assert.Equal(id, id2);
@@ -67,17 +70,14 @@ namespace PerfIt.Tests
             id = Correlation.GetId(setIfNotThere: false);
             var inst = new SimpleInstrumentor(new InstrumentationInfo()
             {
-                Counters = CounterTypes.StandardCounters,
                 CategoryName = "cat",
                 InstanceName = "ins",
-                PublishCounters = false,
-                PublishEvent = true,
                 RaisePublishErrors = true
             });
 
             //InstrumentationEventSource.Instance.WriteInstrumentationEvent("blah", "ff", 12, "gfg", id.ToString());
 
-            await inst.InstrumentAsync(() => Task.Delay(100), "not to worry");
+            await inst.InstrumentAsync(() => Task.Delay(100));
             var id2 = Correlation.GetId(setIfNotThere: false);
 
             Assert.Equal(id, id2);

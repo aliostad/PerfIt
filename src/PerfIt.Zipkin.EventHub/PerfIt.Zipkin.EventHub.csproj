@@ -69,10 +69,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PerfIt.Zipkin\PerfIt.Zipkin.csproj">
-      <Project>{503c3313-727f-4669-828b-152138853f6f}</Project>
-      <Name>PerfIt.Zipkin</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PerfIt\PerfIt.csproj">
       <Project>{d5c2f6db-26e7-415c-89e9-97b4c83e09ab}</Project>
       <Name>PerfIt</Name>

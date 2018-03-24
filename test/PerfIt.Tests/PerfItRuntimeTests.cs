@@ -4,11 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+#if NETCOREAPP2_0
+using Microsoft.Extensions.Configuration;
+#endif
 
 namespace PerfIt.Tests
 {
     public class PerfItRuntimeTests
     {
+#if NETCOREAPP2_0
+        public PerfItRuntimeTests()
+        {
+            var dic = new Dictionary<string, string>
+            {
+                { "perfit:publishCounters", "true" },
+                { "perfit:publishErrors:a", "false" },
+                { "perfit:publishErrors:b", "true" },
+                { "perfit#publishErrors", "true" },
+                { "perfit:publishEvent:c", "false" },
+                { "perfit:samplingRate:c", "0.1" },
+                { "perfit:samplingRate", "0.2" },
+                { "perfit#publishEvent#cc", "false" },
+                { "perfit#samplingRate#cc", "0.3" }
+            };
+            
+            var cfg = new ConfigurationBuilder().AddInMemoryCollection(dic).Build();
+            PerfItRuntime.ConfigurationProvider = (s) => cfg[s];
+        }
+#endif
         [Fact]
         public void SettingGlobalPublishCountersInConfigWorks()
         {

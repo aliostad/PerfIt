@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET452
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,3 +12,4 @@ namespace PerfIt
         IEnumerable<IInstrumentationInfo> Discover(Assembly assembly);
     }
 }
+#endif

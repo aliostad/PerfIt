@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET452
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -69,3 +70,4 @@ namespace PerfIt.Handlers
         }
     }
 }
+#endif

@@ -80,10 +80,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PerfIt.Castle.Interception\PerfIt.Castle.Interception.csproj">
-      <Project>{650b1b1a-acab-4341-9f57-5d8c8667f0a9}</Project>
-      <Name>PerfIt.Castle.Interception</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\PerfIt\PerfIt.csproj">
       <Project>{d5c2f6db-26e7-415c-89e9-97b4c83e09ab}</Project>
       <Name>PerfIt</Name>
