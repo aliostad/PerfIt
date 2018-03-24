@@ -73,7 +73,6 @@ namespace PerfIt.Mvc
                 CategoryName = CategoryName,
                 SamplingRate = SamplingRate,
                 PublishCounters = PublishCounters,
-                PublishEvent = PublishEvent,
                 RaisePublishErrors = RaisePublishErrors
             });
 
@@ -158,9 +157,11 @@ namespace PerfIt.Mvc
                     var token = actionExecutedContext.HttpContext.Items[PerfItTwoStageKey] as InstrumentationToken;
                     if (actionExecutedContext.Exception != null && token != null)
                     {
-                        token.Contexts.Item2.SetContextToErrorState();
+                        token.Contexts.SetContextToErrorState();
                     }
-                    _instrumentor.Finish(token, instrumentationContext);
+                    var ctx = new InstrumentationContext() { Text1 = instrumentationContext };
+
+                    _instrumentor.Finish(token, ctx);
                 }
             }
             catch (Exception exception)

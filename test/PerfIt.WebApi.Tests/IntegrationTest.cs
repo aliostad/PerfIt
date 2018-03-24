@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using System.Web.Http.SelfHost;
-using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using Xunit;
 using System.Diagnostics.Tracing;
 using System.Reflection;
@@ -23,7 +22,7 @@ namespace PerfIt.WebApi.Tests
 
         public IntegrationTest()
         {
-            PerfItRuntime.InstallStandardCounters(TestCategory);
+            CounterInstaller.InstallStandardCounters(TestCategory);
         }
 
         [Fact]
@@ -44,10 +43,6 @@ namespace PerfIt.WebApi.Tests
         [Fact]
         public void Server_CanServe()
         {
-            var listener = ConsoleLog.CreateListener();
-            listener.EnableEvents(InstrumentationEventSource.Instance, EventLevel.LogAlways,
-                Keywords.All);
-
             string baseAddress = "http://localhost:34543/";
             var configuration = new HttpSelfHostConfiguration(baseAddress);
             configuration.Routes.Add("def", new HttpRoute("api/{controller}"));
@@ -65,7 +60,7 @@ namespace PerfIt.WebApi.Tests
         [Fact(Skip = "Requires admin")]
         public void InstallWillInstallTheCategoryAndUseCatProvidedForTheNullOne()
         {
-            PerfItRuntime.Install(Assembly.GetExecutingAssembly(), new FilterDiscoverer(), "Woohooo");
+            CounterInstaller.Install(Assembly.GetExecutingAssembly(), new FilterDiscoverer(), "Woohooo");
         }
 
     }

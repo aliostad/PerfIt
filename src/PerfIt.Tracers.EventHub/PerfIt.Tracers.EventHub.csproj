@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
 		<Summary>A High-Performance Azure EventHubs Sink for PerfIt events</Summary>
-		<Description>A High-Performance Azure EventHubs Sink for PerfIt events</Description>
+		<Description>PerfIt is an instrumentation library for .NET</Description>
 		<VersionPrefix>5.0.0</VersionPrefix>
 		<VersionSuffix>beta5</VersionSuffix>
 		<Authors>Ali Kheyrollahi</Authors>

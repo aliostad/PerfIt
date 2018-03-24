@@ -86,7 +86,6 @@ namespace PerfIt
                         CategoryName = CategoryName,
                         SamplingRate = SamplingRate,
                         PublishCounters = PublishCounters,
-                        PublishEvent = PublishEvent,
                         RaisePublishErrors = RaisePublishErrors,
                         CorrelationIdKey = CorrelationIdKey
                     });
@@ -104,7 +103,8 @@ namespace PerfIt
 
             Func<Task> t = async () => response = await base.SendAsync(request, cancellationToken);
 
-            await instrumenter.InstrumentAsync(t, request.RequestUri.AbsoluteUri, SamplingRate);
+            var ctx = new InstrumentationContext() { Text1 = request.RequestUri.AbsoluteUri };
+            await instrumenter.InstrumentAsync(t, SamplingRate, ctx);
             return response;
         }
 
