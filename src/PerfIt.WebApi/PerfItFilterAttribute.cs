@@ -22,13 +22,11 @@ namespace PerfIt.WebApi
             Description = string.Empty;
             PublishCounters = true;
             RaisePublishErrors = false;
-            PublishEvent = true;
             CategoryName = categoryName;
         }
 
         private void Init(HttpActionContext actionContext)
         {
-            SetEventPolicy();
             SetPublishCounterPolicy();
             SetErrorPolicy();
             SetSamplingRate();
@@ -106,8 +104,6 @@ namespace PerfIt.WebApi
 
         public bool RaisePublishErrors { get; set; }
 
-        public bool PublishEvent { get; set; }
-
         public string CategoryName { get; set; }
 
         public double SamplingRate { get; set; }
@@ -145,11 +141,9 @@ namespace PerfIt.WebApi
                 }
             }
 
-            if (PublishCounters || PublishEvent)
-            {
-                var token = _instrumentor.Start(SamplingRate);
-                actionContext.Request.Properties.Add(PerfItTwoStageKey, token);
-            }
+           
+            var token = _instrumentor.Start(SamplingRate);
+            actionContext.Request.Properties.Add(PerfItTwoStageKey, token);
         }
 
         private void SetPublishCounterPolicy()
@@ -160,11 +154,6 @@ namespace PerfIt.WebApi
         protected void SetErrorPolicy()
         {
             RaisePublishErrors = PerfItRuntime.IsPublishErrorsEnabled(CategoryName, RaisePublishErrors);
-        }
-
-        protected void SetEventPolicy()
-        {
-            PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
         }
 
         protected void SetSamplingRate()

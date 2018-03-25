@@ -24,14 +24,12 @@ namespace PerfIt.Mvc
             Description = string.Empty;
             PublishCounters = true;
             RaisePublishErrors = false;
-            PublishEvent = true;
             CategoryName = categoryName;
             
         }
 
         private void Init(ActionExecutingContext actionContext)
         {
-            SetEventPolicy();
             SetPublishCounterPolicy();
             SetErrorPolicy();
             SetSamplingRate();
@@ -100,8 +98,6 @@ namespace PerfIt.Mvc
 
         public bool RaisePublishErrors { get; set; }
 
-        public bool PublishEvent { get; set; }
-
         public double SamplingRate { get; set; }
 
         public string CorrelationIdKey { get; set; }
@@ -129,11 +125,6 @@ namespace PerfIt.Mvc
         protected void SetErrorPolicy()
         {
             RaisePublishErrors = PerfItRuntime.IsPublishErrorsEnabled(CategoryName, RaisePublishErrors);
-        }
-
-        protected void SetEventPolicy()
-        {
-            PublishEvent = PerfItRuntime.IsPublishEventsEnabled(CategoryName, PublishEvent);
         }
 
         protected void SetSamplingRate()
@@ -188,11 +179,8 @@ namespace PerfIt.Mvc
                 }
             }
 
-            if (PublishCounters || PublishEvent)
-            {
-                var token = _instrumentor.Start(SamplingRate);
-                actionContext.HttpContext.Items[PerfItTwoStageKey] = token;
-            }
+            var token = _instrumentor.Start(SamplingRate);
+            actionContext.HttpContext.Items[PerfItTwoStageKey] = token;
         }
 
         protected override string ProvideInstrumentationContext(ActionExecutedContext actionExecutedContext)

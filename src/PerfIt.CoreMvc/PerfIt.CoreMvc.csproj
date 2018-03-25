@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<Summary>PerfIt library for ASP.NET Core MVC</Summary>
+		<Description>PerfIt is an instrumentation library for .NET</Description>
+		<VersionPrefix>5.0.0</VersionPrefix>
+		<VersionSuffix>beta6</VersionSuffix>
+		<Authors>Ali Kheyrollahi</Authors>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<AssemblyName>PerfIt.CoreMvc</AssemblyName>
+		<PackageId>PerfIt.CoreMvc</PackageId>
+		<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\PerfIt\PerfIt.csproj" />
+	</ItemGroup>
+</Project>
