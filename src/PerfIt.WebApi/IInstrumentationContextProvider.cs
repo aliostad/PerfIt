@@ -9,6 +9,6 @@ namespace PerfIt.WebApi
 {
     public interface IInstrumentationContextProvider
     {
-        string GetContext(HttpActionExecutedContext actionExecutedContext);
+        InstrumentationContext GetContext(HttpActionExecutedContext actionExecutedContext);
     }
 }

@@ -9,6 +9,6 @@ namespace PerfIt.Mvc
 {
     public interface IInstrumentationContextProvider
     {
-        string GetContext(ActionExecutedContext actionExecutedContext);
+        InstrumentationContext GetContext(ActionExecutedContext actionExecutedContext);
     }
 }

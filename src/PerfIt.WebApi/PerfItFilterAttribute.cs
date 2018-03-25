@@ -168,8 +168,12 @@ namespace PerfIt.WebApi
 
             try
             {
-                var instrumentationContext = string.Format("{0}_{1}", actionExecutedContext.Request.Method,
-                    actionExecutedContext.Request.RequestUri);
+                var instrumentationContext = new InstrumentationContext
+                {
+                    Text1 = string.Format("{0}_{1}", actionExecutedContext.Request.Method,
+                        actionExecutedContext.Request.RequestUri)
+                };
+
                 if (_instrumentationContextProvider != null)
                     instrumentationContext = _instrumentationContextProvider.GetContext(actionExecutedContext);
 
@@ -180,9 +184,8 @@ namespace PerfIt.WebApi
                     {
                         token.Contexts.SetContextToErrorState();
                     }
-                    var ctx = new InstrumentationContext() { Text1 = instrumentationContext };
 
-                    _instrumentor.Finish(token, ctx);
+                    _instrumentor.Finish(token, instrumentationContext);
                 }
             }
             catch (Exception exception)

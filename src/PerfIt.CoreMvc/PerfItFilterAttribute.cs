@@ -29,10 +29,16 @@ namespace PerfIt.CoreMvc
                 _instanceNameProvider = (IInstanceNameProvider)Activator.CreateInstance(InstanceNameProviderType);
             }
 
+            _instanceNameProvider = _instanceNameProvider ?? 
+                (IInstanceNameProvider) actionContext.HttpContext.RequestServices.GetService(typeof(IInstanceNameProvider));
+
             if (InstrumentationContextProviderType != null)
             {
                 _instrumentationContextProvider = (IInstrumentationContextProvider)Activator.CreateInstance(InstrumentationContextProviderType);
             }         
+
+            _instrumentationContextProvider = _instrumentationContextProvider ??
+                (IInstrumentationContextProvider) actionContext.HttpContext.RequestServices.GetService(typeof(IInstrumentationContextProvider));
 
             var instanceName = InstanceName;
             if (_instanceNameProvider != null)
@@ -61,8 +67,12 @@ namespace PerfIt.CoreMvc
 
             try
             {
-                var instrumentationContext = string.Format("{0}_{1}", context.ActionDescriptor.DisplayName,
-                    context.HttpContext.Request.Path);
+                var instrumentationContext = new InstrumentationContext
+                {
+                    Text1 = string.Format("{0}_{1}", context.ActionDescriptor.DisplayName,
+                        context.HttpContext.Request.Path)
+                };
+
                 if (_instrumentationContextProvider != null)
                     instrumentationContext = _instrumentationContextProvider.GetContext(context);
 
@@ -73,9 +83,8 @@ namespace PerfIt.CoreMvc
                     {
                         token.Contexts.SetContextToErrorState();
                     }
-                    var ctx = new InstrumentationContext() { Text1 = instrumentationContext };
 
-                    _instrumentor.Finish(token, ctx);
+                    _instrumentor.Finish(token, instrumentationContext);
                 }
             }
             catch (Exception exception)
