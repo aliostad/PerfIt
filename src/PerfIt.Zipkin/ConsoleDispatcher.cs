@@ -9,10 +9,9 @@ namespace PerfIt.Zipkin
 {
     public class ConsoleDispatcher : IDispatcher
     {
-        public Task EmitBatchAsync(IEnumerable<Span> spans)
+        public void Emit(Span span)
         {
-            Console.WriteLine($"Received {spans.Count()} spans...");
-            return Task.FromResult(true);
+            Console.WriteLine($"Received {span.Name} span...");
         }
 
         public void Dispose()

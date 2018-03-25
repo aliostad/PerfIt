@@ -13,17 +13,24 @@ namespace PerfIt.Zipkin
 {
     public class DefaultTracer : ITwoStageTracer
     {
-        public void Finish(object token, string correlationId = null, string instrumentationContext = null)
+        private readonly ISpanEmitter _spanEmitter;
+
+        public DefaultTracer(ISpanEmitter spanEmitter)
+        {
+            _spanEmitter = spanEmitter;
+        }
+
+        public void Finish(object token, long timeTakenMilli, string correlationId = null, InstrumentationContext extraContext = null)
         {
             if(token == null)
                 throw new ArgumentNullException(nameof(token));
-            var tpl = (Tuple<IInstrumentationInfo, Span, Stopwatch>) token;
+            var tpl = (Tuple<IInstrumentationInfo, Span>) token;
             tpl.Item2.SetAsComplete(DateTime.UtcNow);
             ZipkinEventSource.Instance.WriteSpan(
-                tpl.Item2, correlationId, instrumentationContext);
+                tpl.Item2, correlationId, extraContext);
             OnFinishing(tpl.Item2);
             
-            SpanEmitHub.Instance.Emit(tpl.Item2);         
+            _spanEmitter.Emit(tpl.Item2);         
         }
 
         public object Start(IInstrumentationInfo info)
@@ -39,7 +46,7 @@ namespace PerfIt.Zipkin
 
             OnStarting(span);
             
-            return new Tuple<IInstrumentationInfo, Span, Stopwatch>(info, span, Stopwatch.StartNew());
+            return new Tuple<IInstrumentationInfo, Span>(info, span);
         }
 
         protected virtual void OnStarting(Span span)
@@ -52,10 +59,18 @@ namespace PerfIt.Zipkin
             // none
         }
 
+        public void Dispose()
+        {
+            
+        }
     }
 
     public class ServerTracer : DefaultTracer
     {
+        public ServerTracer(ISpanEmitter spanEmitter) : base(spanEmitter)
+        {
+        }
+
         protected override void OnStarting(Span span)
         {
             base.OnStarting(span);
@@ -71,6 +86,10 @@ namespace PerfIt.Zipkin
 
     public class ClientTracer : DefaultTracer
     {
+        public ClientTracer(ISpanEmitter spanEmitter) : base(spanEmitter)
+        {
+        }
+
         protected override void OnStarting(Span span)
         {
             base.OnStarting(span);

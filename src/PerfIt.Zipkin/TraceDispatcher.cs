@@ -13,15 +13,14 @@ namespace PerfIt.Zipkin
     /// </summary>
     public class TraceDispatcher : IDispatcher
     {
-        public Task EmitBatchAsync(IEnumerable<Span> spans)
-        {
-            Trace.WriteLine($"Received {spans.Count()} spans...");
-            return Task.FromResult(true);
-        }
-
         public void Dispose()
         {
             // none
+        }
+
+        public void Emit(Span span)
+        {
+            Trace.WriteLine($"Received {span.Name} span...");
         }
     }
 }

@@ -8,10 +8,10 @@ using Criteo.Profiling.Tracing.Tracers.Zipkin;
 namespace PerfIt.Zipkin
 {
     /// <summary>
-    /// Emits a batch of spans to a destination (media/queue/storage)
+    /// Emits span to a destination (media/queue/storage)
     /// </summary>
     public interface IDispatcher : IDisposable
     {
-        Task EmitBatchAsync(IEnumerable<Span> spans);
+        void Emit(Span span);
     }
 }

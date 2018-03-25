@@ -19,8 +19,9 @@ namespace PerfIt.Zipkin
 
         }
 
-        public void WriteSpan(Span span, string correlationId = null, string instrumentationContext = null)
+        public void WriteSpan(Span span, string correlationId = null, InstrumentationContext context = null )
         {
+            var ctx = context ?? new InstrumentationContext();
             Write(span.ServiceName,
                 span.Name,
                 span.Duration.HasValue ? (span.Duration.Value.Ticks / 10) : 0,
@@ -28,7 +29,10 @@ namespace PerfIt.Zipkin
                 span.SpanState.SpanId,
                 span.SpanState.ParentSpanId,
                 correlationId,
-                instrumentationContext);
+                ctx.Text1,
+                ctx.Text2,
+                ctx.Numeric,
+                ctx.Decimal);
         }
         /// <summary>
         /// 
@@ -40,7 +44,6 @@ namespace PerfIt.Zipkin
         /// <param name="spanId"></param>
         /// <param name="parentId"></param>
         /// <param name="correlationId"></param>
-        /// <param name="instrumentationContext"></param>
         [Event(42, Level = EventLevel.Informational)]
         public void Write(
             string categoryName, 
@@ -50,7 +53,10 @@ namespace PerfIt.Zipkin
             long spanId,
             long? parentId,
             string correlationId,
-            string instrumentationContext = null)
+            string text1 = null,
+            string text2 = null,
+            int numeric = 0,
+            decimal Decimal = 0)
         {
             this.WriteEvent(42, 
                 categoryName, 
@@ -60,8 +66,10 @@ namespace PerfIt.Zipkin
                 traceId,
                 spanId,
                 parentId,
-                instrumentationContext
-                );
+                text1,
+                text2,
+                numeric,
+                Decimal);
         }
     }
 }
