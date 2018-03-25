@@ -2,15 +2,8 @@
 	<PropertyGroup>
 		<TargetFrameworks>net452</TargetFrameworks>
 		<Summary>PerfIt for ASP.NET MVC</Summary>
-		<Description>PerfIt is an instrumentation library for .NET</Description>
-		<VersionPrefix>5.0.0</VersionPrefix>
-		<VersionSuffix>beta6</VersionSuffix>
-		<Authors>Ali Kheyrollahi</Authors>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>PerfIt.Mvc</AssemblyName>
 		<PackageId>PerfIt.Mvc</PackageId>
-		<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />

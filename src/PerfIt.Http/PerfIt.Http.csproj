@@ -2,19 +2,13 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
 		<Summary>PerfIt for HttpClient</Summary>
-		<Description>PerfIt is an instrumentation library for .NET</Description>
-		<VersionPrefix>5.0.0</VersionPrefix>
-		<VersionSuffix>beta6</VersionSuffix>
-		<Authors>Ali Kheyrollahi</Authors>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>PerfIt.Http</AssemblyName>
 		<PackageId>PerfIt.Http</PackageId>
-		<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.4" />
+		
 		</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\PerfIt\PerfIt.csproj" />

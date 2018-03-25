@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+	<Description>PerfIt is an instrumentation library for .NET</Description>  
+    <Authors>Ali Kheyrollahi</Authors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Version>5.0.0-beta7</Version>
+	<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
+	<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>	
+  </PropertyGroup>
+</Project>

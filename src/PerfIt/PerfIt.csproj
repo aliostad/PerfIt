@@ -3,14 +3,8 @@
 		<TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
 		<Summary>PerfIt Instrumentation Library for .NET</Summary>
 		<Description>PerfIt is an instrumentation library for .NET</Description>
-		<VersionPrefix>5.0.0</VersionPrefix>
-		<VersionSuffix>beta6</VersionSuffix>        
-		<Authors>Ali Kheyrollahi</Authors>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<AssemblyName>PerfIt</AssemblyName>
 		<PackageId>PerfIt</PackageId>
-		<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
 	  <PlatformTarget>AnyCPU</PlatformTarget>
