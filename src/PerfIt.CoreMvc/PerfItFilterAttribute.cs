@@ -5,6 +5,7 @@ using System.Text;
 
 namespace PerfIt.CoreMvc
 {
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class PerfItFilterAttribute : ActionFilterAttribute, IInstrumentationInfo
     {
         private ITwoStageInstrumentor _instrumentor;
