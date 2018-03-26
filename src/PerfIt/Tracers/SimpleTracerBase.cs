@@ -48,12 +48,17 @@ namespace PerfIt.Tracers
                 }
 
                 if(isit)
-                    CommitTrace(data);
+                    WriteTrace(data);
                     
             }
         }
 
-        protected abstract void CommitTrace(TraceData data);
+        /// <summary>
+        /// This method is meant to return almost immediately and the tracer to do buffering/batching and commit traces on background.
+        /// An Instrumentor can have many traces hence even async does not help here hence tracers must be high-performance.
+        /// </summary>
+        /// <param name="data"></param>
+        protected abstract void WriteTrace(TraceData data);
 
         public virtual void Finish(object token, long timeTakenMilli, string correlationId = null, InstrumentationContext extraContext = null)
         {

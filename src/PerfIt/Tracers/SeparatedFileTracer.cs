@@ -30,7 +30,7 @@ namespace PerfIt.Tracers
             _writer = new StreamWriter(fileName, true);
         }
 
-        protected override void CommitTrace(TraceData data)
+        protected override void WriteTrace(TraceData data)
         {
             _writer.Write(data.ToString(_columnSeparator));
             _writer.Write(_recordSeparator);
