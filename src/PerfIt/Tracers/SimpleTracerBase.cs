@@ -33,11 +33,23 @@ namespace PerfIt.Tracers
 
         private void Work()
         {
-            TraceData data;
+            TraceData data = null;
+            
             while (!_cancellationTokenSource.Token.IsCancellationRequested)
             {
-                if(_traceData.TryTake(out data, 100, _cancellationTokenSource.Token))
+                bool isit = false;
+                try
+                {
+                    isit = _traceData.TryTake(out data, 100, _cancellationTokenSource.Token);
+                }
+                catch
+                {
+                    // ignore cancellation
+                }
+
+                if(isit)
                     CommitTrace(data);
+                    
             }
         }
 
