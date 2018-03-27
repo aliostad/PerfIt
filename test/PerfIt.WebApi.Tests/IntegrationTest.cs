@@ -41,7 +41,7 @@ namespace PerfIt.WebApi.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Requires admin. Run manually")]
         public void Server_CanServe()
         {
             string baseAddress = "http://localhost:34543/";
