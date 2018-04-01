@@ -23,10 +23,9 @@ namespace PerfIt.Http
         private ConcurrentDictionary<string, SimpleInstrumentor>
             _instrumenters = new ConcurrentDictionary<string, SimpleInstrumentor>();
 
-        private ITwoStageTracer[] _tracers = new ITwoStageTracer[0];
-
-        public PerfitClientDelegatingHandler(string categoryName, IEnumerable<ITwoStageTracer> tracers = null)
+        public PerfitClientDelegatingHandler(string categoryName, params ITwoStageTracer[] tracers)
         {
+            Tracers = tracers.ToList();
             CategoryName = categoryName;
             CorrelationIdKey = Correlation.CorrelationIdKey;
 #if NET452
@@ -47,9 +46,6 @@ namespace PerfIt.Http
 #if NET452
             Counters = PerfItRuntime.HandlerFactories.Keys.ToArray();
 #endif
-            if (tracers != null)
-                _tracers = tracers.ToArray();
-
             InstanceNameProvider = request =>
                 string.Format("{0}_{1}", request.Method.Method.ToLower(), request.RequestUri.Host.ToLower());            
         }
@@ -68,6 +64,8 @@ namespace PerfIt.Http
 
         public double SamplingRate { get; set; }
         string IInstrumentationInfo.CorrelationIdKey { get; set; }
+
+        public List<ITwoStageTracer> Tracers { get; }
 
         /// <summary>
         /// Provides the performance counter instance name.
@@ -95,7 +93,7 @@ namespace PerfIt.Http
                         CorrelationIdKey = CorrelationIdKey
                     });
 
-                    foreach (var tracer in _tracers)
+                    foreach (var tracer in Tracers)
                     {
                         inst.Tracers.Add(tracer.GetType().FullName, tracer);
                     }

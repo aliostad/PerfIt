@@ -11,7 +11,7 @@ namespace PerfIt.Samples.WebApi
 {
     public class TestController : ApiController
     {
-        [PerfItFilter("test", PublishCounters = false)]
+        [PerfItFilter("server-test", PublishCounters = false)]
         public string Get()
         {
             Thread.Sleep(100);

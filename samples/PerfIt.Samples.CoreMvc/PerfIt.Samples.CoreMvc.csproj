@@ -17,6 +17,7 @@
 		</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\PerfIt.CoreMvc\PerfIt.CoreMvc.csproj" />
+	  <ProjectReference Include="..\..\src\PerfIt.Http\PerfIt.Http.csproj" />
 	  <ProjectReference Include="..\..\src\PerfIt\PerfIt.csproj" />
 	</ItemGroup>
 

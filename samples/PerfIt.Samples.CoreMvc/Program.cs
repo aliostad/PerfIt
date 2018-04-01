@@ -8,6 +8,7 @@ using System.Threading;
 using System;
 using System.Net.Http;
 using PerfIt.Tracers;
+using PerfIt.Http;
 
 namespace PerfIt.Samples.CoreMvc
 {
@@ -15,30 +16,46 @@ namespace PerfIt.Samples.CoreMvc
     {
         const string baseAddress = "http://localhost:34543/";
 
-        class ConsoleTracer : SimpleTracerBase
+        class ServerConsoleTracer : SimpleTracerBase
         {
             protected override void WriteTrace(TraceData data)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine($"Took {data.TimeTakenMilli}ms");
+                Console.WriteLine($"(SERVER) Took {data.TimeTakenMilli}ms");
                 Console.ResetColor();
             }
         }
 
+        class ClientConsoleTracer : SimpleTracerBase
+        {
+            protected override void WriteTrace(TraceData data)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine($"(CLIENT) Took {data.TimeTakenMilli}ms");
+                Console.ResetColor();
+            }
+        }
 
         static void Main(string[] args)
         {
-
             // server
             var h = BuildWebHost(args);
             h.Start();
 
-
             // hook to the filter and add a tracer
-            PerfItRuntime.InstrumentorCreated += (sender, e) => e.Instrumentor.Tracers.Add("Console", new ConsoleTracer());
+            PerfItRuntime.InstrumentorCreated += (sender, e) => 
+            {
+                if(e.Info.CategoryName == "server-test")
+                    e.Instrumentor.Tracers.Add("Console", new ServerConsoleTracer());
+            };
 
             // call
-            var client = new HttpClient();
+            var handler = new PerfitClientDelegatingHandler("client-test", new ClientConsoleTracer())
+            {
+                InnerHandler = new HttpClientHandler()
+            };
+
+            var client = new HttpClient(handler);            
             var result = client.GetAsync(baseAddress + "api/test").Result;
             Console.WriteLine(result.Content.ReadAsStringAsync().Result);
             result.EnsureSuccessStatusCode();

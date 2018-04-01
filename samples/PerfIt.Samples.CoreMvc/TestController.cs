@@ -8,7 +8,7 @@ namespace PerfIt.Samples.CoreMvc
 {
     public class TestController
     {
-        [PerfItFilter("test")]
+        [PerfItFilter("server-test")]
         public string Get()
         {
             Thread.Sleep(100);
