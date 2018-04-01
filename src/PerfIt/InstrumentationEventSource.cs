@@ -17,7 +17,7 @@ namespace PerfIt
             
         }
 
-        [Event(1, Level = EventLevel.Informational)]
+        [Event(12, Level = EventLevel.Informational)]
         public void WriteInstrumentationEvent(string categoryName, 
             string instanceName,
             long timeTakenMilli, 
@@ -25,18 +25,19 @@ namespace PerfIt
             string text1 = null,
             string text2 = null,
             int numeric = 0,
-            decimal decima1 = 0)
+            double decima1 = 0)
         {
-            this.WriteEvent(1, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli,  
-                correlationId == null ? string.Empty : correlationId, text1 ?? string.Empty, text2 ?? string.Empty, numeric, decima1);
-        }
+            WriteEvent(12, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli,  
+                correlationId ??  string.Empty, text1 ?? string.Empty, text2 ?? string.Empty, numeric, decima1);
+        }       
+    }
 
-        public void WriteInstrumentationEvent(string categoryName, string instanceName, long timeTakenMilli, string correlationId = null, InstrumentationContext extraContext = null)
+    public static class InstrumentationExtensions
+    {
+        public static void WriteInstrumentationEvent(this InstrumentationEventSource source, string categoryName, string instanceName, long timeTakenMilli, string correlationId = null, InstrumentationContext extraContext = null)
         {
-            this.WriteEvent(1, categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli, 
-                correlationId == null ? string.Empty : correlationId, extraContext?.Text1, extraContext?.Text2, extraContext?.Numeric, extraContext?.Decimal);
+            source.WriteInstrumentationEvent(categoryName ?? "NoCategory", instanceName ?? "NoInstance", timeTakenMilli,
+                correlationId == null ? string.Empty : correlationId, extraContext?.Text1, extraContext?.Text2 ?? string.Empty, extraContext?.Numeric ?? 0, extraContext?.Decimal ?? 0);
         }
-
-        
     }
 }

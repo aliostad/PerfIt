@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net452</TargetFramework>
+		<Summary>Web API sample</Summary>
+		<AssemblyName>PerfIt.Samples.WebApi</AssemblyName>
+		<ApplicationIcon />
+		<OutputType>Exe</OutputType>
+		<StartupObject />
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="EnterpriseLibrary.SemanticLogging" Version="2.0.1406.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.SelfHost" Version="5.2.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\PerfIt.WebApi\PerfIt.WebApi.csproj" />
+	  <ProjectReference Include="..\..\src\PerfIt\PerfIt.csproj" />
+	</ItemGroup>
+
+</Project>

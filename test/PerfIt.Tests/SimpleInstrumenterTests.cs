@@ -88,8 +88,9 @@ namespace PerfIt.Tests
         }
 
 
- #if NET452
-        [PerfCounterIgnoreFactAttribute("test")]
+#if NET452
+        //[PerfCounterIgnoreFactAttribute(TestCategory)]
+        [Fact]
         public void WorksWithEnabledCounters()
         {
             var ins = new SimpleInstrumentor(new InstrumentationInfo()

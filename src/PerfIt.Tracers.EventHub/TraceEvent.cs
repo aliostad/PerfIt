@@ -23,7 +23,7 @@ namespace PerfIt.Tracers.EventHub
 
         public int Numeric { get; set; }
 
-        public decimal Decimal { get; set; }
+        public double Decimal { get; set; }
 
         public long TimeTakenMilli { get; set; }
 

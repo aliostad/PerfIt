@@ -56,7 +56,7 @@ namespace PerfIt.Zipkin
             string text1 = null,
             string text2 = null,
             int numeric = 0,
-            decimal Decimal = 0)
+            double Decimal = 0)
         {
             this.WriteEvent(42, 
                 categoryName, 

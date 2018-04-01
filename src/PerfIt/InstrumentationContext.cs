@@ -15,6 +15,6 @@ namespace PerfIt
 
         public int Numeric { get; set; }
 
-        public decimal Decimal { get; set; }
+        public double Decimal { get; set; }
     }
 }
