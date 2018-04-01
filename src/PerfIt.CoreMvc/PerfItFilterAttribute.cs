@@ -8,6 +8,11 @@ namespace PerfIt.CoreMvc
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class PerfItFilterAttribute : ActionFilterAttribute, IInstrumentationInfo
     {
+        public PerfItFilterAttribute(string categoryName)
+        {
+            CategoryName = categoryName;
+        }
+
         private ITwoStageInstrumentor _instrumentor;
         private IInstanceNameProvider _instanceNameProvider = null;
         private IInstrumentationContextProvider _instrumentationContextProvider = null;
@@ -61,8 +66,8 @@ namespace PerfIt.CoreMvc
 
             _instrumentor = inst;  
         }
-
-        public void OnActionExecuted(ActionExecutedContext context)
+        
+        public override void OnActionExecuted(ActionExecutedContext context)
         {
             base.OnActionExecuted(context);
 
@@ -95,7 +100,7 @@ namespace PerfIt.CoreMvc
             }
         }
 
-        public void OnActionExecuting(ActionExecutingContext context)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             base.OnActionExecuting(context);
 

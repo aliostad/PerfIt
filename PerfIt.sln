@@ -32,10 +32,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfIt.Zipkin.EventHub", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfIt.CoreMvc", "src\PerfIt.CoreMvc\PerfIt.CoreMvc.csproj", "{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{F452120A-1B51-4F63-8C69-5F678730309E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfIt.Samples.WebApi", "samples\PerfIt.Samples.WebApi\PerfIt.Samples.WebApi.csproj", "{5F0AC4AD-AAA3-43A6-92ED-BCA120BBF3CA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,10 +78,6 @@ Global
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5F0AC4AD-AAA3-43A6-92ED-BCA120BBF3CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F0AC4AD-AAA3-43A6-92ED-BCA120BBF3CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F0AC4AD-AAA3-43A6-92ED-BCA120BBF3CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F0AC4AD-AAA3-43A6-92ED-BCA120BBF3CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,7 +93,6 @@ Global
 		{14C00467-FD40-481B-A544-EC8D61D2071E} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
 		{F82A4B2A-03FB-4762-96FB-1F72114C8BCF} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
-		{5F0AC4AD-AAA3-43A6-92ED-BCA120BBF3CA} = {F452120A-1B51-4F63-8C69-5F678730309E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {309852F6-0DE5-40CB-8AD7-0290AD52D2C6}
