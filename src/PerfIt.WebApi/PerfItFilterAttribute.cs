@@ -109,6 +109,13 @@ namespace PerfIt.WebApi
         public double SamplingRate { get; set; }
 
         /// <summary>
+        /// A friendly name that can be used later in the code.
+        /// Does not make it to the instrumentations captured.
+        /// </summary>
+        public string Name { get; set; }
+
+
+        /// <summary>
         /// Implementations of ITwoStageTracer interface. Optional.
         /// </summary>
         public Type[] TracerTypes { get; set; }

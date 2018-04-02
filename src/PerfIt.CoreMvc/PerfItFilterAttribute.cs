@@ -135,6 +135,13 @@ namespace PerfIt.CoreMvc
         public string CorrelationIdKey { get; set; }
 
         /// <summary>
+        /// A friendly name that can be used later in the code.
+        /// Does not make it to the instrumentations captured.
+        /// </summary>
+        public string Name { get; set; }
+
+
+        /// <summary>
         /// Optional. A type implementing IInstanceNameProvider. If provided, it will be used to drive the instance name.
         /// </summary>
         public Type InstanceNameProviderType { get; set; }

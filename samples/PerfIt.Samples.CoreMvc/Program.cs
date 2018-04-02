@@ -36,6 +36,12 @@ namespace PerfIt.Samples.CoreMvc
             }
         }
 
+        /// <summary>
+        /// This is sample whereby a .NET Core MVC API is hosted with a controller that is decorated with PerfIt filter.
+        /// A Console tracer gets added by hooking into PerfItRuntime.InstrumentorCreated.
+        /// On the other hand, we have HttpClient which gets a PerfIt handler with a console tracer.
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             // server

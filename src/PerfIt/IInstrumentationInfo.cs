@@ -40,6 +40,12 @@ namespace PerfIt
         /// </summary>
         string CorrelationIdKey { get; set; }
 
+        /// <summary>
+        /// A friendly name that can be used later in the code.
+        /// Does not make it to the instrumentations captured.
+        /// </summary>
+        string Name { get; set; }
+
 #if NET452
         /// <summary>
         /// Counter types. Each value as a string.

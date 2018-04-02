@@ -13,6 +13,12 @@ namespace PerfIt.Samples.WebApi
 {
     class Program
     {
+        /// <summary>
+        /// This program hosts a Web API that has a controller decorated with a PerfIt filter and then
+        /// sends an HTTP request to instrument.
+        /// Since it is net452, it will raise ETW that can be captured by Enterprise Library. Note listener.LogToConsole();
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             string baseAddress = "http://localhost:34543/";

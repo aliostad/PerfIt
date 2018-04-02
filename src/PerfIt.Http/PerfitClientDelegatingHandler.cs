@@ -55,6 +55,12 @@ namespace PerfIt.Http
         public string[] Counters { get; set; }
         public string CategoryName { get; set; }
 
+        /// <summary>
+        /// A friendly name that can be used later in the code.
+        /// Does not make it to the instrumentations captured.
+        /// </summary>
+        public string Name { get; set; }
+
 #if NET452
         public bool PublishCounters { get; set; }
 #endif
@@ -90,7 +96,8 @@ namespace PerfIt.Http
                         CategoryName = CategoryName,
                         SamplingRate = SamplingRate,
                         RaisePublishErrors = RaisePublishErrors,
-                        CorrelationIdKey = CorrelationIdKey
+                        CorrelationIdKey = CorrelationIdKey,
+                        Name = Name ?? "HTTP" + "-" + insName
                     });
 
                     foreach (var tracer in Tracers)

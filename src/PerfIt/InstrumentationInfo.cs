@@ -33,6 +33,13 @@ namespace PerfIt
         public double SamplingRate { get; set; }
 
         public string CorrelationIdKey { get; set; }
+
+        /// <summary>
+        /// A friendly name that can be used later in the code.
+        /// Does not make it to the instrumentations captured.
+        /// </summary>
+        public string Name { get; set; }
+
 #if NET452
         public string[] Counters { get; set; }
 
@@ -40,6 +47,6 @@ namespace PerfIt
         /// Whether publish windows performance counters
         /// </summary>
         public bool PublishCounters { get; set; }
-#endif    
+#endif
     }
 }
