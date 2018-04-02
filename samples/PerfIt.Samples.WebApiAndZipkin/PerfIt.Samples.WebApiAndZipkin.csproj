@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net452</TargetFramework>
+  </PropertyGroup>
+
+ 	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.4" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.SelfHost" Version="5.2.4" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\PerfIt.WebApi\PerfIt.WebApi.csproj" />
+	  <ProjectReference Include="..\..\src\PerfIt.Zipkin\PerfIt.Zipkin.csproj" />
+	  <ProjectReference Include="..\..\src\PerfIt.Http\PerfIt.Http.csproj" />
+	  <ProjectReference Include="..\..\src\PerfIt\PerfIt.csproj" />
+	  
+	</ItemGroup> 
+</Project>

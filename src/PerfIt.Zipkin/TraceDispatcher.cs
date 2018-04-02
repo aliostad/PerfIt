@@ -20,7 +20,7 @@ namespace PerfIt.Zipkin
 
         public void Emit(Span span)
         {
-            Trace.WriteLine($"Received {span.Name} span...");
+            Trace.WriteLine($"Received {span.Name} span... => {span.ToString()}");
         }
     }
 }

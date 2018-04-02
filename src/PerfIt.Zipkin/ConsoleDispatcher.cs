@@ -11,7 +11,7 @@ namespace PerfIt.Zipkin
     {
         public void Emit(Span span)
         {
-            Console.WriteLine($"Received {span.Name} span...");
+            Console.WriteLine($"Received {span.Name} span... => {span.ToString()}");
         }
 
         public void Dispose()
