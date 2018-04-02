@@ -117,6 +117,12 @@ namespace PerfIt.Mvc
         /// </summary>
         public Type InstrumentationContextProviderType { get; set; }
 
+        /// <summary>
+        /// A friendly name that can be used later in the code.
+        /// Does not make it to the instrumentations captured.
+        /// </summary>
+        public string Name { get; set; }
+
         private void SetPublishCounterPolicy()
         {
             PublishCounters = PerfItRuntime.IsPublishCounterEnabled(CategoryName, PublishCounters);
