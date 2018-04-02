@@ -20,5 +20,8 @@ A Zipkin emitter is created with a Console dispatcher so that all Zipkin traces 
 A Zipkin tracer gets added by hooking into PerfItRuntime.InstrumentorCreated.
 On the other hand, we have HttpClient which gets a PerfIt handler with a `ClientTraceHandler` which injects Zipkin headers to the request.
 
+## PerfIt.Samples.WebAPiAndZipkin (net452)
 
-
+This program hosts a Web API that has a controller decorated with .a PerfIt filter and then sends an HTTP request to instrument
+There is a Zipkin ServerTraceHandler to pick up headers from request and inject headers to the response.
+Zipkin emitter has a console dispatcher which outputs spans to the console.

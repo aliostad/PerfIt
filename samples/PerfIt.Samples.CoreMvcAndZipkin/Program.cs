@@ -19,7 +19,7 @@ namespace PerfIt.Samples.CoreMvcAndZipkin
         /// This is sample whereby a .NET Core MVC API is hosted with a controller that is decorated with PerfIt filter.
         /// A Zipkin emitter is created with a Console dispatcher so that all Zipkin traces are sent to Console.
         /// A Zipkin tracer gets added by hooking into PerfItRuntime.InstrumentorCreated.
-        /// On the other hand, we have HttpClient which gets a PerfIt handler with a console tracer.
+        /// On the other hand, we have HttpClient which gets a PerfIt handler with a ClientTraceHandler which injects Zipkin headers.
         /// </summary>
         /// <param name="args"></param>
         static void Main(string[] args)

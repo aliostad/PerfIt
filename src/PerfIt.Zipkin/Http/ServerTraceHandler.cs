@@ -11,13 +11,14 @@ namespace PerfIt.Zipkin.Http
     {
         private readonly string _serviceName;
         private readonly ZipkinHttpTraceExtractor  _extractor = new ZipkinHttpTraceExtractor();
+        private readonly ITraceInjector _injector = new ZipkinHttpTraceInjector();
 
         public ServerTraceHandler(string serviceName)
         {
             _serviceName = serviceName;
         }
        
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
         {
             Trace trace;
             if (!_extractor.TryExtract(request.Headers, (c, key) => c.GetValues(key).FirstOrDefault(), out trace))
@@ -31,7 +32,10 @@ namespace PerfIt.Zipkin.Http
                 trace.Record(Annotations.Tag("http.host", request.RequestUri.Host .ToString()));
                 trace.Record(Annotations.Tag("http.uri", request.RequestUri.ToString()));
                 trace.Record(Annotations.Tag("http.path", request.RequestUri.AbsolutePath));
-                return base.SendAsync(request, cancellationToken);
+                
+                var result = await base.SendAsync(request, cancellationToken);
+                _injector.Inject(trace, result.Headers, (c, key, value) => c.Add(key, value));
+                return result;
             }
         }
     }
