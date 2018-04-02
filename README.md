@@ -10,14 +10,14 @@ A light-weight library/framework for code/performance instrumentation in .NET (b
 Core Concepts
 =====
 
- - Instrumentation: an aspect-oriented or closure-based wrapping of your code to measure how it performances and capture its context
- - SimpleInstrumentor: core class within PerfIt responsible for all instrumentations
- - Trace: result of an instrumentation. Contains time taken plus both configuration-based and runtime-based context
- - Tracer: A class/system that receives traces and can publish traces to storage/transports (e.g. Console, EventHub, ETW)
- - Zipkin: A [distributed tracing](https://github.com/openzipkin/zipkin) system/framework/specification developed by Twitter
- - Zipkin Emitter: A hub where all Zipkin traces within a process is received
- - Zipkin Dispatcher: A class that receives Zipkin traces from the emitter and sends them to a transport/storage
- - EventSource: A class in .NET Framework where it raises ETW events under windows and LTTng events in Linux
+ - **Instrumentation:** an aspect-oriented or closure-based wrapping of your code to measure how it performances and capture its context
+ - **SimpleInstrumentor:** core class within PerfIt responsible for all instrumentations
+ - **Trace:** result of an instrumentation. Contains time taken plus both configuration-based and runtime-based context
+ - **Tracer:** A class/system that receives traces and can publish traces to storage/transports (e.g. Console, EventHub, ETW)
+ - **Zipkin:** A [distributed tracing](https://github.com/openzipkin/zipkin) system/framework/specification developed by Twitter
+ - **Zipkin Emitter:** A hub where all Zipkin traces within a process is received
+ - **Zipkin Dispatcher:** A class that receives Zipkin traces from the emitter and sends them to a transport/storage
+ - **EventSource:** A class in .NET Framework where it raises ETW events under windows and LTTng events in Linux
 
 Breaking changes in version 5.0.0
 ==
@@ -41,14 +41,14 @@ PerfIt is a light-weight and generic instrumentation lib for publishing standard
 
 **What are PerfIt packages?**
 
- - PerfIt: common constructs for instrumentation
- - PerfIt.Http: for instrumenting HttpClient
- - PerfIt.WebApi: for instrumenting ASP.NET Web API
- - PerfIt.Mvc: for instrumenting ASP.NET MVC
- - PerfIt.CoreMvc: for instrumenting ASP.NET Core MVC
- - PerfIt.Tracers.EventHub: for publishing PerfIt traces to EventHub
- - PerfIt.Zipkin: common constructs for adding Zipkin traces
- - PerfIt.Zipkin.EventHub: for publishing Zipkin traces to EventHub
+ - **PerfIt:** common constructs for instrumentation
+ - **PerfIt.Http:** for instrumenting HttpClient
+ - **PerfIt.WebApi:** for instrumenting ASP.NET Web API
+ - **PerfIt.Mvc:** for instrumenting ASP.NET MVC
+ - **PerfIt.CoreMvc:** for instrumenting ASP.NET Core MVC
+ - **PerfIt.Tracers.EventHub:** for publishing PerfIt traces to EventHub
+ - **PerfIt.Zipkin:** common constructs for adding Zipkin traces
+ - **PerfIt.Zipkin.EventHub:** for publishing Zipkin traces to EventHub
 
 **Why do I need PerfIt?**
 
