@@ -5,33 +5,72 @@ PerfIt!
 
 [![Join the chat at https://gitter.im/perfIt-dotnet/Lobby](https://badges.gitter.im/perfIt-dotnet/Lobby.svg)](https://gitter.im/perfIt-dotnet/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Windows performance monitoring and Event Tracing for Windows (ETW) instrumentation for .NET (including ASP.NET Web API)
+A light-weight library/framework for code/performance instrumentation in .NET (both **.NET 4.52+ and .NET Core**)
+
+Core Concepts
+=====
+
+ - Instrumentation: an aspect-oriented or closure-based wrapping of your code to measure how it performances and capture its context
+ - SimpleInstrumentor: core class within PerfIt responsible for all instrumentations
+ - Trace: result of an instrumentation. Contains time taken plus both configuration-based and runtime-based context
+ - Tracer: A class/system that receives traces and can publish traces to storage/transports (e.g. Console, EventHub, ETW)
+ - Zipkin: A [distributed tracing](https://github.com/openzipkin/zipkin) system/framework/specification developed by Twitter
+ - Zipkin Emitter: A hub where all Zipkin traces within a process is received
+ - Zipkin Dispatcher: A class that receives Zipkin traces from the emitter and sends them to a transport/storage
+ - EventSource: A class in .NET Framework where it raises ETW events under windows and LTTng events in Linux
+
+Breaking changes in version 5.0.0
+==
+
+PerfIt 5 now supports both .NET 4.52+ and .NET Core, and it was an opportunity to get rid of some tech debt and clean up the interfaces. If you have been using previous versions of PerfIt, apart from some minor changes, your code will work as it was. But here are main changes:
+
+ - `PublishEvent` property no longer exists. PerfIt always publishes EventSource events although you may remove it from the Tracers dictionary to suppress that.
+ - Everything to do with Performance Counters on `PerfItRuntime` has moved to `CounterInstaller`.
+ - Instead of `InstrumentationContext` string, now there is `InstrumentationContext` object where you can add a bit more context.
+ - `PerfitClientDelegatingHandler` has moved to PerfIt.Http project/package to support both .NET 4.52+ and .NET Core
+ - There is a `Name` property now on `IInstrumentationInfo`
+ - There is a global static event (`PerfItRuntime.InstrumentorCreated`) whenever an Instrumentor is created. Ideal for changing instrumentors that are created using attributes.
+
 
 FAQ
 ===
 
 **What is PerfIt?**
 
-PerfIt is a performance counter publishing library for .NET. With a little bit of setup, it *painlessly* publishes standard performance counters.
-What is also new in version 1.0, is the **ETW events** (ETW = Event Tracing for Windows) that can be published as part of instrumentation of the application. In version 2.0, you can set a `SamplingRate` so it does not generate a lot of data in case your system handles a lot of load.
+PerfIt is a light-weight and generic instrumentation lib for publishing standard instrumentation traces (Performance Counters and ETW events on Windows, LTTng traces on Linux via .NET Core's `EventSource` class, Zipkin traces) or your custom ones. Historically, PerfIt woudl only support Performance Counters and ETW, but it publish those if they are supported on the platform it runs.
 
-**Why should I use it?**
+**What are PerfIt packages?**
 
-If you are using .NET for a serious project, you need to instrument your code (and service). If you do not then PerfIt could do that easily without getting in your way to write your business logic.
+ - PerfIt: common constructs for instrumentation
+ - PerfIt.Http: for instrumenting HttpClient
+ - PerfIt.WebApi: for instrumenting ASP.NET Web API
+ - PerfIt.Mvc: for instrumenting ASP.NET MVC
+ - PerfIt.CoreMvc: for instrumenting ASP.NET Core MVC
+ - PerfIt.Tracers.EventHub: for publishing PerfIt traces to EventHub
+ - PerfIt.Zipkin: common constructs for adding Zipkin traces
+ - PerfIt.Zipkin.EventHub: for publishing Zipkin traces to EventHub
 
-**What counters does it publish?**
+**Why do I need PerfIt?**
 
-There are 5 standard counters that come with PerfIt out of the box (`TotalNoOfOperations`, `AverageTimeTaken`, `LastOperationExecutionTime`, `NumberOfOperationsPerSecond` and `CurrentConcurrentOperationsCount`) and you can choose one or all (typically you would choose **all**).
-
-You can also create your own counters by implementing a simple base class.
+If you are using .NET for a serious project, you would most likely want to instrument your code and network-bound calls. PerfIt helps to make instrumentation easier by looking after boilerplate stuff so that you focus on your business logic.
 
 **What is the overhead of using PerfIt?**
 
-It is negligible compared to the code you would normally find within an API. It is within 1-2 ms.
+It is negligible compared to the code you would normally find within an API. It should be <1ms.
 
-**Can I use it with ASP.NET Web API 2?**
+**What about instrumenting serving or consuming HTTP?**
 
-Yes, you can use it with any version of the ASP.NET Web API. There is a problem (that has a workaround) when registering Web API 2 which is an inherent problem with the `InstallUtil.exe` which does not honour `AssemblyRedirect` and the workaround has been discussed below.
+PerfIt has constructs for ASP.NET MVC, ASP.NET Web API, ASP.NET Core MVC and HttpClient.
+
+**What counters does it publish?**
+
+If your platform supports performance counters (Windows) and you have not disabled it, it will publish counters. There are 5 standard counters that come with PerfIt out of the box (`TotalNoOfOperations`, `AverageTimeTaken`, `LastOperationExecutionTime`, `NumberOfOperationsPerSecond` and `CurrentConcurrentOperationsCount`) and you can choose one or all (typically you would choose **all**).
+
+You can also create your own counters by implementing a simple base class.
+
+**What is category and instance name? Is this not a left-over from Performance Counters?**
+
+Yes and no. Yes, it was added initially because of Performance Counters but still is a common sense two-level hiararchy for naming traces. So they are here to stay.
 
 **What if I just want ETW events and no Performance Counters since installing them is a hassle?**
 
@@ -63,10 +102,41 @@ If you need define these for an Azure application, Azure configuration schema do
 
 Getting Started (Measuring any part of your code)
 ==
-Please see the blog post [Here](http://byterot.blogspot.co.uk/2015/05/perfit-decoupled-from-web-api-measure-all-parts-of-your-.net-application-using-perfit-aspnetwebapi-telemetry-etw.html).
+Best way to get started is to look at the **samples solution** and have a look at its [README](https://github.com/aliostad/PerfIt/blob/master/SAMPLES-README.md).
 
-Getting Started (ASP.NET Web API)
-==
+But here are two typical scenarios, one for .NET Core (Windows/Mac/Linux) with closure-base instrumentation and other for .NET 4.52 (Windows) with aspect-oriented publishing Performance Counters
+
+## Getting Started - .NET Core (Windows/Mac/Linux)
+
+### Step 1: Create an Console project
+
+Use Visual Studio or `dotnet new` to create an empty console application
+
+### Step 2: Add PerfIt to your project
+
+Add reference to PerfIt
+
+```
+PM> Install-Package PerfIt
+```
+### Step 3: Add this code
+
+``` csharp
+var si = new SimpleInstrumentor(new InstrumentationInfo()
+{
+    CategoryName = "test-category",
+    InstanceName = "test-instance"
+});
+
+si.Tracers.Add("TextFile", new SeparatedFileTracer("trace.txt"));
+si.InstrumentAsync(() => Task.Delay(100)).GetAwaiter().GetResult();
+si.Dispose();
+Console.WriteLine(File.ReadAllText("trace.txt"));
+```
+
+As you can see, traces get stored on the file. This is not an option for very high performance cases but it is OK for cases where sampling is low or the load is not too big and you can use File tailers such as Elatico's Beats/LogStash to tail this trace file.
+
+## Getting Started - ASP.NET Web API (Windows)
 
 ### Step 1: Create an ASP.NET Web API
 
