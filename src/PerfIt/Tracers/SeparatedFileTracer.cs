@@ -39,6 +39,7 @@ namespace PerfIt.Tracers
         public override void Dispose()
         {
             base.Dispose();
+            _writer.Flush();
             _writer.Dispose();
         }
     }
