@@ -131,6 +131,7 @@ var si = new SimpleInstrumentor(new InstrumentationInfo()
 si.Tracers.Add("TextFile", new SeparatedFileTracer("trace.txt"));
 si.InstrumentAsync(() => Task.Delay(100)).GetAwaiter().GetResult();
 si.Dispose();
+Thread.Sleep(100);
 Console.WriteLine(File.ReadAllText("trace.txt"));
 ```
 
