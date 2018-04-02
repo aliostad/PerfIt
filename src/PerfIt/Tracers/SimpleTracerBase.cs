@@ -40,7 +40,7 @@ namespace PerfIt.Tracers
                 bool isit = false;
                 try
                 {
-                    isit = _traceData.TryTake(out data, 100, _cancellationTokenSource.Token);
+                    isit = _traceData.TryTake(out data, 50, _cancellationTokenSource.Token);
                 }
                 catch
                 {
