@@ -29,7 +29,7 @@ PerfIt 5 now supports both .NET 4.52+ and .NET Core, and it was an opportunity t
  - Instead of `InstrumentationContext` string, now there is `InstrumentationContext` object where you can add a bit more context.
  - `PerfitClientDelegatingHandler` has moved to PerfIt.Http project/package to support both .NET 4.52+ and .NET Core
  - There is a `Name` property now on `IInstrumentationInfo`
- - There is a global static event (`PerfItRuntime.InstrumentorCreated`) whenever an Instrumentor is created. Ideal for changing instrumentors that are created using attributes.
+ - There is a global static event (`PerfItRuntime.InstrumentorCreated`) whenever an Instrumentor is created. Ideal for modifying instrumentors that are created using attributes such as adding/removing tracers.
 
 
 FAQ
