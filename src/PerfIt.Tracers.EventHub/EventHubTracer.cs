@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.EventHubs;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Psyfon;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,9 @@ namespace PerfIt.Tracers.EventHub
                 Numeric = extraContext?.Numeric ?? 0,
                 Decimal = extraContext?.Decimal ?? 0,
                 TimeTakenMilli = timeTakenMilli
+            }, new JsonSerializerSettings()
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
             });
 
             _dispatcher.Add(new EventData(Encoding.UTF8.GetBytes(so)));
