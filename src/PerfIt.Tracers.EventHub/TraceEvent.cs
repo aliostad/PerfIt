@@ -6,6 +6,12 @@ namespace PerfIt.Tracers.EventHub
 {
     public class TraceEvent
     {
+        public TraceEvent()
+        {
+            MachineName = Environment.MachineName;
+            EventDate = DateTimeOffset.Now;
+        }
+
         /// <summary>
         /// Instance name of the event
         /// </summary>
@@ -29,5 +35,8 @@ namespace PerfIt.Tracers.EventHub
 
         public string CorrelationId { get; set; }
 
+        public DateTimeOffset EventDate { get; set; }
+
+        public string MachineName { get; set; }
     }
 }
