@@ -1,3 +1,4 @@
+[![NuGet version](https://img.shields.io/nuget/v/PerfIt.svg)](https://www.nuget.org/packages/PerfIt/)
 ![AppVeyor](https://ci.appveyor.com/api/projects/status/github/aliostad/PerfIt?svg=True)
 
 PerfIt!
