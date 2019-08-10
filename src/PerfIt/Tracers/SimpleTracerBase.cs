@@ -60,14 +60,18 @@ namespace PerfIt.Tracers
         /// <param name="data"></param>
         protected abstract void WriteTrace(TraceData data);
 
-        public virtual void Finish(object token, long timeTakenMilli, string correlationId = null, InstrumentationContext extraContext = null)
+        public virtual void Finish(object token, long timeTakenMilli = -1, string correlationId = null, InstrumentationContext extraContext = null)
         {
-            _traceData.Add(new TraceData((IInstrumentationInfo)token, timeTakenMilli, correlationId, extraContext));
+            var t = (TimedInstrumentationInfo) token;
+            if (timeTakenMilli < 0)
+                timeTakenMilli = (long) DateTimeOffset.Now.Subtract(t.StartedAt).TotalMilliseconds;
+
+            _traceData.Add(new TraceData(t, timeTakenMilli, correlationId, extraContext));
         }
 
         public virtual object Start(IInstrumentationInfo info)
         {
-            return info;
+            return new TimedInstrumentationInfo(info);
         }
     }
 }
