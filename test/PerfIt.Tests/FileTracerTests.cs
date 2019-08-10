@@ -45,13 +45,13 @@ namespace PerfIt.Tests
 
             var segments = lines[0].Split('\t');
 
-            Assert.Equal(8, segments.Length);
+            Assert.Equal(9, segments.Length);
 
             Assert.Equal("Test instance", segments[1]);
             Assert.Equal("test", segments[0]);
-            Assert.Equal("Text1", segments[4]);
-            Assert.Equal("Text2", segments[5]);
-            Assert.Equal("424242", segments[6]);
+            Assert.Equal("Text1", segments[5]);
+            Assert.Equal("Text2", segments[6]);
+            Assert.Equal("424242", segments[7]);
             // INTENTIONAL // Assert.Equal("0.420420420", segments[7]);  !!floating point numbers :/
 
             //     1- Category

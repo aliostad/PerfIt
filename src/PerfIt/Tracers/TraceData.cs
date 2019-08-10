@@ -7,7 +7,12 @@ namespace PerfIt.Tracers
 {
     public class TraceData
     {
-        public TraceData(IInstrumentationInfo info, long timeTakenMilli, 
+        private TraceData()
+        {
+            // for deserialisation
+        }
+
+        public TraceData(InstrumentationInfo info, long timeTakenMilli, 
             string correlationId, InstrumentationContext context)
         {
             TimeTakenMilli = timeTakenMilli;
@@ -41,7 +46,7 @@ namespace PerfIt.Tracers
         /// <summary>
         /// 
         /// </summary>
-        public IInstrumentationInfo Info { get; }
+        public InstrumentationInfo Info { get; }
 
         /// <summary>
         /// Creates a string representation

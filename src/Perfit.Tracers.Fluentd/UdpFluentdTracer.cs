@@ -15,7 +15,7 @@ namespace Perfit.Tracers.Fluentd
     {
         private readonly string _address;
         private readonly int _port;
-        private readonly UdpClient _client;
+        private readonly UdpClient _client = new UdpClient();
         private static readonly JsonSerializerSettings _settings = new JsonSerializerSettings()
         {
             DateFormatString = "yyyy-MM-ddTHH:mm:ss.FFFK",

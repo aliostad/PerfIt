@@ -75,7 +75,11 @@ namespace Perfit.Tracers.Fluentd.Tests
             Assert.NotNull(_listener.LastResult.Buffer);
             var s = Encoding.UTF8.GetString(_listener.LastResult.Buffer);
             var data = JsonConvert.DeserializeObject<TraceData>(s);
-
+            Assert.Equal(cor, data.CorrelationId);
+            Assert.Equal("cat", data.Info.CategoryName);
+            Assert.Equal("ins", data.Info.InstanceName);
+            Assert.Equal("subo", data.Info.Name);
+            Assert.Equal(100L, data.TimeTakenMilli);
         }
         
         public void Dispose()
