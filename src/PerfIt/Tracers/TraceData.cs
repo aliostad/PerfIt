@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,13 +14,40 @@ namespace PerfIt.Tracers
             Info = info;
             Context = context;
             CorrelationId = correlationId;
+            TimestampUtc = DateTimeOffset.UtcNow;
         }
+
+        /// <summary>
+        /// UTC Timestamp of the trace 
+        /// </summary>
+        public DateTimeOffset TimestampUtc { get; }
+
+        /// <summary>
+        /// How long in millis it took
+        /// </summary>
+        [JsonProperty("time")]
         public long TimeTakenMilli { get; }
+
+        /// <summary>
+        /// CorrelationId
+        /// </summary>
         public string CorrelationId { get; }
+
+        /// <summary>
+        /// Optional extra context
+        /// </summary>
         public InstrumentationContext Context { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public IInstrumentationInfo Info { get; }
 
+        /// <summary>
+        /// Creates a string representation
+        /// </summary>
+        /// <param name="separator"></param>
+        /// <returns></returns>
         public string ToString(char separator)
         {
             var sb = new StringBuilder();
@@ -35,7 +63,8 @@ namespace PerfIt.Tracers
                 sb.Append(Info.InstanceName);
                 sb.Append(separator);
             }
-
+            sb.Append(TimestampUtc.ToString("O"));
+            sb.Append(separator);
             sb.Append(CorrelationId);
             sb.Append(separator);
             sb.Append(TimeTakenMilli);

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net452;netcoreapp2.2</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Perfit.Tracers.Fluentd\Perfit.Tracers.Fluentd.csproj" />
+    <ProjectReference Include="..\..\src\PerfIt\PerfIt.csproj" />
+  </ItemGroup>
+
+</Project>

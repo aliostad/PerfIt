@@ -32,6 +32,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfIt.Zipkin.EventHub", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfIt.CoreMvc", "src\PerfIt.CoreMvc\PerfIt.CoreMvc.csproj", "{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Perfit.Tracers.Fluentd", "src\Perfit.Tracers.Fluentd\Perfit.Tracers.Fluentd.csproj", "{EF60536C-472F-4622-AB4F-6124360C0747}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Perfit.Tracers.Fluentd.Tests", "test\Perfit.Tracers.Fluentd.Tests\Perfit.Tracers.Fluentd.Tests.csproj", "{546E9BC5-2F4D-49A0-A998-A67C77075592}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +82,14 @@ Global
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF60536C-472F-4622-AB4F-6124360C0747}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF60536C-472F-4622-AB4F-6124360C0747}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF60536C-472F-4622-AB4F-6124360C0747}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF60536C-472F-4622-AB4F-6124360C0747}.Release|Any CPU.Build.0 = Release|Any CPU
+		{546E9BC5-2F4D-49A0-A998-A67C77075592}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{546E9BC5-2F4D-49A0-A998-A67C77075592}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{546E9BC5-2F4D-49A0-A998-A67C77075592}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{546E9BC5-2F4D-49A0-A998-A67C77075592}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,6 +105,8 @@ Global
 		{14C00467-FD40-481B-A544-EC8D61D2071E} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
 		{F82A4B2A-03FB-4762-96FB-1F72114C8BCF} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
 		{64698F0C-9E45-4A7E-AA42-D8C814B0CF3A} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
+		{EF60536C-472F-4622-AB4F-6124360C0747} = {5AF7DD1A-2D29-4F0F-9CA3-73A87EFC41DC}
+		{546E9BC5-2F4D-49A0-A998-A67C77075592} = {20A37C8B-4ECF-445A-99A4-AD9E2E6B513C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {309852F6-0DE5-40CB-8AD7-0290AD52D2C6}
