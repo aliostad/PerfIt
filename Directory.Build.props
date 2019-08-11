@@ -3,7 +3,7 @@
 	<Description>PerfIt is an instrumentation library for .NET</Description>  
     <Authors>Ali Kheyrollahi</Authors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>5.1.0</Version>
+    <Version>5.1.1</Version>
 	<PackageProjectUrl>https://github.com/aliostad/PerfIt/</PackageProjectUrl>
 	<PackageLicenseUrl>https://github.com/aliostad/PerfIt/blob/master/LICENSE.txt</PackageLicenseUrl>	
   </PropertyGroup>

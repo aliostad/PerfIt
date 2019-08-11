@@ -25,12 +25,12 @@ namespace PerfIt.Tracers
         /// <summary>
         /// UTC Timestamp of the trace 
         /// </summary>
+        [JsonProperty(propertyName: "time")]
         public DateTimeOffset TimestampUtc { get; }
 
         /// <summary>
         /// How long in millis it took
         /// </summary>
-        [JsonProperty("time")]
         public long TimeTakenMilli { get; }
 
         /// <summary>
