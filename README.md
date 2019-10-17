@@ -38,7 +38,7 @@ FAQ
 
 **What is PerfIt?**
 
-PerfIt is a light-weight and generic instrumentation lib for publishing standard instrumentation traces (Performance Counters and ETW events on Windows, LTTng traces on Linux via .NET Core's `EventSource` class, Zipkin traces) or your custom ones. Historically, PerfIt woudl only support Performance Counters and ETW, but it publish those if they are supported on the platform it runs.
+PerfIt is a light-weight and generic instrumentation lib for publishing standard instrumentation traces (Performance Counters and ETW events on Windows, LTTng traces on Linux via .NET Core's `EventSource` class, Zipkin traces) or your custom ones. Historically, PerfIt would only support Performance Counters and ETW, but it publish those if they are supported on the platform it runs.
 
 **What are PerfIt packages?**
 
