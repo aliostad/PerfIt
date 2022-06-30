@@ -11,7 +11,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="EnterpriseLibrary.SemanticLogging" Version="2.0.1406.1" />
-		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.SelfHost" Version="5.2.4" />
 	</ItemGroup>
 
