@@ -5,7 +5,7 @@
 		<PackageId>PerfIt.WebApi</PackageId>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.4" />
 		</ItemGroup>
 	<ItemGroup>
