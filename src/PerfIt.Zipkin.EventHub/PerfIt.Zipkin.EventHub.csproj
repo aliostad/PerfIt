@@ -6,7 +6,7 @@
 		<PackageId>PerfIt.Zipkin.EventHub</PackageId>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Criteo.Profiling.Tracing" Version="0.4.3" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.4" />
 		<PackageReference Include="Psyfon" Version="0.4.4" />
